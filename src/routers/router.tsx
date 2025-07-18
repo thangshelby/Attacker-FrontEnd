@@ -5,6 +5,7 @@ import SignUpPage from "../pages/auth/SignUpPage";
 import SettingsPage from "../pages/user/SettingsPage";
 import LandingPage from "../pages/user/LandingPage";
 import NotFoundPage from "../pages/user/notfound/NotFoundPage";
+import AuthLayout from "../pages/auth/AuthLayout";
 
 const Router = (): React.ReactElement => {
   return (
@@ -16,8 +17,8 @@ const Router = (): React.ReactElement => {
       }
     >
       <Routes>
-        {/* Authencication routes */}
-        <Route path="/auth">
+        {/* Authentication routes */}
+        <Route path="/auth" element={<AuthLayout />}>
           <Route index path="login" element={<LoginPage />} />
           <Route path="sign-up" element={<SignUpPage />} />
         </Route>
