@@ -1,8 +1,36 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useForm } from "react-hook-form";
+import { useAuthStore } from "../../store/authStore";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
+const loginSchema = z.object({
+  email: z.string().email({ message: "Email không hợp lệ" }),
+  password: z.string().min(1, { message: "Mật khẩu không được để trống" }),
+  rememberMe: z.boolean().optional(),
+});
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const { error,clearError } = useAuthStore();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data) => {
+    login.mutate(data);
+  };
+
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -17,7 +45,7 @@ const LoginPage = () => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="#" method="POST" className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label
               htmlFor="email"
@@ -30,10 +58,21 @@ const LoginPage = () => {
                 id="email"
                 type="email"
                 name="email"
-                required
+                onChange={(e) => {
+                  clearError('email');
+                  setValue("email", e.target.value);
+                  setError(null);
+                }}
                 autoComplete="email"
+                {...register("email", { required: true })}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.email.message || "Email is required."}
+                </p>
+              )}
+              {error.email && <p className="text-red-500 text-sm mt-1">{error.email}</p>}
             </div>
           </div>
 
@@ -59,10 +98,21 @@ const LoginPage = () => {
                 id="password"
                 type="password"
                 name="password"
-                required
                 autoComplete="current-password"
+                onChange={(e) => {
+                  clearError('password');
+                  setValue("password", e.target.value);
+                  setError(null);
+                }}
+                {...register("password", { required: true })}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
               />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.password.message || "Password is required."}
+                </p>
+              )}
+              {error.password && <p className="text-red-500 text-sm mt-1">{error.password}</p>}
             </div>
           </div>
 
@@ -76,11 +126,11 @@ const LoginPage = () => {
           </div>
         </form>
 
-        <p className="mt-10 text-center text-sm/6 text-gray-500 ">
+        <p className="mt-10 text-center text-sm/6 text-gray-500">
           Not a member?{" "}
           <button
-            onClick={() => navigate('/auth/sign-up')}
-className="font-semibold text-indigo-600 hover:text-indigo-500 cursor-pointer hover:opacity-80"
+            onClick={() => navigate("/auth/register")}
+            className="cursor-pointer font-semibold text-indigo-600 hover:text-indigo-500 hover:opacity-80"
           >
             Sign up for free
           </button>

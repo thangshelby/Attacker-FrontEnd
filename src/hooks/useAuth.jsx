@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import {useAuthStore} from "../store/authStore";
 import {queryClient } from '../apis/react-query'
 
+
 export function useAuth() {
   const navigate = useNavigate();
   const {setUser,setError} = useAuthStore();
+
   const {
     data: currentUser,
     isLoading,
@@ -15,8 +17,14 @@ export function useAuth() {
     queryKey: ["currentUser"],  
     queryFn: async () => {
       const { data } = await auth.getCurrentUser();
-      setUser(data.data);
-      return data;
+      setUser(data.data.user);
+      if (data.data.user.kyc_status === "Pending") {
+        console.log("User kyc status is pending, redirecting to verify email.");
+        navigate("/auth/verify-email");
+        return data.data.user;
+      }
+      navigate("/");
+      return data.data.user;
     },
     retry: false,
     enabled: true,
@@ -25,11 +33,22 @@ export function useAuth() {
   const login = useMutation({
     mutationFn: auth.login,
     onSuccess: ({ data }) => {
-      setUser(data.data);
-      queryClient.setQueryData(["currentUser"], data.data);
-      navigate("/");
+      setUser(data.data.user);
+      queryClient.setQueryData(["currentUser"], data.data.user);
+      const token = data.data.accessToken;
+      localStorage.setItem("token", token);
+      if (data.data.user.kyc_status === "Pending") {
+        navigate("/auth/verify-email");
+        return;
+      }
+      if (data.data.user.role === "Admin") {
+        navigate("/admin");
+        return;
+      }
+      if (data.data.user.role === "User") {
+        navigate("/");
+      }
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error) => {
       setError(error.response.data.message);
     },
@@ -38,12 +57,30 @@ export function useAuth() {
   const signUp = useMutation({
     mutationFn: auth.register,
     onSuccess: ({ data }) => {
-      console.log(data.data)
-      setUser(data.data);
-      queryClient.setQueryData(["currentUser"], data.data);
-      // navigate("/");
+      setUser(data.data.user);
+      queryClient.setQueryData(["currentUser"], data.data.user);
+      const token = data.data.accessToken;
+      localStorage.setItem("token", token);
+      navigate("/auth/verify-email");
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error) => {
+      setError(error.response.data.message);
+    },
+  }); 
+
+  const verifyEmail= useMutation({
+    mutationFn: auth.verifyEmail,
+    onSuccess: ({ data }) => {
+      setUser(data.data.user);
+      queryClient.setQueryData(["currentUser"], data.data.user);
+      if (data.data.user.role === "Admin") {
+        navigate("/admin");
+        return;
+      }
+      if (data.data.user.role === "User") {
+        navigate("/");
+      }
+    },
     onError: (error) => {
       setError(error.response.data.message);
     },
@@ -65,7 +102,7 @@ export function useAuth() {
 //       setUser(data.data);
 //       queryClient.setQueryData(["currentUser"], { data: data.data });
 //     },
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//  
 //     onError: (error: any) => {
 //       console.error("Update failed:", error);
 //     },
@@ -77,7 +114,7 @@ export function useAuth() {
     error,
     login,
     signUp,
+    verifyEmail,
     logout,
-    // updateUser: updateUser.mutate,
   };
 }
