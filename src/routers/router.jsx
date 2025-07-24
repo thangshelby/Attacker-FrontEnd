@@ -20,21 +20,30 @@ const Router = () => {
       }
     >
       <Routes>
+        {/* ========================================================= */}
+        {/* 1. PUBLIC ROUTES (Ai cũng có thể truy cập)              */}
+        {/* ========================================================= */}
+        {/* Trang chủ/Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Public: auth routes */}
+        {/* Các trang xác thực (đăng nhập, đăng ký) */}
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route index path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
+        </Route>
+
+        {/* ========================================================= */}
+        {/* 2. PROTECTED ROUTES (Yêu cầu đăng nhập)                 */}
+        {/* ========================================================= */}
         {/* Protected routes */}
-        <Route path="/" element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute />}>
           <Route path="auth" element={<AuthLayout />}>
             <Route path="verify-email" element={<VerifyEmailPage />} />
           </Route>
           <Route path="admin" element={<AdminPage />} />
           <Route path="settings" element={<SettingsPage />} />
-          <Route path="" element={<LandingPage />} />
-        </Route>
-
-        {/* Public: auth routes */}
-        <Route path="/auth" element={<AuthLayout />}>
-          <Route index path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
         </Route>
 
         {/* 404 */}

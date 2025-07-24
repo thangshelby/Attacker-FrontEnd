@@ -57,9 +57,15 @@ const Header = () => {
                 {item.title}
               </a>
             ))}
+            <div className="mt-8 lg:hidden">
+              <Button variant="primary" to="/auth/login" onClick={handleClick}>
+                Đăng nhập
+              </Button>
+            </div>
           </div>
           <HamburgerMenu />
         </nav>
+
         <div
           className={`${
             openNavigation ? "hidden" : "flex"
@@ -68,7 +74,7 @@ const Header = () => {
           <Button
             variant="primary"
             className="bg-blue-500 text-white"
-            to="/login"
+            to="/auth/login"
             size="sm"
           >
             Đăng nhập
