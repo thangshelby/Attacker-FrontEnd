@@ -3,7 +3,7 @@ import { auth } from "../apis/auth";
 import { useNavigate } from "react-router-dom";
 import {useAuthStore} from "../store/authStore";
 import {queryClient } from '../apis/react-query'
-
+import { toast } from "react-toastify";
 
 export function useAuth() {
   const navigate = useNavigate();
@@ -19,10 +19,15 @@ export function useAuth() {
       const { data } = await auth.getCurrentUser();
       setUser(data.data.user);
       if (data.data.user.kyc_status === "Pending") {
-        console.log("User kyc status is pending, redirecting to verify email.");
         navigate("/auth/verify-email");
         return data.data.user;
       }
+      else if (data.data.user.role === "Admin") {
+        navigate("/admin");
+        return data.data.user;
+        
+      }
+      toast.success("User data fetched successfully!");
       navigate("/");
       return data.data.user;
     },

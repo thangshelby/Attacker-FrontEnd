@@ -48,11 +48,10 @@ export default function VerifyEmailPage() {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const paste = e.clipboardData.getData("text");
-    const digits = paste.replace(/\D/g, "").split("").slice(0, 6);
+    const paste = e.clipboardData.getData("text").split("");
 
     const newCode = ["", "", "", "", "", ""];
-    digits.forEach((digit, i) => {
+    paste.forEach((digit, i) => {
       if (i < 6) {
         newCode[i] = digit;
       }
@@ -60,7 +59,6 @@ export default function VerifyEmailPage() {
 
     setCode(newCode);
 
-    // Focus the next empty field or the last field
     const nextEmptyIndex = newCode.findIndex((digit) => !digit);
     const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex;
     inputRefs.current[focusIndex]?.focus();
@@ -73,38 +71,31 @@ export default function VerifyEmailPage() {
       alert("Please enter the complete 6-digit code");
       return;
     }
-    await verifyEmail.mutate({ otp_token: fullCode, email: user.email });
+    verifyEmail.mutate({ otp_token: fullCode, email: user.email });
 
-    console.log("Verification code:", fullCode);
     alert("Code submitted: " + fullCode);
   };
 
   const handleResendCode = () => {
-    // Clear all inputs
     setCode(["", "", "", "", "", ""]);
     inputRefs.current[0]?.focus();
 
-    // Here you would typically trigger a resend request
     alert("Resend code functionality would be implemented here");
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-5">
       <div className="w-full max-w-md rounded-xl bg-white p-10 text-center shadow-lg sm:p-15">
-        {/* Icon */}
         <div className="mb-6 text-3xl text-gray-800">✱</div>
 
-        {/* Title */}
         <h1 className="mb-2 text-2xl font-semibold text-gray-800">
           Confirm your email
         </h1>
 
-        {/* Subtitle */}
         <p className="mb-10 text-sm leading-relaxed text-gray-600">
           We sent a code to email@untitled.com
         </p>
 
-        {/* Code Input Fields */}
         <div className="mb-10 flex justify-center gap-4">
           {code.map((digit, index) => (
             <input
