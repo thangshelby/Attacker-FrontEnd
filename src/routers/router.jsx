@@ -9,7 +9,8 @@ import NotFoundPage from "../pages/notfound/NotFoundPage";
 import AuthLayout from "../pages/auth/AuthLayout";
 import AdminPage from "../pages/admin/AdminPage";
 import ProtectedRoute from "../utils/ProtectedRoute";
-
+import RootLayout from "../layouts/RootLayout";
+import Dashboard from "../pages/user/Dashboard";
 const Router = () => {
   return (
     <Suspense
@@ -32,6 +33,10 @@ const Router = () => {
           <Route index path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
+        </Route>
+
+        <Route element={<RootLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
         </Route>
 
         {/* ========================================================= */}
