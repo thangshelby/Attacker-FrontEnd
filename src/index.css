@@ -3,6 +3,8 @@
 /* === Custom Theme Variables === */
 @import "./styles/theme.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* === Base Style Overrides === */
 @layer base {
   html,
