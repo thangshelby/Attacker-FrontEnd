@@ -10,7 +10,12 @@ import AuthLayout from "../pages/auth/AuthLayout";
 import AdminPage from "../pages/admin/AdminPage";
 import ProtectedRoute from "../utils/ProtectedRoute";
 import RootLayout from "../layouts/RootLayout";
+import Home from "../pages/user/Home";
 import Dashboard from "../pages/user/Dashboard";
+import Profiles from "../pages/user/Profile";
+import MyLoans from "../pages/user/MyLoan";
+import HistoryTransaction from "../pages/user/HistoryTransaction";
+import NewLoans from "../pages/user/NewLoans";
 const Router = () => {
   return (
     <Suspense
@@ -35,8 +40,13 @@ const Router = () => {
           {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
         </Route>
 
-        <Route element={<RootLayout />}>
+        <Route path="/" element={<RootLayout />}>
+          <Route index element={<Home />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profiles" element={<Profiles />} />
+          <Route path="loans" element={<MyLoans />} />
+          <Route path="history" element={<HistoryTransaction />} />
+          <Route path="newloan" element={<NewLoans />} />
         </Route>
 
         {/* ========================================================= */}

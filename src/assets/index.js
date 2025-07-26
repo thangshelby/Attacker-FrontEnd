@@ -17,6 +17,7 @@ import chatBot from "./images/chatbot.png"
 import testimonial1 from "./images/testimonial_1 .png";
 import testimonial2 from "./images/testimonial_2.png";
 import ctaImg from "./images/cta.png";
+import logo from "./svg/Logo.svg"
 export {
     appLogo,
     authBackground,
@@ -36,5 +37,6 @@ export {
     chatBot,
     testimonial1,
     testimonial2,
-    ctaImg
+    ctaImg,
+    logo,
 }
