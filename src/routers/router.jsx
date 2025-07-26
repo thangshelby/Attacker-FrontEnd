@@ -3,19 +3,19 @@ import { Suspense } from "react";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmail";
-import SettingsPage from "../pages/user/SettingsPage";
-import LandingPage from "../pages/user/LandingPage";
+import SettingsPage from "../pages/user/SettingPage/SettingPage.jsx";
+import LandingPage from "../pages/user/LandingPage/LandingPage.jsx";
 import NotFoundPage from "../pages/notfound/NotFoundPage";
 import AuthLayout from "../pages/auth/AuthLayout";
 import AdminPage from "../pages/admin/AdminPage";
 import ProtectedRoute from "../utils/ProtectedRoute";
 import RootLayout from "../layouts/RootLayout";
-import Home from "../pages/user/Home";
-import Dashboard from "../pages/user/Dashboard";
-import Profiles from "../pages/user/Profile";
-import MyLoans from "../pages/user/MyLoan";
-import HistoryTransaction from "../pages/user/HistoryTransaction";
-import NewLoans from "../pages/user/NewLoans";
+import Home from "../pages/user/Home/Home.jsx";
+import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
+import Profiles from "../pages/user/Profile/Profile.jsx";
+import MyLoans from "../pages/user/MyLoan/MyLoan.jsx";
+import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransaction.jsx";
+import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
 const Router = () => {
   return (
     <Suspense
