@@ -1,4 +1,4 @@
-import { SidebarLayout, SidebarItem } from "./layout/SidebarLayout";
+import { SidebarLayout, SidebarItem } from "../layouts/SidebarLayout";
 import {
   Home,
   LayoutDashboard,

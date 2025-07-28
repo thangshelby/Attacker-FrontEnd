@@ -1,7 +1,7 @@
 import { useContext, useState, createContext } from "react";
-import { logo } from "../../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
+import { logo } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
 import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
-import { testimonial1 } from "../../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
+import { testimonial1 } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
 import { NavLink } from "react-router-dom";
 
 // 1. Context để chia sẻ trạng thái expand/collapse

@@ -1,31 +1,29 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { auth } from "../apis/auth";
 import { useNavigate } from "react-router-dom";
-import {useAuthStore} from "../store/authStore";
-import {queryClient } from '../apis/react-query'
+import { useAuthStore } from "../store/authStore";
+import { queryClient } from "../apis/react-query";
 import { toast } from "react-toastify";
 
 export function useAuth() {
   const navigate = useNavigate();
-  const {setUser,setError} = useAuthStore();
+  const { setUser, setError } = useAuthStore();
 
   const {
     data: currentUser,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["currentUser"],  
+    queryKey: ["currentUser"],
     queryFn: async () => {
       const { data } = await auth.getCurrentUser();
       setUser(data.data.user);
       if (data.data.user.kyc_status === "Pending") {
         navigate("/auth/verify-email");
         return data.data.user;
-      }
-      else if (data.data.user.role === "Admin") {
+      } else if (data.data.user.role === "Admin") {
         navigate("/admin");
         return data.data.user;
-        
       }
       toast.success("User data fetched successfully!");
       navigate("/");
@@ -71,9 +69,9 @@ export function useAuth() {
     onError: (error) => {
       setError(error.response.data.message);
     },
-  }); 
+  });
 
-  const verifyEmail= useMutation({
+  const verifyEmail = useMutation({
     mutationFn: auth.verifyEmail,
     onSuccess: ({ data }) => {
       setUser(data.data.user);
@@ -101,17 +99,17 @@ export function useAuth() {
       console.error("Logout failed:", error);
     }
   };
-//   const updateUser = useMutation({
-//     mutationFn: users.update,
-//     onSuccess: ({ data }) => {
-//       setUser(data.data);
-//       queryClient.setQueryData(["currentUser"], { data: data.data });
-//     },
-//  
-//     onError: (error: any) => {
-//       console.error("Update failed:", error);
-//     },
-//   });
+  //   const updateUser = useMutation({
+  //     mutationFn: users.update,
+  //     onSuccess: ({ data }) => {
+  //       setUser(data.data);
+  //       queryClient.setQueryData(["currentUser"], { data: data.data });
+  //     },
+  //
+  //     onError: (error: any) => {
+  //       console.error("Update failed:", error);
+  //     },
+  //   });
 
   return {
     user: currentUser,
