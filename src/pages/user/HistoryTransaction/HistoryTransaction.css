@@ -190,3 +190,24 @@
   border-color: #4285f4;
   box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
 }
+
+.modern-dropdown {
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.modern-dropdown option {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+.modern-dropdown option:hover {
+  background-color: #e3f2fd;
+}
