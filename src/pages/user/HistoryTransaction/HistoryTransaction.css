@@ -74,6 +74,10 @@
   background-color: #f9f9f9;
 }
 
+.history-table tbody tr {
+  cursor: pointer;
+}
+
 .history-table tbody tr:hover {
   background-color: #e3f2fd;
   font-weight: 600;
