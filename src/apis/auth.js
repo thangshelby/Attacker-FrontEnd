@@ -18,11 +18,7 @@ export const auth = {
       withCredentials: true,
     }),
   logout: () =>
-    api.post(
-      "/users/logout",
-      {},
-      {
-        withCredentials: true,
-      },
-    ),
+    api.post("/users/logout", {
+      withCredentials: true,
+    }),
 };
