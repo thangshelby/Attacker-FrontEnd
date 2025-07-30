@@ -92,7 +92,7 @@ export function SidebarItem({ icon, text, alert, to }) {
   return (
     <NavLink
       onClick={(e) => {
-        if (to == "") {
+        if (to == "not-used") {
           e.preventDefault();
         }
       }}
@@ -104,7 +104,7 @@ export function SidebarItem({ icon, text, alert, to }) {
           isActive
             ? "bg-gradient-to-r from-indigo-200 to-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100"
             : "text-gray-600 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-800"
-        }`
+        } ${isActive && to !== "not-used" ? "bg-indigo-50 dark:bg-gray-800" : ""}`
       }
     >
       <div className="flex h-5 min-h-[20px] w-5 min-w-[20px] flex-shrink-0 items-center justify-center">

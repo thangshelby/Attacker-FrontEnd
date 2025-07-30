@@ -32,7 +32,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 
 const Sidebar = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -75,12 +75,12 @@ const Sidebar = () => {
 
         <Collapsible open={open} onOpenChange={setOpen}>
           <CollapsibleTrigger
-            className={`flex w-full cursor-pointer items-center rounded-md p-0 justify-between pr-4 focus:ring-0 focus:outline-none focus-visible:ring-0 ${open && "bg-gradient-to-r from-indigo-200 to-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100"} `}
+            className={`flex w-full cursor-pointer hover:bg-indigo-50 items-center rounded-md p-0 justify-between pr-4 focus:ring-0 focus:outline-none focus-visible:ring-0 ${open && "bg-gradient-to-r from-indigo-200 to-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100"} `}
           >
             <SidebarItem
               icon={<ShieldCheck className={`${open&&'text-indigo-800'}`} />}
               text={<span className={`${open&&'text-indigo-800'}`}>Định danh</span>}
-              to=""
+              to="not-used"
             />
             <ChevronDown
               size={16}

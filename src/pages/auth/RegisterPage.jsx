@@ -53,13 +53,11 @@ const RegisterPage = () => {
     signUp.mutate(apiData);
   };
 
-
-
   return (
     // Layout chính - chiếm toàn bộ màn hình và có nền gradient
     <div className="flex flex-col justify-center p-8 md:p-6">
       {signUp.isPending && (
-        <div className="absolute w-full h-full flex items-center justify-center bg-black/60 bg-opacity-50 z-10">
+        <div className="bg-opacity-50 absolute z-10 flex h-full w-full items-center justify-center bg-black/60">
           Loading...
         </div>
       )}
