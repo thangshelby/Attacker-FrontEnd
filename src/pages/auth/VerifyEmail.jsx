@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useAuthStore } from "../../store/authStore";
-import { email } from "zod";
 
 export default function VerifyEmailPage() {
   const [code, setCode] = useState(["", "", "", "", "", " "]);
@@ -84,8 +83,8 @@ export default function VerifyEmailPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-5">
-      <div className="w-full max-w-md rounded-xl bg-white p-10 text-center shadow-lg sm:p-15">
+    <div className="flex min-h-screen items-center justify-center p-5">
+      <div className="w-full rounded-xl p-10 text-center sm:p-15">
         <div className="mb-6 text-3xl text-gray-800">✱</div>
 
         <h1 className="mb-2 text-2xl font-semibold text-gray-800">
@@ -93,7 +92,8 @@ export default function VerifyEmailPage() {
         </h1>
 
         <p className="mb-10 text-sm leading-relaxed text-gray-600">
-          We sent a code to email@untitled.com
+          We sent a code to{" "}
+          <span className="text-sky-500 underline cursor-pointer">{user.email}</span>
         </p>
 
         <div className="mb-10 flex justify-center gap-4">
@@ -120,7 +120,7 @@ export default function VerifyEmailPage() {
         {/* Create Account Button */}
         <button
           onClick={handleVerifyEmail}
-          className="w-full rounded-lg bg-gray-800 px-6 py-4 text-base font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none active:translate-y-0"
+          className="w-full cursor-pointer rounded-lg bg-gray-800 px-6 py-4 text-base font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none active:translate-y-0"
         >
           Create an account
         </button>

@@ -10,11 +10,12 @@ import {
 import { testimonial1 } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
 import { NavLink } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-// 1. Context để chia sẻ trạng thái expand/collapse
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 const SidebarContext = createContext();
 
-// 2. Component Layout chính của Sidebar
 export function SidebarLayout({ children }) {
+  const { user } = useAuth();
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -52,7 +53,7 @@ export function SidebarLayout({ children }) {
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex flex-1 flex-col px-3">{children}</ul>
+          <ul className="flex flex-1 flex-col px-3 gap-y-2">{children}</ul>
         </SidebarContext.Provider>
 
         <div
@@ -67,10 +68,10 @@ export function SidebarLayout({ children }) {
             <div className="ml-3 flex min-w-0 flex-1 items-center justify-between">
               <div className="min-w-0 leading-4">
                 <h4 className="truncate font-extrabold text-gray-800 dark:text-gray-100">
-                  Harry Potter
+                  {user?.user_name}
                 </h4>
                 <span className="block truncate text-xs font-semibold text-gray-600 dark:text-gray-400">
-                  harrypotter@gmail.com
+                  {user.email}
                 </span>
               </div>
               <MoreVertical
@@ -85,15 +86,19 @@ export function SidebarLayout({ children }) {
   );
 }
 
-// 3. Component cho từng mục trong Sidebar - FIXED
 export function SidebarItem({ icon, text, alert, to }) {
   const { expanded } = useContext(SidebarContext);
 
   return (
     <NavLink
+      onClick={(e) => {
+        if (to == "") {
+          e.preventDefault();
+        }
+      }}
       to={to}
       className={({ isActive }) =>
-        `group relative my-1 flex cursor-pointer items-center rounded-md py-2 font-medium transition-colors ${
+        `group relative flex cursor-pointer items-center rounded-md py-2 font-medium transition-colors ${
           expanded ? "px-3" : "justify-center px-3"
         } ${
           isActive

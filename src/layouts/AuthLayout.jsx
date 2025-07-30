@@ -1,17 +1,15 @@
-import { Outdent } from "lucide-react";
-import React from "react";
 import { Outlet } from "react-router-dom";
 import { logo } from "../assets";
 
 const AuthLayout = () => {
   return (
-    <main className="flex h-screen items-center justify-center overflow-hidden bg-gray-100 p-4">
-      <div className="overflow-scholl w-full max-w-5xl rounded-2xl bg-white shadow-lg md:grid md:grid-cols-2">
+    <main className="relative flex h-screen items-center justify-center overflow-hidden bg-gray-100 p-4">
+      <div className="w-full max-w-7xl rounded-2xl bg-white shadow-lg lg:grid lg:grid-cols-2">
         <div className="h-full w-full">
           <Outlet />
         </div>
 
-        <div className="relative hidden items-center justify-center bg-cyan-500 shadow-2xl md:flex">
+        <div className="relative hidden items-center justify-center bg-cyan-500 shadow-2xl lg:flex">
           {/* Lớp phủ Gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 opacity-80"></div>
 

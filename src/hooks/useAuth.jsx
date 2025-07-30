@@ -4,10 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { queryClient } from "../apis/react-query";
 import { toast } from "react-toastify";
+import { useAppStore } from "../store/appStore";
+import { set } from "zod";
 
 export function useAuth() {
   const navigate = useNavigate();
   const { setUser, setError } = useAuthStore();
+  const { setLoading, setMessage, setError: setAppError } = useAppStore();
 
   const {
     data: currentUser,
@@ -25,7 +28,7 @@ export function useAuth() {
         navigate("/admin");
         return data.data.user;
       }
-      toast.success("User data fetched successfully!");
+      setMessage("Welcome back!");
       navigate("/");
       return data.data.user;
     },
@@ -42,14 +45,17 @@ export function useAuth() {
       localStorage.setItem("token", token);
       if (data.data.user.kyc_status === "Pending") {
         navigate("/auth/verify-email");
+        setMessage("Please verify your email to continue.");
         return;
       }
       if (data.data.user.role === "Admin") {
         navigate("/admin");
+        setMessage("Welcome back, Admin!");
         return;
       }
       if (data.data.user.role === "User") {
         navigate("/");
+        setMessage("Welcome back!");
       }
     },
     onError: (error) => {
@@ -65,6 +71,7 @@ export function useAuth() {
       const token = data.data.accessToken;
       localStorage.setItem("token", token);
       navigate("/auth/verify-email");
+      setMessage("Registration successful! Please verify your email.");
     },
     onError: (error) => {
       setError(error.response.data.message);
@@ -78,11 +85,11 @@ export function useAuth() {
       queryClient.setQueryData(["currentUser"], data.data.user);
       if (data.data.user.role === "Admin") {
         navigate("/admin");
+        setMessage("Email verified! Welcome back, Admin!");
         return;
       }
-      if (data.data.user.role === "User") {
-        navigate("/");
-      }
+      navigate("/");
+      setMessage("Email verified! Welcome back!");
     },
     onError: (error) => {
       setError(error.response.data.message);
