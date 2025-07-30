@@ -1,9 +1,15 @@
+import React from "react";
 import { useContext, useState, createContext } from "react";
 import { logo } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
-import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
+import {
+  ChevronFirst,
+  ChevronLast,
+  MoreVertical,
+  ChevronDown,
+} from "lucide-react";
 import { testimonial1 } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
 import { NavLink } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 // 1. Context để chia sẻ trạng thái expand/collapse
 const SidebarContext = createContext();
 
@@ -125,4 +131,65 @@ export function SidebarItem({ icon, text, alert, to }) {
   );
 }
 
-export default SidebarLayout;
+export function SidebarDropdownItem({ icon, text, children }) {
+  const { expanded } = useContext(SidebarContext);
+  const { pathname } = useLocation();
+
+  // Kiểm tra xem có item con nào đang active không
+  const childPaths = React.Children.map(children, (child) => child.props.to);
+  const isActive = childPaths.some((path) => pathname.startsWith(path));
+
+  // Dropdown sẽ mở mặc định nếu có item con đang active
+  const [isOpen, setIsOpen] = useState(isActive);
+
+  return (
+    <>
+      <li
+        className={`group relative my-1 flex cursor-pointer items-center rounded-md py-2 font-medium transition-colors ${
+          expanded ? "px-3" : "justify-center px-3"
+        } ${
+          isActive
+            ? "bg-indigo-50 text-indigo-800 dark:bg-gray-800 dark:text-indigo-200"
+            : "text-gray-600 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-800"
+        }`}
+        onClick={() => setIsOpen((o) => !o)}
+      >
+        <div className="flex h-5 min-h-[20px] w-5 min-w-[20px] flex-shrink-0 items-center justify-center">
+          <div className="flex h-5 w-5 items-center justify-center [&>svg]:h-5 [&>svg]:w-5">
+            {icon}
+          </div>
+        </div>
+        {expanded && (
+          <span className="ml-3 overflow-hidden text-ellipsis whitespace-nowrap">
+            {text}
+          </span>
+        )}
+        {expanded && (
+          <ChevronDown
+            size={16}
+            className={`ml-auto transition-transform ${isOpen ? "rotate-180" : ""}`}
+          />
+        )}
+        {!expanded && (
+          <div className="invisible absolute left-full z-10 ml-6 -translate-x-3 rounded-md bg-indigo-100 px-2 py-1 text-sm whitespace-nowrap text-indigo-800 opacity-0 transition-all group-hover:visible group-hover:translate-x-0 group-hover:opacity-100 dark:bg-gray-800 dark:text-indigo-200">
+            {text}
+          </div>
+        )}
+      </li>
+
+      {/* Dropdown Content */}
+      {expanded && (
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-96" : "max-h-0"
+          }`}
+        >
+          {/* Thụt lề cho các item con */}
+          <ul className="pt-1 pl-7">{children}</ul>
+        </div>
+      )}
+    </>
+  );
+}
+
+// export default SidebarLayout;

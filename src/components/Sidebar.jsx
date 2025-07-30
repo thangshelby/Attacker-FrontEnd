@@ -1,8 +1,15 @@
-import { SidebarLayout, SidebarItem } from "../layouts/SidebarLayout";
+import {
+  SidebarLayout,
+  SidebarItem,
+  SidebarDropdownItem,
+} from "../layouts/SidebarLayout";
 import {
   Home,
   LayoutDashboard,
   UserCircle,
+  BadgeInfo,
+  SchoolIcon,
+  NotebookPen,
   Wallet,
   History,
   CreditCard,
@@ -21,11 +28,24 @@ const Sidebar = () => {
           text="Tổng quan"
           to="/dashboard"
         />
-        <SidebarItem
-          icon={<UserCircle />}
-          text="Hồ sơ cá nhân"
-          to="/profiles"
-        />
+        <SidebarDropdownItem icon={<UserCircle />} text="Hồ sơ cá nhân">
+          {/* 3. Thêm các item con vào đây */}
+          <SidebarItem
+            icon={<BadgeInfo size={18} />} // Có thể dùng icon khác hoặc nhỏ hơn
+            text="Thông tin chung"
+            to="/profile/general-info"
+          />
+          <SidebarItem
+            icon={<SchoolIcon size={18} />}
+            text="Hồ sơ sinh viên"
+            to="/profile/student-info "
+          />
+          <SidebarItem
+            icon={<NotebookPen size={18} />}
+            text="Hồ sơ học vấn"
+            to="/profile/academic-info"
+          />
+        </SidebarDropdownItem>
         <SidebarItem icon={<Wallet />} text="Khoản vay của tôi" to="/loans" />
         <SidebarItem icon={<History />} text="Lịch sử vay" to="/history" />
         <SidebarItem icon={<CreditCard />} text="Khoản vay mới" to="/newloan" />
