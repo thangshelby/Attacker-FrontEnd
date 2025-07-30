@@ -15,7 +15,9 @@ import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
 import Profiles from "../pages/user/Profile/Profile.jsx";
 import MyLoans from "../pages/user/MyLoan/MyLoan.jsx";
 import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransaction.jsx";
-// import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
+import DIDs from "@/pages/user/DecentralizedIdentification/DIDs/DIDs";
+import VCs from "@/pages/user/DecentralizedIdentification/VCs/VCs";
+import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
 const Router = () => {
   return (
     <Suspense
@@ -51,9 +53,13 @@ const Router = () => {
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="DIDs" element={<DIDs />} />
+            <Route path="VCs" element={<VCs />} />
+
             <Route path="profiles" element={<Profiles />} />
             <Route path="loans" element={<MyLoans />} />
             <Route path="history" element={<HistoryTransaction />} />
+            <Route path="newloan" element={<NewLoans />} />
           </Route>
           <Route path="admin" element={<AdminPage />} />
           <Route path="settings" element={<SettingsPage />} />

@@ -7,7 +7,7 @@ const ThemeToggle = () => {
 
   return (
     <div>
-      <div onClick={toggleTheme}>
+      <div className="cursor-pointer" onClick={toggleTheme}>
         {theme === "light" ? <FaMoon /> : <FaSun />}
       </div>
     </div>
