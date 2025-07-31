@@ -10,7 +10,7 @@ import { useAuthStore } from "../../store/authStore";
 
 const registerSchema = z
   .object({
-    user_name: z.string().min(1, { message: "Họ và tên không được để trống" }),
+    name: z.string().min(1, { message: "Họ và tên không được để trống" }),
     email: z.string().email({ message: "Email không hợp lệ" }),
     password: z
       .string()
@@ -35,7 +35,7 @@ const RegisterPage = () => {
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      user_name: "",
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -77,19 +77,17 @@ const RegisterPage = () => {
             <div className="relative">
               <FiUser className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" />
               <input
-                id="user_name"
+                id="name"
                 type="text"
-                autoComplete="user_name"
-                {...register("user_name")}
+                autoComplete="name"
+                {...register("name")}
                 placeholder="Họ và tên của bạn"
                 onFocus={handleFocus}
                 className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-gray-800 transition-all duration-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none"
               />
             </div>
-            {errors.user_name && (
-              <p className="mt-1 text-xs text-red-600">
-                {errors.user_name.message}
-              </p>
+            {errors.name && (
+              <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>
             )}
           </div>
           {/* Input Email */}

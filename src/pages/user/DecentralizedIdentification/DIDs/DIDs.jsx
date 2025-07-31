@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MoreVertical } from "lucide-react";
-import Step1 from "../../../../components/DIDs/Step1";
-import Step2 from "../../../../components/DIDs/Step2";
+import Step1 from "../../../../components/dids/Step1";
+import Step2 from "../../../../components/dids/Step2";
 import {
   Table,
   TableBody,
@@ -62,10 +62,10 @@ export default function DIDs() {
   const { createIdentityProfile } = useIdentityProfile();
 
   const handdleCreateProfile = async (data) => {
-    createIdentityProfile.mutate(data)
-  }
+    createIdentityProfile.mutate(data);
+  };
   return (
-    <div className="flex flex-col gap-y-8 p-8">
+    <div className="relative flex flex-col gap-y-2 p-2">
       <div className="flex items-center justify-between">
         <div className="flex items-end gap-x-1">
           <h1 className="text-2xl font-bold">
@@ -86,19 +86,17 @@ export default function DIDs() {
                 Import you DID from Digital Wallet
               </div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[800px]">
+            <DialogContent className="md:max-w-[720px] lg:max-w-[640px] xl:max-w-[680px]">
               <DialogHeader>
-                <DialogTitle>Edit profile</DialogTitle>
-                <DialogDescription>
-                  Import your DID from Digital Wallet
-                </DialogDescription>
+                <DialogTitle>Import your DID from Digital Wallet</DialogTitle>
+                <DialogDescription></DialogDescription>
                 <Stepper
                   steps={steps}
                   currentStep={currentStep}
                   onStepChange={setCurrentStep}
                 />
               </DialogHeader>
-              <div className="px-8 py-4">
+              <div className="px-4 py-2 2xl:px-8 2xl:py-4">
                 {currentStep === 0 && <Step1 />}
                 {currentStep === 1 && <Step2 />}
               </div>
@@ -118,7 +116,7 @@ export default function DIDs() {
                     disabled={currentStep === steps.length - 1}
                     className={`cursor-pointer bg-indigo-700`}
                   >
-                   Import DID
+                    Import DID
                   </Button>
                 </div>
               </DialogFooter>
@@ -199,7 +197,3 @@ export default function DIDs() {
     </div>
   );
 }
-
-
-
-

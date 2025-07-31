@@ -3,14 +3,12 @@ import { auth } from "../apis/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { queryClient } from "../apis/react-query";
-import { toast } from "react-toastify";
 import { useAppStore } from "../store/appStore";
-import { set } from "zod";
 
 export function useAuth() {
   const navigate = useNavigate();
   const { setUser, setError } = useAuthStore();
-  const { setLoading, setMessage, setError: setAppError } = useAppStore();
+  const { setLoading, setToast, setError: setAppError } = useAppStore();
 
   const {
     data: currentUser,
@@ -28,7 +26,10 @@ export function useAuth() {
         navigate("/admin");
         return data.data.user;
       }
-      setMessage("Welcome back!");
+      setToast({
+        type: "success",
+        message: "Welcome back !",
+      });
       navigate("/");
       return data.data.user;
     },
@@ -45,17 +46,26 @@ export function useAuth() {
       localStorage.setItem("token", token);
       if (data.data.user.kyc_status === "Pending") {
         navigate("/auth/verify-email");
-        setMessage("Please verify your email to continue.");
+        setToast({
+          type: "info",
+          message: "Please verify your email to continue.",
+        });
         return;
       }
       if (data.data.user.role === "Admin") {
         navigate("/admin");
-        setMessage("Welcome back, Admin!");
+        setToast({
+          type: "success",
+          message: "Welcome back, Admin!",
+        });
         return;
       }
       if (data.data.user.role === "User") {
         navigate("/");
-        setMessage("Welcome back!");
+        setToast({
+          type: "success",
+          message: "Welcome back!",
+        });
       }
     },
     onError: (error) => {
@@ -71,9 +81,16 @@ export function useAuth() {
       const token = data.data.accessToken;
       localStorage.setItem("token", token);
       navigate("/auth/verify-email");
-      setMessage("Registration successful! Please verify your email.");
+      setToast({
+        type: "success",
+        message: "Registration successful! Please verify your email.",
+      });
     },
     onError: (error) => {
+      setToast({
+        type: "error",
+        message: "Thất bại!",
+      });
       setError(error.response.data.message);
     },
   });
@@ -85,11 +102,17 @@ export function useAuth() {
       queryClient.setQueryData(["currentUser"], data.data.user);
       if (data.data.user.role === "Admin") {
         navigate("/admin");
-        setMessage("Email verified! Welcome back, Admin!");
+        setToast({
+          type: "success",
+          message: "Email verified! Welcome back, Admin!",
+        });
         return;
       }
       navigate("/");
-      setMessage("Email verified! Welcome back!");
+      setToast({
+        type: "success",
+        message: "Email verified! Welcome back!",
+      });
     },
     onError: (error) => {
       setError(error.response.data.message);
@@ -98,7 +121,7 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      await auth.logout(); // Call the server to clear cookies
+      await auth.logout();
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
@@ -106,17 +129,6 @@ export function useAuth() {
       console.error("Logout failed:", error);
     }
   };
-  //   const updateUser = useMutation({
-  //     mutationFn: users.update,
-  //     onSuccess: ({ data }) => {
-  //       setUser(data.data);
-  //       queryClient.setQueryData(["currentUser"], { data: data.data });
-  //     },
-  //
-  //     onError: (error: any) => {
-  //       console.error("Update failed:", error);
-  //     },
-  //   });
 
   return {
     user: currentUser,

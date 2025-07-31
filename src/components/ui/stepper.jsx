@@ -1,9 +1,6 @@
-"use client";
-
 import * as React from "react";
 import { Check, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 // interface StepProps {
 //   title: string
@@ -29,7 +26,7 @@ const Step = ({ title, description, isCompleted, isActive }) => {
           {isCompleted ? (
             <Check className="h-4 w-4" />
           ) : (
-            <span className="text-sm font-medium">{title[0]}</span>
+            <span className="text-xs font-medium">{title[0]}</span>
           )}
         </div>
       </div>
@@ -61,7 +58,7 @@ const Step = ({ title, description, isCompleted, isActive }) => {
 export function Stepper({ steps, currentStep, onStepChange }) {
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <div className="flex flex-col items-start justify-between gap-1 md:flex-row md:items-center lg:gap-2 2xl:gap-4">
         {steps.map((step, index) => (
           <React.Fragment key={step.title}>
             <Step
