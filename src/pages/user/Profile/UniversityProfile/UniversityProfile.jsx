@@ -15,32 +15,11 @@ import {
   ChevronDown,
   Sparkles,
 } from "lucide-react";
-
-// Mock data - replace with your actual data
-const universities = [
-  {
-    id: "hcmus",
-    name: "Đại học Khoa học Tự nhiên TP.HCM",
-    address: "227 Nguyễn Văn Cừ, Q.5, TP.HCM",
-  },
-  {
-    id: "hcmut",
-    name: "Đại học Bách khoa TP.HCM",
-    address: "268 Lý Thường Kiệt, Q.10, TP.HCM",
-  },
-  {
-    id: "huflit",
-    name: "Đại học Ngoại ngữ - Tin học TP.HCM",
-    address: "155 Sư Vạn Hạnh, Q.10, TP.HCM",
-  },
-];
-
-const faculties = [
-  { id: "cntt", name: "Công nghệ Thông tin" },
-  { id: "kt", name: "Kỹ thuật" },
-  { id: "kinhte", name: "Kinh tế" },
-  { id: "ngoaingu", name: "Ngoại ngữ" },
-];
+import { universities, faculties } from "@/constants/constants";
+import { useStudent } from "@/hooks/useStudent";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/authStore";
 
 // Validation schema
 const studentSchema = z.object({
@@ -83,52 +62,98 @@ const FormField = ({
 );
 
 const UniversityProfile = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { updateStudent} = useStudent();
+  const { user, student } = useAuthStore();
+
 
   const {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(studentSchema),
     defaultValues: {
-      student_id: "",
-      university: "",
-      faculty_name: "",
-      major_name: "",
-      year_of_study: 1,
-      class_id: "",
-      has_parttime_job: false,
-      has_supporter: false,
+      student_id: student?.student_id || "",
+      university: student?.university || "",
+      faculty_name: student?.faculty_name || "",
+      major_name: student?.major_name || "",
+      year_of_study: student?.year_of_study || 1,
+      class_id: student?.class_id || "",
+      has_parttime_job: student?.has_parttime_job || false,
+      has_supporter: student?.has_supporter || false,
     },
   });
+    useEffect(()=>{
+    if(student){
+      reset({
+        student_id: student.student_id || "",
+        university: student.university || "",
+        faculty_name: student.faculty_name || "",
+        major_name: student.major_name || "",
+        year_of_study: student.year_of_study || 1,
+        class_id: student.class_id || "",
+        has_parttime_job: student.has_parttime_job || false,
+        has_supporter: student.has_supporter || false,
+      }); 
+    }
+  },[student])
 
   const selectedUniversity = universities.find(
     (uni) => uni.id === watch("university"),
   );
 
   const onSubmit = async (data) => {
-    setIsSubmitting(true);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmUpdate = async () => {
+    const data = watch();
     try {
-      // Simulate API call
-      console.log("Student data:", data);
-
-      // Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      setSubmitSuccess(true);
-      setTimeout(() => setSubmitSuccess(false), 3000);
+      await updateStudent.mutateAsync({
+        citizen_id: user.citizen_id,
+        ...data,
+      });
+      setShowConfirmModal(false);
     } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error updating student:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="mx-4 w-[400px] rounded-2xl bg-white p-8 shadow-2xl dark:bg-gray-800">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="mb-6 text-lg leading-relaxed font-semibold text-gray-800 dark:text-gray-200">
+                Bạn có chắc muốn cập nhật thông tin này?
+              </h3>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={handleConfirmUpdate}
+                  className="min-w-[80px] rounded-full bg-blue-500 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+                >
+                  Có
+                </button>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="min-w-[80px] rounded-full bg-gray-500 px-8 py-3 font-medium text-white transition-colors hover:bg-gray-600"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
         <div className="mb-8 text-center">
@@ -142,18 +167,6 @@ const UniversityProfile = () => {
             Cập nhật thông tin về trường học của bạn để hoàn tất hồ sơ
           </p>
         </div>
-
-        {/* Success Message */}
-        {submitSuccess && (
-          <div className="animate-fade-in mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-            <div className="flex items-center">
-              <CheckCircle className="mr-3 h-5 w-5 text-green-500" />
-              <span className="font-medium text-green-800 dark:text-green-200">
-                Cập nhật thông tin thành công!
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Main Form */}
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -339,10 +352,10 @@ const UniversityProfile = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={updateStudent.isPending}
                   className="relative rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSubmitting ? (
+                  {updateStudent.isPending ? (
                     <div className="flex items-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Đang lưu...

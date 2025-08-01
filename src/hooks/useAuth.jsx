@@ -8,7 +8,7 @@ import { useAppStore } from "../store/appStore";
 export function useAuth() {
   const navigate = useNavigate();
   const { setUser, setError } = useAuthStore();
-  const { setLoading, setToast, setError: setAppError } = useAppStore();
+  const { setToast } = useAppStore();
 
   const {
     data: currentUser,

@@ -60,6 +60,7 @@ const formSchema = z.object({
   // citizen_id: validateCitizenId(),
   name: z.string(),
   citizen_id: z.string(),
+  phone: z.string(),
   email: z.string(),
   number: z.string(),
   birth: z.string(),
@@ -67,8 +68,6 @@ const formSchema = z.object({
   address: z.string(),
 });
 const UserProfile = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const { user } = useAuth();
   const { updateUser } = useUser();
@@ -84,44 +83,30 @@ const UserProfile = () => {
       name: user.name || "Nguyễn Văn A",
       citizen_id: user.citizen_id || "123456789",
       email: user.email || "nguyenvana@email.com",
-      number: user.number || "0123456789",
-      birth: user.birth || "1990-01-01",
+      phone: user.phone || "0123456789",
+      birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
       gender: user.gender || "male",
       address: user.address || "123 Nguyễn Văn Cừ, Q.5, TP.HCM",
     },
   });
 
   const onSubmit = (data) => {
-    console.log(data);
-    updateUser.mutate({
-      _id: user._id,
-      ...data,
-    });
+    setShowConfirmModal(true);
   };
+
   const handleConfirmUpdate = async () => {
-    setIsSubmitting(true);
     setShowConfirmModal(false);
-
+    const data= watch();
     try {
-      // Remove password fields if they're empty
-      const submitData = { ...formData };
-      if (!submitData.password) {
-        delete submitData.password;
-        delete submitData.confirmPassword;
-      }
-
-      console.log("Updated user data:", submitData);
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      setSubmitSuccess(true);
-      setTimeout(() => setSubmitSuccess(false), 3000);
+      await updateUser.mutateAsync({
+        _id: user._id,
+        ...data,
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
-    } finally {
-      setIsSubmitting(false);
     }
+
+
   };
 
   return (
@@ -169,18 +154,6 @@ const UserProfile = () => {
             Cập nhật thông tin để hoàn tất hồ sơ của bạn
           </p>
         </div>
-
-        {/* Success Message */}
-        {submitSuccess && (
-          <div className="animate-fade-in mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-            <div className="flex items-center">
-              <CheckCircle className="mr-3 h-5 w-5 text-green-500" />
-              <span className="font-medium text-green-800 dark:text-green-200">
-                Cập nhật thông tin thành công!
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Main Form */}
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -239,11 +212,11 @@ const UserProfile = () => {
                 <FormField
                   label="Số điện thoại"
                   icon={Phone}
-                  error={errors.number}
+                  error={errors.phone}
                 >
                   <input
                     type="tel"
-                    {...register("number")}
+                    {...register("phone")}
                     placeholder="Nhập số điện thoại"
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
@@ -295,18 +268,20 @@ const UserProfile = () => {
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => reset()}
-                  className="rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                  className="cursor-pointer rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
                 >
                   <X className="mr-2 inline h-4 w-4" />
                   Hủy bỏ
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="relative rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={updateUser.isPending}
+                  onClick={()=>{
+                    onSubmit()
+                  }}
+                  className="relative cursor-pointer rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isSubmitting ? (
+                  {updateUser.isPending ? (
                     <div className="flex items-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Đang cập nhật...
