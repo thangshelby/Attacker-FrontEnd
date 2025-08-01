@@ -64,7 +64,7 @@ const Sidebar = () => {
           <SidebarItem
             icon={<SchoolIcon size={18} />}
             text="Hồ sơ sinh viên"
-            to="/profile/student-info "
+            to="/profile/student-info"
           />
           <SidebarItem
             icon={<NotebookPen size={18} />}

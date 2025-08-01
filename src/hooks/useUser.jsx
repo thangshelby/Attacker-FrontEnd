@@ -26,48 +26,48 @@ export function userUser() {
     },
   });
   const getUsersBySchoolName = useQuery({
-    queryKey: ["usersBySchoolName", user.school_name],
+    queryKey: ["usersBySchoolName", user?.school_name],
     queryFn: async () => {
-      const { data } = await api.getUsersBySchoolName(user.school_name);
+      const { data } = await api.getUsersBySchoolName(user?.school_name);
       return data.data.users;
     },
-    enabled: !!user.school_name,
+    enabled: !!user?.school_name,
     onError: (error) => {
       console.error("Error fetching users by school name:", error);
     },
   });
 
   const getUsersBySchoolId = useQuery({
-    queryKey: ["usersBySchoolId", user.school_id],
+    queryKey: ["usersBySchoolId", user?.school_id],
     queryFn: async () => {
-      const { data } = await api.getUsersBySchoolId(user.school_id);
+      const { data } = await api.getUsersBySchoolId(user?.school_id);
       return data.data.users;
     },
-    enabled: !!user.school_id,
+    enabled: !!user?.school_id,
     onError: (error) => {
       console.error("Error fetching users by school ID:", error);
     },
   });
 
   const getUsersByRole = useQuery({
-    queryKey: ["usersByRole", user.role],
+    queryKey: ["usersByRole", user?.role],
     queryFn: async () => {
-      const { data } = await api.getUsersByRole(user.role);
+      const { data } = await api.getUsersByRole(user?.role);
       return data.data.users;
     },
-    enabled: !!user.role,
+    enabled: !!user?.role,
     onError: (error) => {
       console.error("Error fetching users by role:", error);
     },
   });
 
   const getUserById = useQuery({
-    queryKey: ["userById", user.id],
+    queryKey: ["userById", user?.id],
     queryFn: async () => {
-      const { data } = await api.getUserById(user.id);
+      const { data } = await api.getUserById(user?.id);
       return data.data.user;
     },
-    enabled: !!user.id,
+    enabled: !!user?.id,
     onError: (error) => {
       console.error("Error fetching user by ID:", error);
     },

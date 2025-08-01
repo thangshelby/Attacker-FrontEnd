@@ -16,8 +16,8 @@ import Profiles from "../pages/user/Profile/Profile.jsx";
 import UniversityProfile from "../pages/user/Profile/UniversityProfile/UniversityProfile.jsx";
 import MyLoans from "../pages/user/MyLoan/MyLoan.jsx";
 import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransaction.jsx";
-import DIDs from "@/pages/user/DecentralizedIdentification/DIDs/DIDs";
-import VCs from "@/pages/user/DecentralizedIdentification/VCs/VCs";
+import DIDs from "../pages/user/DecentralizedIdentification/DIDs/DIDs.jsx";
+import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
 const Router = () => {
   return (
@@ -33,12 +33,12 @@ const Router = () => {
         {/* 1. PUBLIC ROUTES (Ai cũng có thể truy cập)              */}
         {/* ========================================================= */}
         {/* Trang chủ/Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
 
         {/* Public: auth routes */}
         {/* Các trang xác thực (đăng nhập, đăng ký) */}
         <Route path="/auth" element={<AuthLayout />}>
-          <Route index path="login" element={<LoginPage />} />
+          <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
         </Route>
@@ -48,9 +48,8 @@ const Router = () => {
         {/* ========================================================= */}
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/auth" element={<AuthLayout />}>
-            <Route path="verify-email" element={<VerifyEmailPage />} />
-          </Route>
+          <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+          
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
@@ -59,7 +58,6 @@ const Router = () => {
               path="profile/student-info"
               element={<UniversityProfile />}
             />
-
 
             <Route path="DIDs" element={<DIDs />} />
             <Route path="VCs" element={<VCs />} />
