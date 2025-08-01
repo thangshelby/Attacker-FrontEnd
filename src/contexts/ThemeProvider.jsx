@@ -1,32 +1,39 @@
 // contexts/ThemeProvider.jsx (Đã sửa lỗi)
 
-import { createContext, useContext, useState, useEffect } from "react";
-
-const ThemeContext = createContext();
+import { useState, useEffect } from "react";
+import { ThemeContext } from "./ThemeContext.js";
 
 export const ThemeProvider = ({ children }) => {
-  // Bắt đầu với `null` để tránh lỗi hydration mismatch
-  const [theme, setTheme] = useState(null);
+  // Khởi tạo với theme mặc định để tránh null state
+  const [theme, setTheme] = useState(() => {
+    // Chỉ trong môi trường browser
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        return savedTheme;
+      }
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return systemPrefersDark ? "dark" : "light";
+    }
+    return "light"; // fallback cho SSR
+  });
 
-  // Effect đầu tiên: Chỉ chạy một lần khi component mount để lấy theme
+  // Effect để đồng bộ theme với DOM khi component mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     const systemPrefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
 
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      setTheme(systemPrefersDark ? "dark" : "light");
+    const finalTheme = savedTheme || (systemPrefersDark ? "dark" : "light");
+    
+    if (theme !== finalTheme) {
+      setTheme(finalTheme);
     }
   }, []);
 
-  // Effect thứ hai: Chạy mỗi khi `theme` thay đổi
+  // Effect để cập nhật DOM và localStorage khi theme thay đổi
   useEffect(() => {
-    // Nếu theme chưa được xác định (vẫn là null), không làm gì cả
-    if (theme === null) return;
-
     const root = document.documentElement; // Đây là thẻ <html>
 
     // Xóa class cũ trước khi thêm class mới để đảm bảo sạch sẽ
@@ -43,11 +50,6 @@ export const ThemeProvider = ({ children }) => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
-  // Tránh render children khi theme chưa được xác định ở client
-  if (theme === null) {
-    return null;
-  }
-
   const value = { theme, toggleTheme };
 
   return (
@@ -55,4 +57,3 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);

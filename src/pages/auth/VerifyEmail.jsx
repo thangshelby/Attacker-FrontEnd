@@ -70,7 +70,7 @@ export default function VerifyEmailPage() {
       alert("Please enter the complete 6-digit code");
       return;
     }
-    verifyEmail.mutate({ otp_token: fullCode, email: user.email });
+          verifyEmail.mutate({ otp_token: fullCode, email: user?.email });
 
     alert("Code submitted: " + fullCode);
   };
@@ -93,7 +93,7 @@ export default function VerifyEmailPage() {
 
         <p className="mb-10 text-sm leading-relaxed text-gray-600">
           We sent a code to{" "}
-          <span className="text-sky-500 underline cursor-pointer">{user.email}</span>
+          <span className="text-sky-500 underline cursor-pointer">{user?.email}</span>
         </p>
 
         <div className="mb-10 flex justify-center gap-4">

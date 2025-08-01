@@ -71,7 +71,7 @@ export function SidebarLayout({ children }) {
                   {user?.user_name}
                 </h4>
                 <span className="block truncate text-xs font-semibold text-gray-600 dark:text-gray-400">
-                  {user.email}
+                  {user?.email}
                 </span>
               </div>
               <MoreVertical
