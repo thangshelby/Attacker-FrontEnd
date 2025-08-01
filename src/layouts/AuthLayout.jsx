@@ -3,8 +3,8 @@ import { logo } from "../assets";
 
 const AuthLayout = () => {
   return (
-    <main className="relative flex h-screen items-center justify-center overflow-hidden bg-gray-100 p-4">
-      <div className="w-full max-w-7xl rounded-2xl bg-white shadow-lg lg:grid lg:grid-cols-2">
+    <main className="relative flex h-screen items-center justify-center overflow-hidden bg-gray-100">
+      <div className="w-full max-w-7xl rounded-2xl bg-white p-4 shadow-lg lg:grid lg:grid-cols-2">
         <div className="h-full w-full">
           <Outlet />
         </div>

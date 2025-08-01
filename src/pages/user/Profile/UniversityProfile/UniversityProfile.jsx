@@ -1,255 +1,379 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
-  Mail,
-  University,
-  BookUser,
+  GraduationCap,
+  Building2,
+  BookOpen,
   Calendar,
-  UploadCloud,
+  Users,
+  Briefcase,
+  Heart,
+  CheckCircle,
+  AlertCircle,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
-import { universities, faculties } from "./mockdat";
+import { universities, faculties } from "@/constants/constants";
+import { useStudent } from "@/hooks/useStudent";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
+import { useAuthStore } from "@/store/authStore";
 
-const FormField = ({ id, label, children }) => (
-  <div>
-    <label
-      htmlFor={id}
-      className="block text-sm font-medium text-gray-600 dark:text-gray-300"
-    >
+// Validation schema
+const studentSchema = z.object({
+  student_id: z.string().min(1, "Mã số sinh viên là bắt buộc"),
+  university: z.string().min(1, "Vui lòng chọn trường đại học"),
+  faculty_name: z.string().min(1, "Vui lòng chọn khoa"),
+  major_name: z.string().min(1, "Chuyên ngành là bắt buộc"),
+  year_of_study: z
+    .number()
+    .min(1, "Năm học phải từ 1 trở lên")
+    .max(6, "Năm học không được quá 6"),
+  class_id: z.string().optional(),
+  has_parttime_job: z.boolean(),
+  has_supporter: z.boolean(),
+});
+
+const FormField = ({
+  label,
+  icon: Icon,
+  error,
+  children,
+  required = false,
+}) => (
+  <div className="space-y-2">
+    <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+      {Icon && <Icon className="mr-2 h-4 w-4 text-indigo-500" />}
       {label}
+      {required && <span className="ml-1 text-red-500">*</span>}
     </label>
-    <div className="mt-1">{children}</div>
+    <div className="relative">
+      {children}
+      {error && (
+        <div className="mt-1 flex items-center text-sm text-red-600">
+          <AlertCircle className="mr-1 h-4 w-4" />
+          {error.message}
+        </div>
+      )}
+    </div>
   </div>
 );
 
-const UnveristyProfile = () => {
-  // Giả sử email này được lấy từ state của user hoặc context
-  const registeredEmail = "harrypotter@gmail.com";
+const UniversityProfile = () => {
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { updateStudent} = useStudent();
+  const { user, student } = useAuthStore();
 
-  const [profile, setProfile] = useState({
-    universityId: "hcmus", // ID của trường được chọn
-    studentId: "19120001",
-    startYear: "2019",
-    endYear: "2024",
-    facultyId: "cntt",
-    major: "Kỹ thuật phần mềm",
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(studentSchema),
+    defaultValues: {
+      student_id: student?.student_id || "",
+      university: student?.university || "",
+      faculty_name: student?.faculty_name || "",
+      major_name: student?.major_name || "",
+      year_of_study: student?.year_of_study || 1,
+      class_id: student?.class_id || "",
+      has_parttime_job: student?.has_parttime_job || false,
+      has_supporter: student?.has_supporter || false,
+    },
   });
+    useEffect(()=>{
+    if(student){
+      reset({
+        student_id: student.student_id || "",
+        university: student.university || "",
+        faculty_name: student.faculty_name || "",
+        major_name: student.major_name || "",
+        year_of_study: student.year_of_study || 1,
+        class_id: student.class_id || "",
+        has_parttime_job: student.has_parttime_job || false,
+        has_supporter: student.has_supporter || false,
+      }); 
+    }
+  },[student])
 
-  const [fileName, setFileName] = useState("");
-
-  // Lấy thông tin trường đại học đang được chọn
-  const selectedUniversity = useMemo(
-    () => universities.find((uni) => uni.id === profile.universityId),
-    [profile.universityId],
+  const selectedUniversity = universities.find(
+    (uni) => uni.id === watch("university"),
   );
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
+  const onSubmit = async (data) => {
+    setShowConfirmModal(true);
   };
 
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFileName(e.target.files[0].name);
+  const handleConfirmUpdate = async () => {
+    const data = watch();
+    try {
+      await updateStudent.mutateAsync({
+        citizen_id: user.citizen_id,
+        ...data,
+      });
+      setShowConfirmModal(false);
+    } catch (error) {
+      console.error("Error updating student:", error);
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Dữ liệu đã gửi:", { ...profile, admissionLetter: fileName });
-    // Thêm logic gọi API để lưu dữ liệu ở đây
-    alert("Đã lưu thông tin thành công!");
-  };
-
   return (
-    <div className="mx-auto max-w-4xl">
-      {/* Tiêu đề trang */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-          Hồ Sơ Học Vấn
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Cập nhật thông tin về trường học của bạn để hoàn tất hồ sơ.
-        </p>
-      </div>
-
-      {/* Card chứa form */}
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
-      >
-        <div className="space-y-8">
-          {/* Phần thông tin trường học */}
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <FormField id="universityId" label="Tên trường">
-                <div className="relative">
-                  <select
-                    id="universityId"
-                    name="universityId"
-                    value={profile.universityId}
-                    onChange={handleChange}
-                    className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-8 shadow-sm transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                  >
-                    {universities.map((uni) => (
-                      <option key={uni.id} value={uni.id}>
-                        {uni.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
-                </div>
-              </FormField>
-              {selectedUniversity && (
-                <div className="mt-2 rounded-md bg-indigo-50 p-3 text-sm text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
-                  <p>
-                    <strong>Địa chỉ:</strong> {selectedUniversity.address}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <FormField id="studentId" label="Mã số sinh viên">
-              <input
-                type="text"
-                id="studentId"
-                name="studentId"
-                value={profile.studentId}
-                onChange={handleChange}
-                className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-              />
-            </FormField>
-
-            <FormField id="email" label="Email sinh viên">
-              <div className="flex items-center rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 dark:border-gray-600 dark:bg-gray-700/50">
-                <Mail size={16} className="mr-2 text-gray-400" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  {registeredEmail}
-                </span>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="mx-4 w-[400px] rounded-2xl bg-white p-8 shadow-2xl dark:bg-gray-800">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-            </FormField>
+              <h3 className="mb-6 text-lg leading-relaxed font-semibold text-gray-800 dark:text-gray-200">
+                Bạn có chắc muốn cập nhật thông tin này?
+              </h3>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={handleConfirmUpdate}
+                  className="min-w-[80px] rounded-full bg-blue-500 px-8 py-3 font-medium text-white transition-colors hover:bg-blue-600"
+                >
+                  Có
+                </button>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="min-w-[80px] rounded-full bg-gray-500 px-8 py-3 font-medium text-white transition-colors hover:bg-gray-600"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Phần thông tin học tập */}
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
-            <div className="flex gap-4">
-              <FormField id="startYear" label="Năm nhập học">
-                <input
-                  type="number"
-                  id="startYear"
-                  name="startYear"
-                  value={profile.startYear}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </FormField>
-              <FormField id="endYear" label="Năm tốt nghiệp (dự kiến)">
-                <input
-                  type="number"
-                  id="endYear"
-                  name="endYear"
-                  value={profile.endYear}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </FormField>
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
+            <GraduationCap className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
+            Hồ Sơ Học Vấn
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Cập nhật thông tin về trường học của bạn để hoàn tất hồ sơ
+          </p>
+        </div>
+
+        {/* Main Form */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/80 shadow-xl backdrop-blur-sm dark:border-gray-700/20 dark:bg-gray-800/80">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+              <h2 className="flex items-center text-lg font-semibold text-white">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Thông tin sinh viên
+              </h2>
             </div>
 
-            <div>
-              <FormField id="facultyId" label="Khoa">
-                <div className="relative">
-                  <select
-                    id="facultyId"
-                    name="facultyId"
-                    value={profile.facultyId}
-                    onChange={handleChange}
-                    className="w-full appearance-none rounded-lg border-gray-300 bg-white px-4 py-2.5 pr-8 shadow-sm transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            <div className="space-y-8 p-6">
+              {/* University Selection */}
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="lg:col-span-2">
+                  <FormField
+                    label="Trường đại học"
+                    icon={Building2}
+                    error={errors.university}
+                    required
                   >
-                    {faculties.map((fac) => (
-                      <option key={fac.id} value={fac.id}>
-                        {fac.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
+                    <div className="relative">
+                      <select
+                        {...register("university")}
+                        className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 pr-10 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                      >
+                        <option value="">Chọn trường đại học</option>
+                        {universities.map((uni) => (
+                          <option key={uni.id} value={uni.id}>
+                            {uni.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                    </div>
+                    {selectedUniversity && (
+                      <div className="mt-3 rounded-lg border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-800 dark:bg-indigo-900/30">
+                        <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                          <strong>Địa chỉ:</strong> {selectedUniversity.address}
+                        </p>
+                      </div>
+                    )}
+                  </FormField>
                 </div>
-              </FormField>
-            </div>
 
-            <div className="md:col-span-2">
-              <FormField id="major" label="Chuyên ngành">
-                <input
-                  type="text"
-                  id="major"
-                  name="major"
-                  value={profile.major}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-                />
-              </FormField>
-            </div>
-          </div>
+                <FormField
+                  label="Mã số sinh viên"
+                  icon={Users}
+                  error={errors.student_id}
+                  required
+                >
+                  <input
+                    type="text"
+                    {...register("student_id")}
+                    placeholder="Nhập mã số sinh viên"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                </FormField>
 
-          {/* Phần tải lên giấy tờ */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300">
-              Giấy xác nhận nhập học
-            </label>
-            <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 dark:border-gray-600">
-              <div className="text-center">
-                <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="mt-4 flex text-sm leading-6 text-gray-600 dark:text-gray-400">
-                  <label
-                    htmlFor="file-upload"
-                    className="relative cursor-pointer rounded-md font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-none hover:text-indigo-500 dark:text-indigo-400 dark:ring-offset-gray-800"
+                <FormField label="Mã lớp" icon={Users} error={errors.class_id}>
+                  <input
+                    type="text"
+                    {...register("class_id")}
+                    placeholder="Nhập mã lớp (tùy chọn)"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                </FormField>
+              </div>
+
+              {/* Academic Information */}
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <FormField
+                  label="Khoa"
+                  icon={BookOpen}
+                  error={errors.faculty_name}
+                  required
+                >
+                  <div className="relative">
+                    <select
+                      {...register("faculty_name")}
+                      className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 pr-10 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+                      <option value="">Chọn khoa</option>
+                      {faculties.map((faculty) => (
+                        <option key={faculty.id} value={faculty.name}>
+                          {faculty.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  </div>
+                </FormField>
+
+                <FormField
+                  label="Năm học"
+                  icon={Calendar}
+                  error={errors.year_of_study}
+                  required
+                >
+                  <input
+                    type="number"
+                    {...register("year_of_study", { valueAsNumber: true })}
+                    min="1"
+                    max="6"
+                    placeholder="Năm thứ mấy"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                </FormField>
+
+                <div className="lg:col-span-2">
+                  <FormField
+                    label="Chuyên ngành"
+                    icon={GraduationCap}
+                    error={errors.major_name}
+                    required
                   >
-                    <span>Tải lên một file</span>
                     <input
-                      id="file-upload"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      onChange={handleFileChange}
+                      type="text"
+                      {...register("major_name")}
+                      placeholder="Nhập tên chuyên ngành"
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     />
-                  </label>
-                  <p className="pl-1">hoặc kéo và thả</p>
+                  </FormField>
                 </div>
-                <p className="text-xs leading-5 text-gray-500">
-                  PNG, JPG, PDF tối đa 10MB
-                </p>
-                {fileName && (
-                  <p className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                    Đã chọn file: {fileName}
-                  </p>
-                )}
+              </div>
+
+              {/* Additional Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Thông tin bổ sung
+                </h3>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-gray-200 p-4 transition-all duration-200 hover:border-indigo-300 dark:border-gray-600 dark:hover:border-indigo-500">
+                    <label className="flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        {...register("has_parttime_job")}
+                        className="rounded border-gray-300 bg-white text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700"
+                      />
+                      <div className="ml-3">
+                        <div className="flex items-center text-sm font-medium text-gray-900 dark:text-white">
+                          <Briefcase className="mr-2 h-4 w-4 text-indigo-500" />
+                          Có việc làm thêm
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Bạn hiện tại có công việc part-time không?
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div className="rounded-xl border border-gray-200 p-4 transition-all duration-200 hover:border-indigo-300 dark:border-gray-600 dark:hover:border-indigo-500">
+                    <label className="flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        {...register("has_supporter")}
+                        className="rounded border-gray-300 bg-white text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700"
+                      />
+                      <div className="ml-3">
+                        <div className="flex items-center text-sm font-medium text-gray-900 dark:text-white">
+                          <Heart className="mr-2 h-4 w-4 text-indigo-500" />
+                          Có người hỗ trợ
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Bạn có người hỗ trợ tài chính học tập không?
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  className="rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateStudent.isPending}
+                  className="relative rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {updateStudent.isPending ? (
+                    <div className="flex items-center">
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                      Đang lưu...
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Lưu thông tin
+                    </div>
+                  )}
+                </button>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Nút hành động */}
-        <div className="mt-8 flex justify-end gap-x-3 border-t border-gray-200 pt-6 dark:border-gray-700">
-          <button
-            type="button"
-            className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
-          >
-            Hủy
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Lưu thay đổi
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default UnveristyProfile;
+export default UniversityProfile;

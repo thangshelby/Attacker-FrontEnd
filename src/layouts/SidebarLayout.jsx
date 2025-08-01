@@ -1,17 +1,11 @@
 import React from "react";
-import { useContext, useState, createContext } from "react";
-import { logo } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
-import {
-  ChevronFirst,
-  ChevronLast,
-  MoreVertical,
-  ChevronDown,
-} from "lucide-react";
-import { testimonial1 } from "../assets"; // Thay đổi đường dẫn tới asset của bạn nếu cần
+import { useState, createContext, useContext } from "react";
+import { logo } from "../assets";
+import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { testimonial1 } from "../assets";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useAppStore } from "@/store/appStore";
 const SidebarContext = createContext();
 
 export function SidebarLayout({ children }) {
@@ -53,7 +47,7 @@ export function SidebarLayout({ children }) {
         </div>
 
         <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex flex-1 flex-col px-3 gap-y-2">{children}</ul>
+          <ul className="flex flex-1 flex-col gap-y-2 px-3">{children}</ul>
         </SidebarContext.Provider>
 
         <div
@@ -68,7 +62,7 @@ export function SidebarLayout({ children }) {
             <div className="ml-3 flex min-w-0 flex-1 items-center justify-between">
               <div className="min-w-0 leading-4">
                 <h4 className="truncate font-extrabold text-gray-800 dark:text-gray-100">
-                  {user?.user_name}
+                  {user?.name}
                 </h4>
                 <span className="block truncate text-xs font-semibold text-gray-600 dark:text-gray-400">
                   {user?.email}
@@ -85,15 +79,25 @@ export function SidebarLayout({ children }) {
     </aside>
   );
 }
+import { useAuthStore } from "@/store/authStore";
 
 export function SidebarItem({ icon, text, alert, to }) {
   const { expanded } = useContext(SidebarContext);
-
+  const { user } = useAuthStore();
+  const { setModal } = useAppStore();
   return (
     <NavLink
       onClick={(e) => {
-        if (to == "not-used") {
-          e.preventDefault();
+        if (to == "/DIDs") {
+          if (!user.verified) {
+            setModal({
+              type: "warn",
+              title: "Không đủ thông tin",
+              message:
+                "Bạn không thể truy cập trang này. Vui lòng cập nhật đầy đủ thông tin người dùng",
+            });
+            e.preventDefault();
+          }
         }
       }}
       to={to}
@@ -136,6 +140,9 @@ export function SidebarItem({ icon, text, alert, to }) {
   );
 }
 
+import { useLocation } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
+
 export function SidebarDropdownItem({ icon, text, children }) {
   const { expanded } = useContext(SidebarContext);
   const { pathname } = useLocation();
@@ -150,7 +157,7 @@ export function SidebarDropdownItem({ icon, text, children }) {
   return (
     <>
       <li
-        className={`group relative my-1 flex cursor-pointer items-center rounded-md py-2 font-medium transition-colors ${
+        className={`group relative flex cursor-pointer items-center rounded-md py-2 font-medium transition-colors ${
           expanded ? "px-3" : "justify-center px-3"
         } ${
           isActive
@@ -196,5 +203,3 @@ export function SidebarDropdownItem({ icon, text, children }) {
     </>
   );
 }
-
-// export default SidebarLayout;

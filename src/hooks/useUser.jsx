@@ -1,13 +1,19 @@
-import api from "../apis/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
+import { useAppStore } from "@/store/appStore";
+import { user as userAPI } from "../apis/user";
 
-export function userUser() {
+export function useUser() {
   const { user, setUser } = useAuthStore();
+  const { setToast } = useAppStore();
 
   const updateUser = useMutation({
-    mutationFn: (data) => api.updateUser(data),
+    mutationFn: (data) => userAPI.updateUser(data),
     onSuccess: (data) => {
+      setToast({
+        type: "success",
+        message: "Cập nhật thông tin người dùng thành công !",
+      });
       setUser(data.data.user);
     },
     onError: (error) => {

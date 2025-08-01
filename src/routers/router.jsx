@@ -12,13 +12,14 @@ import ProtectedRoute from "../utils/ProtectedRoute";
 import RootLayout from "../layouts/RootLayout";
 import Home from "../pages/user/Home/Home.jsx";
 import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
-import Profiles from "../pages/user/Profile/Profile.jsx";
+import UserProfile from "@/pages/user/Profile/UserProfile/UserProfile";
 import UniversityProfile from "../pages/user/Profile/UniversityProfile/UniversityProfile.jsx";
 import MyLoans from "../pages/user/MyLoan/MyLoan.jsx";
 import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransaction.jsx";
 import DIDs from "../pages/user/DecentralizedIdentification/DIDs/DIDs.jsx";
 import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
+
 const Router = () => {
   return (
     <Suspense
@@ -53,7 +54,7 @@ const Router = () => {
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="profile/general-info" element={<Profiles />} />
+            <Route path="profile/general-info" element={<UserProfile />} />
             <Route
               path="profile/student-info"
               element={<UniversityProfile />}

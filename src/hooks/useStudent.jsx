@@ -1,12 +1,39 @@
-import api from "@/apis/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { student } from "@/apis/student";
 import { useAppStore } from "@/store/appStore";
+import { useAuthStore } from "@/store/authStore";
+import { use } from "react";
 
 export function useStudent() {
+  const { setToast } = useAppStore();
+  const { setStudent, user } = useAuthStore();
+
+  const { data: studentData } = useQuery({
+    queryKey: ["student"],
+    queryFn: async () => {
+      const { data } = await student.getStudent(user.citizen_id);
+      setStudent(data.data.student);
+      return data.data.student;
+    },
+    retry: false,
+    enabled: true,
+    onError: (error) => {
+      console.error("Error fetching student:", error);
+    },
+  });
+  const getStudent = useQuery({
+    queryKey: ["student"],
+    queryFn: () => student.getStudent(),
+  });
   const updateStudent = useMutation({
-    mutationFn: (data) => api.updateStudent(data),
+    mutationFn: (data) => student.updateStudent(data),
     onSuccess: (data) => {
-      console.log("Student updated successfully:", data);
+      setToast({
+        type: "success",
+        message: "Student updated successfully",
+      });
+
+      setStudent(data.data.student);
     },
     onError: (error) => {
       console.error("Error updating student:", error);
@@ -14,7 +41,7 @@ export function useStudent() {
   });
 
   const updateStudentDIDById = useMutation({
-    mutationFn: (id, data) => api.updateStudentById(id, data),
+    mutationFn: (id, data) => student.updateStudentById(id, data),
     onSuccess: (data) => {
       console.log("Student DID updated successfully:", data);
     },
@@ -24,7 +51,9 @@ export function useStudent() {
   });
 
   return {
+    student: studentData,
+    getStudent,
     updateStudent,
     updateStudentDIDById,
-  }
+  };
 }
