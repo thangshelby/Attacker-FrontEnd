@@ -12,6 +12,8 @@ import {
   TrendingUp,
   FileText,
   Clock,
+  User,
+  Home,
 } from "lucide-react";
 
 // Mock data for loan purposes
@@ -29,6 +31,7 @@ const loanPurposes = [
     description: "Laptop, máy tính, thiết bị",
   },
   { id: 5, name: "Chi phí khác", description: "Các chi phí học tập khác" },
+  { id: 6, name: "Khác", description: "Mục đích khác (vui lòng ghi rõ)" },
 ];
 
 // Validation functions
@@ -38,6 +41,10 @@ const validateAmount = (amount) => {
 
 const validateTenor = (tenor) => {
   return tenor >= 3 && tenor <= 60; // 3-60 months
+};
+
+const validateFamilyIncome = (income) => {
+  return income > 0 && income <= 1000000000; // Max 1 billion VND
 };
 
 const FormField = ({
@@ -78,6 +85,9 @@ const NewLoans = () => {
     requested_loan_amount: "",
     loan_tenor: "",
     loan_purpose: "",
+    custom_purpose: "",
+    guarantor: "",
+    family_income: "",
     monthly_installment: 0,
   });
   const [errors, setErrors] = useState({});
@@ -114,6 +124,23 @@ const NewLoans = () => {
       newErrors.loan_purpose = { message: "Mục đích vay là bắt buộc" };
     }
 
+    // Validate custom purpose if "Khác" is selected
+    if (formData.loan_purpose === "6" && !formData.custom_purpose.trim()) {
+      newErrors.custom_purpose = { message: "Vui lòng mô tả mục đích vay" };
+    }
+
+    if (!formData.guarantor.trim()) {
+      newErrors.guarantor = { message: "Người bảo lãnh là bắt buộc" };
+    }
+
+    if (!formData.family_income) {
+      newErrors.family_income = { message: "Thu nhập gia đình là bắt buộc" };
+    } else if (!validateFamilyIncome(parseFloat(formData.family_income))) {
+      newErrors.family_income = {
+        message: "Thu nhập gia đình không hợp lệ",
+      };
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -123,6 +150,11 @@ const NewLoans = () => {
       ...formData,
       [field]: value,
     };
+
+    // Clear custom purpose if loan purpose is not "Khác"
+    if (field === "loan_purpose" && value !== "6") {
+      newFormData.custom_purpose = "";
+    }
 
     // Auto-calculate monthly installment when amount or tenor changes
     if (field === "requested_loan_amount" || field === "loan_tenor") {
@@ -162,6 +194,7 @@ const NewLoans = () => {
         requested_loan_amount: parseFloat(formData.requested_loan_amount),
         loan_tenor: parseInt(formData.loan_tenor),
         loan_purpose: parseInt(formData.loan_purpose),
+        family_income: parseFloat(formData.family_income),
       };
 
       console.log("Loan request data:", submitData);
@@ -178,6 +211,9 @@ const NewLoans = () => {
         requested_loan_amount: "",
         loan_tenor: "",
         loan_purpose: "",
+        custom_purpose: "",
+        guarantor: "",
+        family_income: "",
         monthly_installment: 0,
       });
     } catch (error) {
@@ -193,6 +229,9 @@ const NewLoans = () => {
       requested_loan_amount: "",
       loan_tenor: "",
       loan_purpose: "",
+      custom_purpose: "",
+      guarantor: "",
+      family_income: "",
       monthly_installment: 0,
     });
     setErrors({});
@@ -208,6 +247,13 @@ const NewLoans = () => {
   const selectedPurpose = loanPurposes.find(
     (p) => p.id === parseInt(formData.loan_purpose),
   );
+
+  const getPurposeDisplayText = () => {
+    if (formData.loan_purpose === "6" && formData.custom_purpose) {
+      return formData.custom_purpose;
+    }
+    return selectedPurpose?.name || "";
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-900">
@@ -232,7 +278,14 @@ const NewLoans = () => {
                   <strong>Thời hạn:</strong> {formData.loan_tenor} tháng
                 </p>
                 <p className="text-sm">
-                  <strong>Mục đích:</strong> {selectedPurpose?.name}
+                  <strong>Mục đích:</strong> {getPurposeDisplayText()}
+                </p>
+                <p className="text-sm">
+                  <strong>Người bảo lãnh:</strong> {formData.guarantor}
+                </p>
+                <p className="text-sm">
+                  <strong>Thu nhập gia đình:</strong>{" "}
+                  {formatCurrency(formData.family_income)}
                 </p>
                 <p className="text-sm">
                   <strong>Trả hàng tháng:</strong>{" "}
@@ -247,13 +300,13 @@ const NewLoans = () => {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={handleConfirmSubmit}
-                  className="min-w-[100px] rounded-full bg-green-500 px-8 py-3 font-medium text-white transition-colors hover:bg-green-600"
+                  className="cursor-pointer min-w-[100px] rounded-full bg-green-500 px-8 py-3 font-medium text-white transition-colors hover:bg-green-600"
                 >
                   Xác nhận
                 </button>
                 <button
                   onClick={() => setShowConfirmModal(false)}
-                  className="min-w-[100px] rounded-full bg-gray-500 px-8 py-3 font-medium text-white transition-colors hover:bg-gray-600"
+                  className="cursor-pointer min-w-[100px] rounded-full bg-gray-500 px-8 py-3 font-medium text-white transition-colors hover:bg-gray-600"
                 >
                   Hủy
                 </button>
@@ -363,6 +416,49 @@ const NewLoans = () => {
                   </select>
                 </FormField>
 
+                <FormField
+                  label="Người bảo lãnh"
+                  icon={User}
+                  error={errors.guarantor}
+                  required
+                  description="Họ tên người bảo lãnh cho khoản vay"
+                >
+                  <input
+                    type="text"
+                    value={formData.guarantor}
+                    onChange={(e) =>
+                      handleInputChange("guarantor", e.target.value)
+                    }
+                    placeholder="Ví dụ: Nguyễn Văn A"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                </FormField>
+
+                <FormField
+                  label="Thu nhập gia đình"
+                  icon={Home}
+                  error={errors.family_income}
+                  required
+                  description="Thu nhập hàng tháng của gia đình (VND)"
+                >
+                  <input
+                    type="number"
+                    value={formData.family_income}
+                    onChange={(e) =>
+                      handleInputChange("family_income", e.target.value)
+                    }
+                    placeholder="Ví dụ: 15000000"
+                    min="1"
+                    max="1000000000"
+                    className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                  />
+                  {formData.family_income && (
+                    <p className="mt-1 text-sm text-green-600">
+                      {formatCurrency(formData.family_income)}
+                    </p>
+                  )}
+                </FormField>
+
                 <div className="lg:col-span-2">
                   <FormField
                     label="Mục đích vay"
@@ -386,11 +482,34 @@ const NewLoans = () => {
                       ))}
                     </select>
                   </FormField>
+
+                  {/* Custom Purpose Input - Shows when "Khác" is selected */}
+                  {formData.loan_purpose === "6" && (
+                    <div className="mt-4">
+                      <FormField
+                        label="Mô tả mục đích cụ thể"
+                        icon={FileText}
+                        error={errors.custom_purpose}
+                        required
+                        description="Vui lòng mô tả chi tiết mục đích vay của bạn"
+                      >
+                        <textarea
+                          value={formData.custom_purpose}
+                          onChange={(e) =>
+                            handleInputChange("custom_purpose", e.target.value)
+                          }
+                          placeholder="Mô tả chi tiết mục đích vay của bạn..."
+                          rows="3"
+                          className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white resize-none"
+                        />
+                      </FormField>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Calculation Results */}
-              {formData.requested_loan_amount && formData.loan_tenor && (
+              {/* {formData.requested_loan_amount && formData.loan_tenor && (
                 <div className="rounded-xl border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/30">
                   <h3 className="mb-4 flex items-center text-lg font-semibold text-green-800 dark:text-green-200">
                     <Calculator className="mr-2 h-5 w-5" />
@@ -448,7 +567,7 @@ const NewLoans = () => {
                     </p>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
 
             {/* Action Buttons */}
@@ -457,7 +576,7 @@ const NewLoans = () => {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                  className="cursor-pointer rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
                 >
                   <X className="mr-2 inline h-4 w-4" />
                   Hủy bỏ
@@ -465,7 +584,7 @@ const NewLoans = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="relative rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="cursor-pointer relative rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { XCircle, Shield, Lock, Eye, CheckCircle, AlertTriangle, Wallet, ArrowRight, Info } from 'lucide-react';
 
-const Home = () => {
+const UnverifiedDIDPage = () => {
   const [showDetails, setShowDetails] = useState(false);
 
   const verificationSteps = [
@@ -204,4 +204,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default UnverifiedDIDPage;

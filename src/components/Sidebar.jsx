@@ -65,18 +65,11 @@ const Sidebar = () => {
             to="/profile/academic-info"
           />
         </SidebarDropdownItem>
-        <SidebarDropdownItem icon={<ShieldCheck />} text={"Định danh "}>
-          <SidebarItem
-            icon={<BanknoteArrowUp />}
-            text="Chung chi cua ban"
-            to="/VCs"
-          />
-          <SidebarItem
-            icon={<ShieldUser />}
-            text="Định danh phi tập trung"
-            to="/DIDs"
-          />
-        </SidebarDropdownItem>
+        <SidebarItem
+          icon={<ShieldCheck />}
+          text="Định danh phi tập trung"
+          to="/DIDs"
+        />
 
         <SidebarItem icon={<Wallet />} text="Khoản vay của tôi" to="/loans" />
         <SidebarItem icon={<History />} text="Lịch sử vay" to="/history" />

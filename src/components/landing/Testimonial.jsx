@@ -41,14 +41,14 @@ const Testimonials = () => {
             <div className="mt-8 flex justify-center gap-4 lg:justify-start">
               <button
                 onClick={handlePrev}
-                className="rounded-full border border-gray-300 p-3 text-gray-700 transition hover:bg-gray-100"
+                className="cursor-pointer rounded-full border border-gray-300 p-3 text-gray-700 transition hover:bg-gray-100"
                 aria-label="Previous testimonial"
               >
                 <ChevronLeft size={24} />
               </button>
               <button
                 onClick={handleNext}
-                className="rounded-full bg-gray-900 p-3 text-white transition hover:bg-gray-700"
+                className="cursor-pointer rounded-full bg-gray-900 p-3 text-white transition hover:bg-gray-700"
                 aria-label="Next testimonial"
               >
                 <ChevronRight size={24} />

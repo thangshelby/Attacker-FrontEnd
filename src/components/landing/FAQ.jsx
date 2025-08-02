@@ -9,7 +9,7 @@ const FaqItem = ({ item, isOpen, onClick }) => {
     <div className="border-b border-gray-200 py-4">
       <button
         onClick={onClick}
-        className="flex w-full items-center justify-between text-left"
+        className="cursor-pointer flex w-full items-center justify-between text-left"
       >
         <h3 className="text-lg font-semibold text-gray-800">{item.question}</h3>
         <span className="text-purple-600">
