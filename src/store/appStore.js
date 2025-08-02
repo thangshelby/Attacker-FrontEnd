@@ -9,6 +9,9 @@ export const useAppStore = create((set) => ({
   setModal: (modal) => set({ modal }),
   clearModal: () => set({ modal: null }),
 
+  expanded: true,
+  setExpanded: (expanded) => set({ expanded }),
+
   loading: false,
   error: null,
   isSidebarOpen: false,

@@ -1,9 +1,8 @@
 import React from "react";
 import { useState, createContext, useContext } from "react";
 import { logo } from "../assets";
-import { ChevronFirst, ChevronLast, MoreVertical } from "lucide-react";
+import { ChevronFirst, ChevronLast } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { testimonial1 } from "../assets";
 import { useAuth } from "../hooks/useAuth";
 import { useAppStore } from "@/store/appStore";
 const SidebarContext = createContext();
@@ -11,6 +10,7 @@ const SidebarContext = createContext();
 export function SidebarLayout({ children }) {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(true);
+  const {setExpanded:setExpandedApp} = useAppStore();
 
   return (
     <aside
@@ -39,8 +39,11 @@ export function SidebarLayout({ children }) {
 
           {/* Nút toggle */}
           <button
-            onClick={() => setExpanded((curr) => !curr)}
-            className="flex-shrink-0 rounded-lg bg-gray-50 p-1.5 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            onClick={() =>{
+              setExpanded(!expanded);
+              setExpandedApp(!expanded);
+            }}
+            className="cursor-pointer flex-shrink-0 rounded-lg bg-gray-50 p-1.5 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             {expanded ? <ChevronFirst size={20} /> : <ChevronLast size={20} />}
           </button>
@@ -49,32 +52,6 @@ export function SidebarLayout({ children }) {
         <SidebarContext.Provider value={{ expanded }}>
           <ul className="flex flex-1 flex-col gap-y-2 px-3">{children}</ul>
         </SidebarContext.Provider>
-
-        <div
-          className={`flex border-t p-3 dark:border-gray-700 ${!expanded ? "justify-center" : ""}`}
-        >
-          <img
-            src={testimonial1}
-            className="h-10 w-10 flex-shrink-0 rounded-md"
-            alt="user avatar"
-          />
-          {expanded && (
-            <div className="ml-3 flex min-w-0 flex-1 items-center justify-between">
-              <div className="min-w-0 leading-4">
-                <h4 className="truncate font-extrabold text-gray-800 dark:text-gray-100">
-                  {user?.name}
-                </h4>
-                <span className="block truncate text-xs font-semibold text-gray-600 dark:text-gray-400">
-                  {user?.email}
-                </span>
-              </div>
-              <MoreVertical
-                size={20}
-                className="ml-2 flex-shrink-0 text-gray-600 dark:text-gray-400"
-              />
-            </div>
-          )}
-        </div>
       </nav>
     </aside>
   );

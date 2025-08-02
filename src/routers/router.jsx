@@ -14,6 +14,7 @@ import Home from "../pages/user/Home/Home.jsx";
 import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
 import UserProfile from "@/pages/user/Profile/UserProfile/UserProfile";
 import UniversityProfile from "../pages/user/Profile/UniversityProfile/UniversityProfile.jsx";
+import AcademicProfile from "../pages/user/Profile/Academic/AcademicProfile.jsx";
 import MyLoans from "../pages/user/MyLoan/MyLoan.jsx";
 import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransaction.jsx";
 import DIDs from "../pages/user/DecentralizedIdentification/DIDs/DIDs.jsx";
@@ -58,6 +59,10 @@ const Router = () => {
             <Route
               path="profile/student-info"
               element={<UniversityProfile />}
+            />
+            <Route
+              path="profile/academic-info"
+              element={<AcademicProfile />}
             />
 
             <Route path="DIDs" element={<DIDs />} />
