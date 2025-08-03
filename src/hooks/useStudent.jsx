@@ -2,7 +2,6 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { student } from "@/apis/student";
 import { useAppStore } from "@/store/appStore";
 import { useAuthStore } from "@/store/authStore";
-import { use } from "react";
 
 export function useStudent() {
   const { setToast } = useAppStore();
@@ -43,7 +42,6 @@ export function useStudent() {
   const updateStudentDIDById = useMutation({
     mutationFn: (id, data) => student.updateStudentById(id, data),
     onSuccess: (data) => {
-      console.log("Student DID updated successfully:", data);
     },
     onError: (error) => {
       console.error("Error updating student DID:", error);

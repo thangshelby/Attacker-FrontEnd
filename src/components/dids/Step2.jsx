@@ -20,7 +20,9 @@ const Step2 = ({ onNext, watch }) => {
         description: watch("description"),
         method: watch("method"),
       });
-      onNext(3); 
+      setTimeout(() => {
+        onNext(3);
+      }, 1200);
     } catch (error) {
       console.error("Error requesting VC:", error);
     }
