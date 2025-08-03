@@ -20,6 +20,9 @@ import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransact
 import DIDs from "../pages/user/DecentralizedIdentification/DIDs/DIDs.jsx";
 import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
+import ProtectedAcademicProfile from "@/utils/ProtectedAcademicProfile";
+import AcademicProfileNotVerified from "@/pages/user/Profile/Academic/AcademicProfileNotVerified";
+import LoanAdminDashboard from "@/pages/admin/Sidepage";
 
 const Router = () => {
   return (
@@ -44,14 +47,14 @@ const Router = () => {
           <Route path="register" element={<RegisterPage />} />
           {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
         </Route>
-
+        <Route path="/adminn" element={<LoanAdminDashboard />} />
         {/* ========================================================= */}
         {/* 2. PROTECTED ROUTES (Yêu cầu đăng nhập)                 */}
         {/* ========================================================= */}
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-          
+
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
@@ -60,9 +63,18 @@ const Router = () => {
               path="profile/student-info"
               element={<UniversityProfile />}
             />
+
             <Route
               path="profile/academic-info"
-              element={<AcademicProfile />}
+              element={
+                <ProtectedAcademicProfile>
+                  <AcademicProfile />
+                </ProtectedAcademicProfile>
+              }
+            />
+            <Route
+              path="profile/academic-info/not-verified"
+              element={<AcademicProfileNotVerified />}
             />
 
             <Route path="DIDs" element={<DIDs />} />
