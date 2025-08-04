@@ -7,7 +7,6 @@ const ProtectedAcademicProfile = ({ children }) => {
   const { academicData } = useAcademic();
   const navigate = useNavigate();
   React.useEffect(() => {
-    console.log("Academic Data:", academicData);
     if (!academicData?.verified) {
       navigate("/profile/academic-info/not-verified", { replace: true });
     }
