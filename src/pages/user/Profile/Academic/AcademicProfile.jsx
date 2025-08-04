@@ -19,6 +19,7 @@ import {
   Info,
   AlertCircle,
 } from "lucide-react";
+import { uploadImage } from "@/utils";
 
 // Mock data
 const mockStudent = {
@@ -52,6 +53,7 @@ const mockAcademicData = {
 
 // Transcript Upload Component
 const TranscriptUpload = ({ transcripts, onTranscriptsChange, errors }) => {
+
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragOver = useCallback((e) => {
@@ -65,7 +67,7 @@ const TranscriptUpload = ({ transcripts, onTranscriptsChange, errors }) => {
   }, []);
 
   const addFiles = useCallback(
-    (files) => {
+    async (files) => {
       const imageFiles = files.filter((file) =>
         file.type.startsWith("image/"),
       );
@@ -81,6 +83,9 @@ const TranscriptUpload = ({ transcripts, onTranscriptsChange, errors }) => {
       });
 
       if (validFiles.length > 0) {
+        console.log("Uploading files:", validFiles[0]);
+        await uploadImage(validFiles[0])
+
         const newTranscripts = validFiles.map((file, index) => ({
           id: Date.now() + index,
           file,

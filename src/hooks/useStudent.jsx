@@ -25,7 +25,10 @@ export function useStudent() {
     queryFn: () => student.getStudent(),
   });
   const updateStudent = useMutation({
-    mutationFn: (data) => student.updateStudent(data),
+    mutationFn: (data) => student.updateStudent({
+      citizen_id: user.citizen_id,
+      ...data,
+    }),
     onSuccess: (data) => {
       setToast({
         type: "success",

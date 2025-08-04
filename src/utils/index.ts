@@ -1,8 +1,10 @@
+import api from "../apis/api";
+
 export const truncate = (
   text: string,
   startChars: number,
   endChars: number,
-  maxLength: number
+  maxLength: number,
 ) => {
   if (text.length > maxLength) {
     var start = text.substring(0, startChars);
@@ -15,8 +17,6 @@ export const truncate = (
   return text;
 };
 
-
-
 export async function uploadImageToPinata(file: any) {
   const formData = new FormData();
   formData.append("file", file);
@@ -28,10 +28,11 @@ export async function uploadImageToPinata(file: any) {
         method: "POST",
         body: formData,
         headers: {
-          pinata_api_key:' 1f10e699dda81877bce9',
-          pinata_secret_api_key:' 0137dc1ea3f89163b1f1b78517856882414b9b3f526a74d3ffd53a217aab139b',
+          pinata_api_key: " 1f10e699dda81877bce9",
+          pinata_secret_api_key:
+            " 0137dc1ea3f89163b1f1b78517856882414b9b3f526a74d3ffd53a217aab139b",
         },
-      }
+      },
     );
 
     const result = await response.json();
@@ -41,17 +42,27 @@ export async function uploadImageToPinata(file: any) {
   }
 }
 
-
-export function formatDate(dateString:string) {
+export function formatDate(dateString: string) {
   const date = new Date(dateString);
-  
-  return date.toLocaleString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
+
+  return date.toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   });
 }
 
+export async function uploadImage(file: File) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await api.post("/images/upload_image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+}
