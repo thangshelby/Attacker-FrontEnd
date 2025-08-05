@@ -1,10 +1,12 @@
 import { academic } from "../apis/academic";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
 import { useStudent } from "./useStudent";
 
 export function useAcademic() {
   const { student } = useStudent();
-    const {
+  const { user } = useAuth();
+  const {
     data: academicData,
     isLoading,
     error,

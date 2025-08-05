@@ -4,7 +4,7 @@ import Sidebar from "@/components/Sidebar";
 
 const RootLayout = () => {
   return (
-    <div className="flex h-screen w-full flex-row bg-black/80">
+    <div className="flex h-screen overflow-auto w-full flex-row bg-black/80">
       <Sidebar />
       {/* <div className="w-[20%]">
 

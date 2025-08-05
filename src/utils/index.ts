@@ -66,3 +66,18 @@ export async function uploadImage(file: File) {
   });
   return response.data;
 }
+
+export const getGPAColor = (gpa) => {
+  if (gpa >= 3.6) return "text-green-400";
+  if (gpa >= 3.0) return "text-blue-400";
+  if (gpa >= 2.5) return "text-yellow-400";
+  return "text-red-400";
+};
+
+export const getGPALevel = (gpa) => {
+  if (gpa >= 3.6) return "Xuất sắc";
+  if (gpa >= 3.2) return "Giỏi";
+  if (gpa >= 2.5) return "Khá";
+  if (gpa >= 2.0) return "Trung bình";
+  return "Yếu";
+};

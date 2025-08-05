@@ -1,5 +1,4 @@
 import React from "react";
-import { useAuthStore } from "../../../store/authStore";
 import Header from "../../../components/landing/Header";
 import Hero from "../../../components/landing/Hero";
 import Features from "../../../components/landing/Feature";
