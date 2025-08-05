@@ -5,6 +5,7 @@ import { useAppStore } from "./store/appStore";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import NotificationModal from "./components/NotificationModal";
+import FloatingChatBot from "./components/chatbot/chatbot";
 
 function App() {
   const { toast: toastState, clearToast, modal } = useAppStore();
@@ -27,6 +28,7 @@ function App() {
       <NotificationModal />
       <Router />
       <ToastContainer />
+      <FloatingChatBot />
     </BrowserRouter>
   );
 }
