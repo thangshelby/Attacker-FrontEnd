@@ -3,6 +3,7 @@ import { useAuthStore } from "../store/authStore";
 import { Outlet } from "react-router-dom";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
+import { useNotification } from "@/hooks/useNotifcation";
 const ProtectedRoute = () => {
   const { user } = useAuthStore();
 
@@ -11,6 +12,7 @@ const ProtectedRoute = () => {
   }
   useStudent();
   useAcademic();
+  useNotification();
 
   return <Outlet />;
 };

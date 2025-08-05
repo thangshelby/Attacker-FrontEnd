@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 /* === Custom Theme Variables === */
-@import "./styles/theme.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -21,7 +20,7 @@
   }
 
   button {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary/50;
+    @apply focus:ring-primary/50 focus:ring-2 focus:outline-none;
   }
 }
 
@@ -138,5 +137,192 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* @import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300&display=swap"); */
+
+@import "tailwindcss";
+
+/* ========== THEME: Design Tokens (Tailwind v4 way) ========== */
+@theme {
+  /* === Font Families === */
+  --font-sora: "Sora", sans-serif;
+  --font-code: "Source Code Pro", monospace;
+  --font-grotesk: "Space Grotesk", sans-serif;
+  --font-family-body: "Inter", system-ui, sans-serif;
+  --font-family-heading: "Poppins", system-ui, sans-serif;
+  --font-family-mono: "Fira Code", monospace;
+
+  /* === Color Palette === */
+  --color-primary: #222222;
+  --color-accent: #f57a00;
+  --color-secondary: #e8a811;
+
+  --color-background: #fafafa;
+  --color-background-muted: #e1d7c3;
+  --color-surface: #f2f2f2;
+  --color-border: #d0d5e0;
+
+  --color-text: #2b2b2b;
+  --color-muted-text: #7a7a7a;
+
+  --color-info: #51a3e3;
+  --color-success: #45d08a;
+  --color-warning: #fcd34d;
+  --color-error: #e74c3c;
+
+  --color-stroke-1: #26242c;
+
+  /* === Spacing === */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* === Radius === */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* === Shadows === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+
+  /* === Border ===*/
+}
+
+/* ========== BASE STYLES ========== */
+@layer base {
+  :root {
+    /* CSS Variables for fallback */
+    --font-body: var(--font-family-body);
+    --font-heading: var(--font-family-heading);
+    --font-mono: var(--font-family-mono);
+  }
+
+  :root.dark {
+    --color-background: #e4e9f4;
+    --color-background-muted: #1e293b;
+    --color-surface: #1e293b;
+    --color-border: #334155;
+    --color-text: #f1f5f9;
+    --color-muted-text: #94a3b8;
+  }
+
+  html {
+    font-family: var(--font-body);
+    color-scheme: light dark;
+  }
+}
+
+/* ========== UTILITIES ========== */
+@layer utilities {
+  /* === Backgrounds === */
+  .bg-primary {
+    background-color: var(--color-background);
+  }
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+  .bg-surface {
+    background-color: var(--color-surface);
+  }
+  .bg-muted {
+    background-color: var(--color-background-muted);
+  }
+
+  /* === Text Colors === */
+  .text-primary {
+    color: var(--color-primary);
+  }
+  .text-accent {
+    color: var(--color-accent);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+  .text-muted {
+    color: var(--color-muted-text);
+  }
+  .text-surface {
+    color: var(--color-surface);
+  }
+
+  /* === Borders === */
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+  .border-accent {
+    border-color: var(--color-accent);
+  }
+  .border-muted {
+    border-color: var(--color-border);
+  }
+
+  /* === Radius === */
+  .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+  .rounded-md {
+    border-radius: var(--radius-md);
+  }
+  .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+  .rounded-full {
+    border-radius: var(--radius-full);
+  }
+
+  /* === Shadows === */
+  .shadow-sm {
+    box-shadow: var(--shadow-sm);
+  }
+  .shadow-md {
+    box-shadow: var(--shadow-md);
+  }
+  .shadow-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* === Spacing (for padding/margin helpers) === */
+  .p-xs {
+    padding: var(--spacing-xs);
+  }
+  .p-sm {
+    padding: var(--spacing-sm);
+  }
+  .p-md {
+    padding: var(--spacing-md);
+  }
+  .p-lg {
+    padding: var(--spacing-lg);
+  }
+  .p-xl {
+    padding: var(--spacing-xl);
+  }
+
+  .m-xs {
+    margin: var(--spacing-xs);
+  }
+  .m-sm {
+    margin: var(--spacing-sm);
+  }
+  .m-md {
+    margin: var(--spacing-md);
+  }
+  .m-lg {
+    margin: var(--spacing-lg);
+  }
+  .m-xl {
+    margin: var(--spacing-xl);
   }
 }

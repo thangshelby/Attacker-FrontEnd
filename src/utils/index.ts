@@ -1,5 +1,5 @@
 import api from "../apis/api";
-
+import moment from "moment";
 export const truncate = (
   text: string,
   startChars: number,
@@ -17,31 +17,6 @@ export const truncate = (
   return text;
 };
 
-export async function uploadImageToPinata(file: any) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  try {
-    const response = await fetch(
-      "https://api.pinata.cloud/pinning/pinFileToIPFS",
-      {
-        method: "POST",
-        body: formData,
-        headers: {
-          pinata_api_key: " 1f10e699dda81877bce9",
-          pinata_secret_api_key:
-            " 0137dc1ea3f89163b1f1b78517856882414b9b3f526a74d3ffd53a217aab139b",
-        },
-      },
-    );
-
-    const result = await response.json();
-    return `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
-  } catch (error) {
-    console.error("Upload failed:", error);
-  }
-}
-
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
 
@@ -53,6 +28,19 @@ export function formatDate(dateString: string) {
     minute: "2-digit",
     hour12: true,
   });
+}
+
+export function getUploadElapsedTime(uploadTimeISO: string): string {
+  const now = moment();
+  const uploadTime = moment(uploadTimeISO);
+
+  if (uploadTime.isAfter(now)) return "Upload time is in the future";
+  const duration = moment.duration(now.diff(uploadTime));
+  const hours = duration.hours();
+  const minutes = duration.minutes();
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
+  return "now";
 }
 
 export async function uploadImage(file: File) {

@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppStore } from "@/store/appStore";
 
-const NotificationModal = ({}) => {
+const NotificationModal = () => {
   const { modal, clearModal } = useAppStore();
 
   if (!modal) {
