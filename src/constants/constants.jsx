@@ -1,3 +1,5 @@
+import { Award, FileText, Users, Calendar, Settings } from "lucide-react";
+
 // Mock data
 // Các trường / đơn vị trong khối ĐHQG-TP.HCM (bao gồm 7 trường thành viên chính, phân hiệu và viện tiêu biểu)
 export const universities = [
@@ -113,4 +115,108 @@ export const defaultUniversityProfile = {
   has_supporter: false,
   // student_card_front: null,
   // student_card_back: null,
-};
+}; // Sample notifications data
+export const sampleNotifications = [
+  {
+    id: 1,
+    title: "Bảng điểm học kỳ 1 đã được cập nhật",
+    message:
+      "Bảng điểm môn Lập trình Web đã được giảng viên cập nhật. Xem chi tiết ngay.",
+    type: "success",
+    time: "2 phút trước",
+    isRead: true,
+    icon: FileText,
+  },
+  {
+    id: 2,
+    title: "Thông báo học bổng mới",
+    message:
+      "Học bổng khuyến khích học tập năm 2024 đang mở đăng ký. Hạn chót: 15/08/2024",
+    type: "info",
+    time: "1 giờ trước",
+    isRead: true,
+    icon: Award,
+  },
+  {
+    id: 3,
+    title: "Lịch thi cuối kỳ",
+    message: "Lịch thi cuối kỳ học kỳ 1 năm học 2024-2025 đã được công bố.",
+    type: "warning",
+    time: "3 giờ trước",
+    isRead: true,
+    icon: Calendar,
+  },
+  {
+    id: 4,
+    title: "Hoạt động tình nguyện",
+    message:
+      "Chương trình tình nguyện 'Mùa hè xanh 2024' đang tuyển sinh viên tham gia.",
+    type: "info",
+    time: "1 ngày trước",
+    isRead: true,
+    icon: Users,
+  },
+  {
+    id: 5,
+    title: "Cập nhật hệ thống",
+    message:
+      "Hệ thống sẽ bảo trì từ 22:00 - 02:00 ngày mai. Vui lòng hoàn thành công việc trước thời gian này.",
+    type: "warning",
+    time: "2 ngày trước",
+    isRead: true,
+    icon: Settings,
+  },
+];
+
+// Mock data for loan purposes
+export const loanPurposes = [
+  { id: 1, name: "Học phí", description: "Chi trả học phí học kỳ" },
+  { id: 2, name: "Sinh hoạt phí", description: "Chi phí sinh hoạt hàng tháng" },
+  {
+    id: 3,
+    name: "Mua sách và tài liệu",
+    description: "Sách giáo khoa, tài liệu học tập",
+  },
+  {
+    id: 4,
+    name: "Thiết bị học tập",
+    description: "Laptop, máy tính, thiết bị",
+  },
+  { id: 5, name: "Chi phí khác", description: "Các chi phí học tập khác" },
+  { id: 6, name: "Khác", description: "Mục đích khác (vui lòng ghi rõ)" },
+];
+
+// Payment methods
+export const paymentMethods = [
+  {
+    id: 1,
+    name: "Trả cả gốc và lãi vào ngày đáo hạn",
+    description: "Trả toàn bộ số tiền vay và lãi khi hết hạn",
+    interestRate: 0.08,
+    shortName: "Trả cuối kỳ",
+    hasFrequency: false,
+  },
+  {
+    id: 2,
+    name: "Trả lãi định kỳ, gốc cuối kỳ",
+    description: "Trả lãi định kỳ theo tần suất đã chọn, trả gốc khi hết hạn",
+    interestRate: 0.06,
+    shortName: "Trả lãi định kỳ",
+    hasFrequency: true,
+  },
+  {
+    id: 3,
+    name: "Trả đều gốc và lãi định kỳ",
+    description: "Trả một phần gốc và lãi theo tần suất đã chọn",
+    interestRate: 0.05,
+    shortName: "Trả đều định kỳ",
+    hasFrequency: true,
+  },
+];
+
+// Payment frequencies
+export const paymentFrequencies = [
+  { id: 1, name: "1 tháng", months: 1, description: "Trả hàng tháng" },
+  { id: 3, name: "3 tháng", months: 3, description: "Trả mỗi quý" },
+  { id: 6, name: "6 tháng", months: 6, description: "Trả mỗi 6 tháng" },
+];

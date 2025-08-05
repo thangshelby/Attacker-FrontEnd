@@ -20,6 +20,7 @@ import { useUser } from "@/hooks/useUser";
 import ImageUpload from "@/components/profile/ImageUpload";
 import { defaultUserProfile } from "@/constants/constants";
 import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const FormField = ({
   label,
@@ -59,8 +60,9 @@ const UserProfile = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentProcessingSide, setCurrentProcessingSide] = useState(null);
-  const { user, updateUser } = useUser();
-
+  const { updateUser } = useUser();
+  const { user } = useAuth();
+  const userr = {};
   const {
     register,
     handleSubmit,
@@ -72,13 +74,13 @@ const UserProfile = () => {
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      name: user?.name || "",
-      citizen_id: user?.citizen_id || "",
-      email: user?.email || "",
-      phone: user?.phone || "",
-      birth: new Date(user?.birth || new Date()).toISOString().split("T")[0],
-      gender: user?.gender || "male",
-      address: user?.address || "",
+      name: userr?.name || "",
+      citizen_id: userr?.citizen_id || "",
+      email: userr?.email || "",
+      phone: userr?.phone || "",
+      birth: new Date(userr?.birth || new Date()).toISOString().split("T")[0],
+      gender: userr?.gender || "male",
+      address: userr?.address || "",
       citizen_card_front: user?.citizen_card_front || null,
       citizen_card_back: user?.citizen_card_back || null,
     },
@@ -87,11 +89,13 @@ const UserProfile = () => {
   useEffect(() => {
     if (
       watchedValues.citizen_card_front &&
-      watchedValues.citizen_card_back &&
-      !user?.citizen_id
+      watchedValues.citizen_card_back
+      // &&!user?.citizen_id
     ) {
       reset({
-        ...defaultUserProfile,
+        ...user,
+        birth: new Date(user?.birth || new Date()).toISOString().split("T")[0],
+
         citizen_card_front: watchedValues.citizen_card_front,
         citizen_card_back: watchedValues.citizen_card_back,
       });

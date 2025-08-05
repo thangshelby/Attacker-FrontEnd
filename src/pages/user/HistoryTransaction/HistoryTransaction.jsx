@@ -18,18 +18,19 @@ import {
   MapPin,
   GraduationCap,
 } from "lucide-react";
-
+import { useAuth } from "@/hooks/useAuth";
+import { useStudent } from "@/hooks/useStudent";
 // Mock data for loan history
 const mockLoanHistory = [
   {
     id: 1,
     stt: "1",
-    ngayLapHoSo: "2024-01-15",
+    ngayLapHoSo: "2025-08-04",
     thoiGianLapHoSo: "14:30",
-    soTienVay: "5,000,000",
-    ngayDuyet: "2024-01-20",
-    tinhTrang: "Thành công",
-    status: "success",
+    soTienVay: "20,000,000",
+    ngayDuyet: "2025-08-05 - 2025-08-06",
+    tinhTrang: "Đang xử lý",
+    status: "processing",
   },
   {
     id: 2,
@@ -104,29 +105,6 @@ const mockLoanHistory = [
 ];
 
 // Mock detailed loan data
-const mockLoanDetail = {
-  id: 1,
-  loanAmount: "5,000,000",
-  applicationDate: "2024-01-15",
-  applicationTime: "14:30",
-  approvalDate: "2024-01-20",
-  status: "Thành công",
-  interestRate: "8.5%",
-  loanTerm: "12 tháng",
-  monthlyPayment: "456,500",
-  purpose: "Chi phí học tập",
-  studentInfo: {
-    name: "Nguyễn Văn A",
-    studentId: "K22414694",
-    university: "Đại học Kinh Tế - Luật - ĐHQG TPHCM",
-    faculty: "Công nghệ Thông tin",
-    major: "FINTECH",
-    year: "3",
-    phone: "0901234567",
-    email: "student@example.com",
-    address: "123 Nguyễn Văn Cừ, Q.5, TP.HCM",
-  },
-};
 
 const StatusBadge = ({ status, text }) => {
   const getStatusConfig = () => {
@@ -174,7 +152,31 @@ const LoanHistoryPage = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
+  const { user } = useAuth();
+  const { student } = useStudent();
+  const mockLoanDetail = {
+    id: 1,
+    loanAmount: "20,000,000",
+    applicationDate: "2025-08-04",
+    applicationTime: new Date().getTime(),
+    approvalDate: "2025-08-05 - 2025-08-06",
+    status: "Đang xử lý",
+    interestRate: "6%",
+    loanTerm: "12 tháng",
+    monthlyPayment: "545.796",
+    purpose: "Chi phí học tập",
+    studentInfo: {
+      name: user?.name || "Nguyễn Văn A",
+      studentId: user?.student_id || "K22414694",
+      university: "Đại học Kinh Tế - Luật - ĐHQG TPHCM",
+      faculty: "Công nghệ Thông tin",
+      major: "FINTECH",
+      year: "3",
+      phone: user?.phone || "0901234567",
+      email: user?.email || "student@example.com",
+      address: user?.address || "123 Nguyễn Văn Cừ, Q.5, TP.HCM",
+    },
+  };
   const handleViewDetail = (loan) => {
     setSelectedLoan({ ...mockLoanDetail, ...loan });
   };
@@ -197,7 +199,7 @@ const LoanHistoryPage = () => {
           <div className="mb-8">
             <button
               onClick={handleBackToHistory}
-              className="cursor-pointer mb-4 flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="mb-4 flex cursor-pointer items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Quay lại lịch sử giao dịch
@@ -535,7 +537,7 @@ const LoanHistoryPage = () => {
                     <td className="px-6 py-4 text-sm whitespace-nowrap">
                       <button
                         onClick={() => handleViewDetail(item)}
-                        className="cursor-pointer inline-flex items-center rounded-lg bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
+                        className="inline-flex cursor-pointer items-center rounded-lg bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
                       >
                         <Eye className="mr-1 h-4 w-4" />
                         Xem chi tiết

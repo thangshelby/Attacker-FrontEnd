@@ -83,7 +83,7 @@ export function SidebarItem({ icon, text, alert, to }) {
           expanded ? "px-3" : "justify-center px-3"
         } ${
           isActive
-            ? "bg-gradient-to-r from-indigo-200 to-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100"
+            ? "bg-gradient-to-r from-indigo-900 to-indigo-500 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100"
             : "text-gray-600 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-800"
         } ${isActive && to !== "not-used" ? "bg-indigo-50 dark:bg-gray-800" : ""}`
       }
@@ -97,7 +97,7 @@ export function SidebarItem({ icon, text, alert, to }) {
       {expanded && (
         <span className="ml-3 overflow-hidden text-ellipsis whitespace-nowrap">
           {text}
-        </span>
+        </span> 
       )}
 
       {alert && (

@@ -3,6 +3,20 @@
 export const historyData = [
   {
     stt: 1,
+    date: new Date().getDate(),
+    time: new Date().getTime(),
+    amount: "20.000.000",
+    approvedDate: "../../....",
+    status: "Đang xử lý",
+    applicant: "Nguyễn Văn A",
+    totalInstallments: 12,
+    paidInstallments: 3,
+    nextPaymentDate: "1/4/2025",
+    dueDate: new Date().getDate(),
+    remainingAmount: "27.000.000",
+  },
+  {
+    stt: 1,
     date: "1/1/2025",
     time: "09:30:45",
     amount: "32.000.000",

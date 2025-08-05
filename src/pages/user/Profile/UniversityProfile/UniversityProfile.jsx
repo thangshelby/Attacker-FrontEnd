@@ -73,7 +73,7 @@ const UniversityProfile = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentProcessingSide, setCurrentProcessingSide] = useState(null);
   const { student, updateStudent } = useStudent();
-
+  const studentt = {};
   const {
     register,
     watch,
@@ -85,14 +85,14 @@ const UniversityProfile = () => {
     mode: "onChange",
     resolver: zodResolver(universitySchema),
     defaultValues: {
-      student_id: student?.student_id || "",
-      university: student?.university || "",
-      faculty_name: student?.faculty_name || "",
-      major_name: student?.major_name || "",
-      year_of_study: student?.year_of_study || 1,
-      class_id: student?.class_id || "",
-      has_parttime_job: student?.has_parttime_job || false,
-      has_supporter: student?.has_supporter || false,
+      student_id: studentt?.student_id || "",
+      university: studentt?.university || "",
+      faculty_name: studentt?.faculty_name || "",
+      major_name: studentt?.major_name || "",
+      year_of_study: studentt?.year_of_study || 1,
+      class_id: studentt?.class_id || "",
+      has_parttime_job: studentt?.has_parttime_job || false,
+      has_supporter: studentt?.has_supporter || false,
       student_card_front: student?.student_card_front || null,
       student_card_back: student?.student_card_back || null,
     },
@@ -106,10 +106,14 @@ const UniversityProfile = () => {
   useEffect(() => {
     if (
       watchedValues.student_card_front &&
-      watchedValues.student_card_back &&
-      !student.student_id
+      watchedValues.student_card_back
+      //  && !student.student_id
     ) {
-      reset(defaultUniversityProfile);
+      reset({
+        ...student,
+        student_card_front: watchedValues.student_card_front,
+        student_card_back: watchedValues.student_card_back,
+      });
     }
   }, [
     watchedValues.student_card_back,

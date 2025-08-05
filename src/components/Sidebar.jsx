@@ -71,7 +71,7 @@ const Sidebar = () => {
           to="/DIDs"
         />
 
-        <SidebarItem icon={<Wallet />} text="Khoản vay của tôi" to="/loans" />
+        {/* <SidebarItem icon={<Wallet />} text="Khoản vay của tôi" to="/loans" /> */}
         <SidebarItem icon={<History />} text="Lịch sử vay" to="/history" />
         <SidebarItem icon={<CreditCard />} text="Khoản vay mới" to="/newloan" />
         <div className="mt-auto">
@@ -90,7 +90,7 @@ const Sidebar = () => {
           <SidebarItem
             icon={<LogOut size={20} />}
             text="Đăng xuất"
-            to="/logout"
+            to=""
           />
         </div>
       </SidebarLayout>
