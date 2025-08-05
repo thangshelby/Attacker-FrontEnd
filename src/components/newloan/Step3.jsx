@@ -1,36 +1,19 @@
 import React, { useState } from "react";
 import {
   DollarSign,
-  Calendar,
-  Target,
   Calculator,
   CheckCircle,
   AlertCircle,
-  Send,
-  X,
-  CreditCard,
-  TrendingUp,
   FileText,
-  Clock,
   User,
-  Home,
-  Settings,
-  QrCode,
-  Shield,
-  ArrowLeft,
-  ArrowRight,
-  Loader2,
   GraduationCap,
   Award,
-  BookOpen,
-  Smartphone,
-  RefreshCw,
 } from "lucide-react";
 import {
   loanPurposes,
   paymentMethods,
   paymentFrequencies,
-} from "@/constants/constants";
+} from "@/constants/newloan";
 const Step3 = ({ formData, studentInfo }) => {
   const [verificationId, setVerificationId] = useState(null);
 
@@ -69,7 +52,7 @@ const Step3 = ({ formData, studentInfo }) => {
         {/* Loan Summary */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Left Column - Loan Details */}
-          <div className="space-y-6">
+          <div className="flex flex-col justify-between space-y-6">
             <div className="flex flex-col justify-between rounded-xl bg-white p-6 shadow-sm dark:bg-gray-700">
               <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-800 dark:text-gray-200">
                 <DollarSign className="mr-2 h-5 w-5 text-green-500" />

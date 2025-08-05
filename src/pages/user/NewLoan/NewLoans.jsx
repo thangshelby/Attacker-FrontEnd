@@ -7,13 +7,9 @@ import {
   Loader2,
   Award,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNotificationStore } from "@/store/notificationStore";
-import {
-  loanPurposes,
-  paymentMethods,
-  paymentFrequencies,
-} from "@/constants/constants";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";

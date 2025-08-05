@@ -24,7 +24,7 @@ import {
   universities,
   faculties,
   defaultUniversityProfile,
-} from "@/constants/constants";
+} from "@/constants/universityProfile";
 import { useEffect } from "react";
 
 const FormField = ({

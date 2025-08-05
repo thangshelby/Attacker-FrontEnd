@@ -34,24 +34,14 @@ const Router = () => {
       }
     >
       <Routes>
-        {/* ========================================================= */}
-        {/* 1. PUBLIC ROUTES (Ai cũng có thể truy cập)              */}
-        {/* ========================================================= */}
-        {/* Trang chủ/Landing Page */}
         <Route path="/landing" element={<LandingPage />} />
 
-        {/* Public: auth routes */}
-        {/* Các trang xác thực (đăng nhập, đăng ký) */}
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
-          {/* <Route path="verify-email" element={<VerifyEmailPage />} /> */}
         </Route>
         <Route path="/adminn" element={<LoanAdminDashboard />} />
-        {/* ========================================================= */}
-        {/* 2. PROTECTED ROUTES (Yêu cầu đăng nhập)                 */}
-        {/* ========================================================= */}
-        {/* Protected routes */}
+
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
 
