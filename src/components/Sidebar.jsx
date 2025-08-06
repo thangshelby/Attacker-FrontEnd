@@ -23,10 +23,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { logout } = useAuth();
 
   useEffect(() => {
     if (location.pathname !== "/VCs" && location.pathname !== "/DIDs") {
@@ -35,6 +37,10 @@ const Sidebar = () => {
       setOpen(true);
     }
   }, [location.pathname]);
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <div className="flex">
@@ -87,11 +93,19 @@ const Sidebar = () => {
             text="Trợ giúp"
             to="/help"
           />
-          <SidebarItem
-            icon={<LogOut size={20} />}
-            text="Đăng xuất"
-            to=""
-          />
+          
+          {/* Custom logout button */}
+          <div
+            onClick={handleLogout}
+            className="group relative flex cursor-pointer items-center rounded-md py-2 px-3 font-medium transition-colors text-gray-600 hover:bg-red-50 dark:text-gray-300 dark:hover:bg-red-900/20"
+          >
+            <div className="flex h-5 min-h-[20px] w-5 min-w-[20px] flex-shrink-0 items-center justify-center">
+              <LogOut size={20} className="text-red-500" />
+            </div>
+            <span className="ml-3 overflow-hidden text-ellipsis whitespace-nowrap text-red-600 dark:text-red-400">
+              Đăng xuất
+            </span>
+          </div>
         </div>
       </SidebarLayout>
     </div>

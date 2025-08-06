@@ -125,8 +125,15 @@ export function useAuth() {
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
+      // Redirect to login page after logout
+      window.location.href = "http://localhost:5173/auth/login";
     } catch (error) {
       console.error("Logout failed:", error);
+      // Even if logout API fails, clear local state and redirect
+      localStorage.removeItem("token");
+      setUser(null);
+      queryClient.clear();
+      window.location.href = "http://localhost:5173/auth/login";
     }
   };
 
