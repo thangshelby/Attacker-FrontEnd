@@ -21,6 +21,9 @@ const Header = () => {
   const notificationRef = useRef(null);
   const { user } = useAuth();
 
+  // Debug: Check user object
+  console.log("User in Header component:", user);
+
   return (
     <header className="flex items-center justify-between bg-white px-6 py-4 shadow-md dark:bg-gray-900">
       <div className="flex flex-row items-center gap-4">
