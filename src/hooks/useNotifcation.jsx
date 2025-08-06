@@ -12,26 +12,35 @@ export function useNotification() {
   const allNotifications = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
-      const { data } = await notification.getAllNotifications();
-      return data; // Tuỳ thuộc cấu trúc API
+      try {
+        const { data } = await notification.getAllNotifications();
+        return data.data || []; // Backend returns { data: notifications_array }
+      } catch (error) {
+        console.error("Error fetching all notifications:", error);
+        return [];
+      }
     },
     enabled: !citizen_id, // chỉ gọi khi không có citizen_id
+    retry: 3,
+    refetchOnWindowFocus: false,
   });
 
   // 2. Get notifications by citizen_id
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["notifications", citizen_id],
     queryFn: async () => {
-      const response =
-        await notification.getNotificationsByCitizenId(citizen_id);
-      const notifications = await response.data.data.notifications;
-
-      return notifications;
-    },
-    onError: () => {
-      return [];
+      try {
+        const response = await notification.getNotificationsByCitizenId(citizen_id);
+        // Based on backend controller, the structure is response.data.data (which is the array)
+        return response.data.data || [];
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        return []; // Return empty array on error
+      }
     },
     enabled: !!citizen_id,
+    retry: 3, // Retry failed requests
+    refetchOnWindowFocus: false,
   });
 
   // 3. Create notification
