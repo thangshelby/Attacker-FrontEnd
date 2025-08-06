@@ -3,6 +3,10 @@ import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
 
 const FloatingChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  
+  console.log('FloatingChatBot render - isOpen:', isOpen);
+  
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -38,28 +42,57 @@ const FloatingChatBot = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/v1/chat', {
+      console.log('Sending message to API:', userMessage.content);
+      
+      // Call Express API that connects to Python service via gRPC
+      const response = await fetch('http://localhost:8000/api/v1/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage.content })
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          message: userMessage.content
+        })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const botMessage = { id: Date.now() + 1, type: 'bot', content: data.response };
-        setMessages(prev => [...prev, botMessage]);
+      console.log('API Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('API Response data:', data);
+      
+      // FastAPI trả về format khác, không có success field
+      if (data.answer) {
+        const botMessage = { 
+          id: Date.now() + 1, 
+          type: 'bot', 
+          content: data.answer || 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau! 😊'
+        };
+        setTimeout(() => setMessages(prev => [...prev, botMessage]), 1000);
       } else {
-        throw new Error('Failed to get response');
+        throw new Error(data.error || 'No answer received from API');
       }
     } catch (error) {
+      console.error('Chat error:', error);
+      
+      // Fallback demo responses
       const demoResponses = [
-        "Cảm ơn bạn đã hỏi! Về vấn đề này, tôi khuyên bạn nên xem xét các gói vay học phí với lãi suất ưu đãi.",
-        "Student Credit cung cấp nhiều giải pháp phù hợp với sinh viên như bạn.",
-        "Đây là câu hỏi rất hay! Tôi sẽ giúp bạn tìm hiểu về các chương trình hỗ trợ tài chính.",
+        "Cảm ơn bạn đã hỏi! 🌟 Về vấn đề này, tôi khuyên bạn nên xem xét các gói vay học phí với lãi suất ưu đãi dành cho sinh viên.",
+        "Thật tuyệt khi bạn quan tâm đến tài chính! 💡 Student Credit cung cấp nhiều giải pháp phù hợp với sinh viên.",
+        "Đây là câu hỏi rất hay! 🎯 Tôi sẽ giúp bạn tìm hiểu về các chương trình hỗ trợ tài chính phù hợp nhất.",
+        "Rất vui được hỗ trợ bạn! ✨ Về vấn đề tín dụng sinh viên, chúng tôi có nhiều chương trình ưu đãi đặc biệt."
       ];
+      
       const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
-      const botMessage = { id: Date.now() + 1, type: 'bot', content: randomResponse };
-      setTimeout(() => setMessages(prev => [...prev, botMessage]), 1000);
+      const botMessage = { 
+        id: Date.now() + 1, 
+        type: 'bot', 
+        content: randomResponse 
+      };
+      setTimeout(() => setMessages(prev => [...prev, botMessage]), 1500);
     } finally {
       setIsLoading(false);
     }
@@ -85,48 +118,192 @@ const FloatingChatBot = () => {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-50">
+    <div 
+      style={{
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: 999999,
+        pointerEvents: 'auto',
+        width: '80px',
+        height: '80px',
+        backgroundColor: 'rgba(255, 0, 0, 0.1)', // Temporary red background to see the container
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      onClick={() => {
+        console.log('Container clicked - opening chatbot');
+        setIsOpen(true);
+      }}
+    >
       {/* Floating Button */}
       {!isOpen && (
-        <div className="relative">
+        <div style={{ position: 'relative' }}>
           <button
-            onClick={() => setIsOpen(true)}
-            className="w-16 h-16 bg-gradient-to-r from-gray-900 to-black text-white rounded-full shadow-2xl flex items-center justify-center hover:from-gray-800 hover:to-gray-900 transition-all duration-300 hover:scale-110 group border-2 border-purple-500"
+            onClick={(e) => {
+              console.log('Button clicked!', e);
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen(true);
+              console.log('setIsOpen(true) called');
+            }}
+            style={{
+              width: '64px',
+              height: '64px',
+              backgroundColor: '#1f2937',
+              border: '2px solid #8b5cf6',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              cursor: 'pointer',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+              transition: 'all 0.3s ease',
+              position: 'relative',
+              zIndex: 5
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'scale(1.1)';
+              e.target.style.backgroundColor = '#374151';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.backgroundColor = '#1f2937';
+            }}
           >
-            <MessageCircle className="w-7 h-7 group-hover:scale-110 transition-transform text-purple-400" />
+            <MessageCircle size={28} color="#a855f7" />
           </button>
           {/* Pulse animation */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-ping opacity-30"></div>
+          <div 
+            style={{
+              position: 'absolute',
+              inset: '0',
+              background: 'linear-gradient(to right, #9333ea, #ec4899)',
+              borderRadius: '50%',
+              opacity: '0.3',
+              animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
+              pointerEvents: 'none', // Không chặn click events
+              zIndex: -1 // Đặt phía sau button
+            }}
+          ></div>
           {/* Notification dot */}
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-bounce"></div>
+          <div 
+            style={{
+              position: 'absolute',
+              top: '-4px',
+              right: '-4px',
+              width: '16px',
+              height: '16px',
+              background: 'linear-gradient(to right, #ef4444, #ec4899)',
+              borderRadius: '50%',
+              animation: 'bounce 1s infinite',
+              pointerEvents: 'none', // Không chặn click events
+              zIndex: 10 // Hiển thị trên button
+            }}
+          ></div>
         </div>
       )}
 
       {/* Chat Window - Expanded Size */}
       {isOpen && (
-        <div className="w-[480px] h-[600px] bg-gray-900 rounded-lg shadow-2xl border border-gray-700 flex flex-col">
+        <div 
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            width: '450px',
+            height: '600px',
+            backgroundColor: '#111827',
+            borderRadius: '12px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid #374151',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            zIndex: 9998
+          }}
+        >
           
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-black text-white rounded-t-lg border-b border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <Bot className="w-5 h-5 text-white" />
+          <div 
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px',
+              backgroundColor: '#000000',
+              color: 'white',
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
+              borderBottom: '1px solid #374151'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(to right, #8b5cf6, #ec4899)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Bot size={20} color="white" />
               </div>
               <div>
-                <h3 className="font-semibold text-base text-white">Trợ lý AI</h3>
-                <p className="text-xs text-green-400">● Online</p>
+                <h3 style={{ fontWeight: '600', fontSize: '16px', color: 'white', margin: '0' }}>Trợ lý AI</h3>
+                <p style={{ fontSize: '12px', color: '#10b981', margin: '0' }}>● Online</p>
               </div>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Close button clicked');
+                setIsOpen(false);
+              }}
+              style={{
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                color: '#9ca3af',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                position: 'relative',
+                zIndex: 10
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.backgroundColor = '#374151';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#9ca3af';
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <X className="w-5 h-5" />
+              <X size={20} />
             </button>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
+          <div 
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '16px',
+              backgroundColor: '#111827',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
             {messages.map((msg) => (
               <div key={msg.id} className={`flex items-end gap-2 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.type === 'bot' && (
