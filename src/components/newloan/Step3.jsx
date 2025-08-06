@@ -64,7 +64,7 @@ const Step3 = ({ formData, studentInfo }) => {
                     Số tiền vay:
                   </span>
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
-                    {formatCurrency(formData.requested_loan_amount)}
+                    {formatCurrency(formData.loan_amount_requested)}
                   </span>
                 </div>
                 <div className="flex justify-between">

@@ -1,6 +1,20 @@
-// src/constants/newloan.jsx
+export const defaultFormData = {
+  student_id: "",
+  loan_amount_requested: "",
+  loan_tenor: "",
+  guarantor: "",
+  loan_purpose: "",
+  custom_purpose: "",
+  family_income: "",
+  payment_method: "",
+  payment_frequency: "",
+  monthly_installment: 0,
+  total_interest: 0,
+  total_payment: 0,
+};
 
 export const loanPeriod = [
+  { value: "", label: "Chọn thời hạn" },
   { value: "3", label: "3 tháng" },
   { value: "6", label: "6 tháng" },
   { value: "12", label: "12 tháng" },
@@ -11,12 +25,41 @@ export const loanPeriod = [
 ];
 
 export const studentGurantor = [
-  { value: "father", label: "Bố" },
-  { value: "mother", label: "Mẹ" },
-  { value: "brother", label: "Anh trai" },
-  { value: "sister", label: "Chị gái" },
+  { value: "parent", label: "Bố-Mẹ" },
+  { value: "brother-sister", label: "Anh trai-Chị gái" },
   { value: "uncle", label: "Chú/Bác" },
   { value: "other", label: "Người khác" },
+];
+export const incomeRanges = [
+  { value: "", label: "Chọn khoảng thu nhập" },
+  {
+    label: "Dưới 10 triệu VNĐ / tháng",
+    value: "<10000000",
+  },
+  {
+    label: "10 - 20 triệu VNĐ / tháng",
+    value: "10000000-20000000",
+  },
+  {
+    label: "20 - 35 triệu VNĐ / tháng",
+    value: "20000000-35000000",
+  },
+  {
+    label: "35 - 50 triệu VNĐ / tháng",
+    value: "35000000-50000000",
+  },
+  {
+    label: "50 - 70 triệu VNĐ / tháng",
+    value: "50000000-70000000",
+  },
+  {
+    label: "70 - 100 triệu VNĐ / tháng",
+    value: "70000000-100000000",
+  },
+  {
+    label: "Trên 100 triệu VNĐ / tháng",
+    value: ">100000000",
+  },
 ];
 
 // Mock data for loan purposes

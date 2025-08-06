@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNotificationStore } from "@/store/notificationStore";
-
+import { defaultFormData,paymentMethods } from "@/constants/newloan";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
@@ -36,13 +36,12 @@ const StepIndicator = ({ currentStep, steps }) => (
       {steps.map((step, index) => (
         <div key={index} className="flex items-center">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 ${
-              index + 1 < currentStep
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 ${index + 1 < currentStep
                 ? "border-green-500 bg-green-500 text-white"
                 : index + 1 === currentStep
                   ? "border-green-500 bg-green-500 text-white"
                   : "border-gray-300 bg-gray-200 text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400"
-            }`}
+              }`}
           >
             {index + 1 < currentStep ? (
               <CheckCircle className="h-6 w-6" />
@@ -52,11 +51,10 @@ const StepIndicator = ({ currentStep, steps }) => (
           </div>
           <div className="ml-3 text-sm">
             <div
-              className={`font-medium ${
-                index + 1 <= currentStep
+              className={`font-medium ${index + 1 <= currentStep
                   ? "text-green-600 dark:text-green-400"
                   : "text-gray-500 dark:text-gray-400"
-              }`}
+                }`}
             >
               {step.title}
             </div>
@@ -66,11 +64,10 @@ const StepIndicator = ({ currentStep, steps }) => (
           </div>
           {index < steps.length - 1 && (
             <div
-              className={`mx-4 h-0.5 w-12 ${
-                index + 1 < currentStep
+              className={`mx-4 h-0.5 w-12 ${index + 1 < currentStep
                   ? "bg-green-500"
                   : "bg-gray-300 dark:bg-gray-600"
-              }`}
+                }`}
             />
           )}
         </div>
@@ -79,13 +76,13 @@ const StepIndicator = ({ currentStep, steps }) => (
   </div>
 );
 
+
+
 const NewLoans = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(true);
-  const [qrData, setQrData] = useState(null);
   const [verificationId, setVerificationId] = useState(null);
   const { user } = useAuth();
   const { student } = useStudent();
@@ -93,18 +90,8 @@ const NewLoans = () => {
   const { addNotification } = useNotificationStore();
 
   const [formData, setFormData] = useState({
-    student_id: student.student_id,
-    requested_loan_amount: "",
-    loan_tenor: "",
-    loan_purpose: "",
-    custom_purpose: "",
-    guarantor: "",
-    family_income: "",
-    payment_method: "",
-    payment_frequency: "",
-    monthly_installment: 0,
-    total_interest: 0,
-    total_payment: 0,
+    student_id: student.student_id || "SV001",
+    ...defaultFormData
   });
 
   const [studentInfo, setStudentInfo] = useState({
@@ -134,16 +121,208 @@ const NewLoans = () => {
       description: "Xem lại và gửi yêu cầu",
     },
   ];
+  const calculatePaymentDetails = (
+    amount,
+    tenor,
+    paymentMethodId,
+    frequency,
+  ) => {
+    if (!amount || !tenor || !paymentMethodId)
+      return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+
+    const method = paymentMethods.find(
+      (pm) => pm.id === parseInt(paymentMethodId),
+    );
+    if (!method) return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+
+    const principal = parseFloat(amount);
+    const months = parseInt(tenor);
+    const annualRate = method.interestRate;
+    const frequencyMonths = frequency
+      ? parseInt(frequency)
+      : method.id === 2
+        ? 3
+        : 1;
+
+    let periodicPayment = 0;
+    let totalInterest = 0;
+    let totalPayment = 0;
+
+    switch (parseInt(paymentMethodId)) {
+      case 1:
+        totalInterest = principal * annualRate * (months / 12);
+        totalPayment = principal + totalInterest;
+        periodicPayment = 0;
+        break;
+
+      case 2:
+        if (!frequency) {
+          return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+        }
+        const periodicRate = annualRate / (12 / frequencyMonths);
+        const numberOfPayments = Math.floor(months / frequencyMonths);
+        const periodicInterest = principal * periodicRate;
+        totalInterest = periodicInterest * numberOfPayments;
+        totalPayment = principal + totalInterest;
+        periodicPayment = periodicInterest;
+        break;
+
+      case 3:
+        if (!frequency) {
+          return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+        }
+        const effectiveRate = annualRate / (12 / frequencyMonths);
+        const totalPeriods = Math.floor(months / frequencyMonths);
+
+        if (effectiveRate === 0) {
+          periodicPayment = principal / totalPeriods;
+        } else {
+          periodicPayment =
+            (principal *
+              effectiveRate *
+              Math.pow(1 + effectiveRate, totalPeriods)) /
+            (Math.pow(1 + effectiveRate, totalPeriods) - 1);
+        }
+        totalPayment = periodicPayment * totalPeriods;
+        totalInterest = totalPayment - principal;
+        break;
+    }
+
+    return {
+      monthly: Math.round(periodicPayment),
+      totalInterest: Math.round(totalInterest),
+      totalPayment: Math.round(totalPayment),
+    };
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.loan_amount_requested) {
+      newErrors.loan_amount_requested = { message: "Số tiền vay là bắt buộc" };
+    } else if (!validateAmount(parseFloat(formData.loan_amount_requested))) {
+      newErrors.loan_amount_requested = {
+        message: "Số tiền vay không hợp lệ (1-100 triệu VND)",
+      };
+    }
+
+    if (!formData.loan_tenor) {
+      newErrors.loan_tenor = { message: "Thời hạn vay là bắt buộc" };
+    } else if (!validateTenor(parseInt(formData.loan_tenor))) {
+      newErrors.loan_tenor = { message: "Thời hạn vay phải từ 3-60 tháng" };
+    }
+
+    if (!formData.loan_purpose) {
+      newErrors.loan_purpose = { message: "Mục đích vay là bắt buộc" };
+    }
+
+    if (formData.loan_purpose === "6" && !formData.custom_purpose.trim()) {
+      newErrors.custom_purpose = { message: "Vui lòng mô tả mục đích vay" };
+    }
+
+    if (!formData.guarantor.trim()) {
+      newErrors.guarantor = { message: "Người bảo lãnh là bắt buộc" };
+    }
+
+    if (!formData.family_income) {
+      newErrors.family_income = { message: "Thu nhập gia đình là bắt buộc" };
+    }
+
+    if (!formData.payment_method) {
+      newErrors.payment_method = { message: "Phương thức trả lãi là bắt buộc" };
+    }
+
+    const selectedMethod = paymentMethods.find(
+      (pm) => pm.id === parseInt(formData.payment_method),
+    );
+    if (selectedMethod?.hasFrequency && !formData.payment_frequency) {
+      newErrors.payment_frequency = {
+        message: "Tần suất trả tiền là bắt buộc",
+      };
+    }
+
+    if (formData.payment_method && formData.payment_frequency) {
+      const tenor = parseInt(formData.loan_tenor);
+      const frequency = parseInt(formData.payment_frequency);
+
+      if (tenor < frequency) {
+        newErrors.payment_frequency = {
+          message: `Thời hạn vay phải lớn hơn hoặc bằng tần suất trả tiền (${frequency} tháng)`,
+        };
+      }
+
+      if (frequency === 6 && tenor < 12) {
+        newErrors.payment_frequency = {
+          message:
+            "Tần suất trả 6 tháng yêu cầu thời hạn vay tối thiểu 12 tháng",
+        };
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (field, value) => {
+    const newFormData = {
+      ...formData,
+      [field]: value,
+    };
+
+    if (field === "loan_purpose" && value !== "6") {
+      newFormData.custom_purpose = "";
+    }
+
+    if (field === "payment_method") {
+      const selectedMethod = paymentMethods.find(
+        (pm) => pm.id === parseInt(value),
+      );
+      if (!selectedMethod?.hasFrequency) {
+        newFormData.payment_frequency = "";
+      }
+    }
+
+    if (
+      field === "loan_amount_requested" ||
+      field === "loan_tenor" ||
+      field === "payment_method" ||
+      field === "payment_frequency"
+    ) {
+      const amount = parseFloat(newFormData.loan_amount_requested) || 0;
+      const tenor = parseInt(newFormData.loan_tenor) || 0;
+      const paymentMethod = newFormData.payment_method;
+      const frequency = newFormData.payment_frequency;
+
+      const calculations = calculatePaymentDetails(
+        amount,
+        tenor,
+        paymentMethod,
+        frequency,
+      );
+      newFormData.monthly_installment = calculations.monthly;
+      newFormData.total_interest = calculations.totalInterest;
+      newFormData.total_payment = calculations.totalPayment;
+    }
+
+    setFormData(newFormData);
+
+    if (errors[field]) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: null,
+      }));
+    }
+  };
 
   const handleNextStep = () => {
     if (currentStep === 1) {
-      // if (validateForm()) {
-      setCurrentStep(2);
-      // }
+      if (validateForm()) {
+        setCurrentStep(2);
+      }
     } else if (currentStep === 2) {
-      // if (verificationSuccess) {
-      setCurrentStep(3);
-      // }
+      if (verificationSuccess) {
+        setCurrentStep(3);
+      }
     }
   };
 
@@ -159,27 +338,64 @@ const NewLoans = () => {
     try {
       const submitData = {
         ...formData,
-        requested_loan_amount: parseFloat(formData.requested_loan_amount),
+
+        loan_amount_requested: parseFloat(formData.loan_amount_requested),
+
         loan_tenor: parseInt(formData.loan_tenor),
+
         loan_purpose: parseInt(formData.loan_purpose),
+
         family_income: parseFloat(formData.family_income),
+
         payment_method: parseInt(formData.payment_method),
+
         verification_id: verificationId,
+
         student_info: studentInfo,
       };
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      // handleAddNotification();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       setSubmitSuccess(true);
-      handleAddNotification();
+
       setTimeout(() => {
-        // setSubmitSuccess(false);
+        setSubmitSuccess(false);
+
         // Reset form
-        // setCurrentStep(1);
+
+        setCurrentStep(1);
+
         // setQrData(null);
-        // setVerificationSuccess(false);
+
+        setVerificationSuccess(false);
+
         setVerificationId(null);
+
+        setFormData({
+          student_id: "SV001",
+
+          loan_amount_requested: "",
+
+          loan_tenor: "",
+
+          loan_purpose: "",
+
+          custom_purpose: "",
+
+          guarantor: "",
+
+          family_income: "",
+
+          payment_method: "",
+
+          payment_frequency: "",
+
+          monthly_installment: 0,
+
+          total_interest: 0,
+
+          total_payment: 0,
+        });
       }, 3000);
     } catch (error) {
       console.error("Error submitting loan request:", error);
@@ -240,9 +456,8 @@ const NewLoans = () => {
           {currentStep === 1 && (
             <Step1
               formData={formData}
-              studentInfo={studentInfo}
-              setFormData={setFormData}
-              setStudentInfo={setStudentInfo}
+              errors={errors}
+              handleInputChange={handleInputChange}
             />
           )}
 
