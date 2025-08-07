@@ -114,3 +114,84 @@ export const paymentFrequencies = [
   { id: 3, name: "3 tháng", months: 3, description: "Trả mỗi quý" },
   { id: 6, name: "6 tháng", months: 6, description: "Trả mỗi 6 tháng" },
 ];
+
+export const calculatePaymentDetails = (
+  amount,
+  tenor,
+  paymentMethodId,
+  frequency,
+) => {
+  if (!amount || !tenor || !paymentMethodId)
+    return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+
+  const method = paymentMethods.find(
+    (pm) => pm.id === parseInt(paymentMethodId),
+  );
+  if (!method) return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+
+  const principal = parseFloat(amount);
+  const months = parseInt(tenor);
+  const annualRate = method.interestRate;
+  const frequencyMonths = frequency
+    ? parseInt(frequency)
+    : method.id === 2
+      ? 3
+      : 1;
+
+  let periodicPayment = 0;
+  let totalInterest = 0;
+  let totalPayment = 0;
+
+  switch (parseInt(paymentMethodId)) {
+    case 1:
+      totalInterest = principal * annualRate * (months / 12);
+      totalPayment = principal + totalInterest;
+      periodicPayment = 0;
+      break;
+
+    case 2:
+      if (!frequency) {
+        return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+      }
+      const periodicRate = annualRate / (12 / frequencyMonths);
+      const numberOfPayments = Math.floor(months / frequencyMonths);
+      const periodicInterest = principal * periodicRate;
+      totalInterest = periodicInterest * numberOfPayments;
+      totalPayment = principal + totalInterest;
+      periodicPayment = periodicInterest;
+      break;
+
+    case 3:
+      if (!frequency) {
+        return { monthly: 0, totalInterest: 0, totalPayment: 0 };
+      }
+      const effectiveRate = annualRate / (12 / frequencyMonths);
+      const totalPeriods = Math.floor(months / frequencyMonths);
+
+      if (effectiveRate === 0) {
+        periodicPayment = principal / totalPeriods;
+      } else {
+        periodicPayment =
+          (principal *
+            effectiveRate *
+            Math.pow(1 + effectiveRate, totalPeriods)) /
+          (Math.pow(1 + effectiveRate, totalPeriods) - 1);
+      }
+      totalPayment = periodicPayment * totalPeriods;
+      totalInterest = totalPayment - principal;
+      break;
+  }
+
+  return {
+    monthly: Math.round(periodicPayment),
+    totalInterest: Math.round(totalInterest),
+    totalPayment: Math.round(totalPayment),
+  };
+};
+
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(amount);
+};

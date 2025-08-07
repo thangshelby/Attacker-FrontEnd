@@ -8,9 +8,7 @@ export function useNotification() {
   const { setToast } = useAppStore();
   const { user } = useAuth();
   const citizen_id = user?.citizen_id;
-  
 
-  
   // 1. Get all notifications
   const allNotifications = useQuery({
     queryKey: ["notifications"],
@@ -33,7 +31,8 @@ export function useNotification() {
     queryKey: ["notifications", citizen_id],
     queryFn: async () => {
       try {
-        const response = await notification.getNotificationsByCitizenId(citizen_id);
+        const response =
+          await notification.getNotificationsByCitizenId(citizen_id);
         // Based on backend controller, the structure is response.data.data (which is the array)
         return response.data.data || [];
       } catch (error) {

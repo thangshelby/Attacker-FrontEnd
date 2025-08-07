@@ -1,4 +1,4 @@
-import { Award, FileText, Users, Calendar, Settings,CheckCircle } from "lucide-react";
+import { Award, FileText, Users, Calendar, Settings, CheckCircle } from "lucide-react";
 
 const textToIcon = {
   award: Award,
@@ -10,5 +10,5 @@ const textToIcon = {
 };
 
 export const getIcon = (icon) => {
-  return textToIcon[icon];
+  return textToIcon[icon] || Award; // Default fallback icon
 };

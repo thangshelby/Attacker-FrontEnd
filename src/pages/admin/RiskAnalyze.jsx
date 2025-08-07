@@ -23,7 +23,7 @@ import {
   Filter,
 } from "lucide-react";
 
-const AdminLayout = () => {
+const RiskAnalyze = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -876,4 +876,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default RiskAnalyze;

@@ -18,7 +18,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@/hooks/useUser";
 import ImageUpload from "@/components/profile/ImageUpload";
-import { defaultUserProfile } from "@/constants/constants";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 

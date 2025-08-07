@@ -296,7 +296,7 @@ const ActivityItem = ({ activity }) => {
   );
 };
 
-const OverviewDashboard = () => {
+const AdminDashboard = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState("6months");
   const [animatedStats, setAnimatedStats] = useState(false);
 
@@ -703,4 +703,4 @@ const OverviewDashboard = () => {
   );
 };
 
-export default OverviewDashboard;
+export default AdminDashboard;

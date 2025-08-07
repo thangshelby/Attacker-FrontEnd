@@ -18,6 +18,7 @@ import {
   incomeRanges,
   studentGurantor,
   loanPeriod,
+  formatCurrency,
 } from "@/constants/newloan";
 
 // FormField component
@@ -49,25 +50,7 @@ const FormField = ({
     </div>
   </div>
 );
-const Step1 = ({ formData, errors, handleInputChange }) => {
-  const getSelectedPaymentMethod = () => {
-    return paymentMethods.find(
-      (pm) => pm.id === parseInt(formData.payment_method),
-    );
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
-  const selectedPurpose = loanPurposes.find(
-    (p) => p.id === parseInt(formData.loan_purpose),
-  );
-
-  const selectedPaymentMethod = getSelectedPaymentMethod();
+const Step1 = ({ formData, errors, handleInputChange }) => {      
   return (
     <>
       <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
@@ -148,9 +131,7 @@ const Step1 = ({ formData, errors, handleInputChange }) => {
           >
             <select
               value={formData.guarantor}
-              onChange={(e) =>
-                handleInputChange("guarantor", e.target.value)
-              }
+              onChange={(e) => handleInputChange("guarantor", e.target.value)}
               className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm transition-all duration-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             >
               {Array.isArray(studentGurantor) &&

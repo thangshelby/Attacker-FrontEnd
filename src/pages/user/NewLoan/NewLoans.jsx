@@ -8,25 +8,20 @@ import {
   Award,
 } from "lucide-react";
 import { useState } from "react";
-import { useNotificationStore } from "@/store/notificationStore";
-import { defaultFormData,paymentMethods } from "@/constants/newloan";
+import {
+  defaultFormData,
+  paymentMethods,
+  calculatePaymentDetails,
+} from "@/constants/newloan";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
 import Step1 from "@/components/newloan/Step1";
 import Step2 from "@/components/newloan/Step2";
 import Step3 from "@/components/newloan/Step3";
-// Validation functions
+import { useLoan } from "@/hooks/useLoan";
 const validateAmount = (amount) => {
   return amount > 0 && amount <= 100000000;
-};
-
-const validateTenor = (tenor) => {
-  return tenor >= 3 && tenor <= 60;
-};
-
-const validateFamilyIncome = (income) => {
-  return income > 0 && income <= 1000000000;
 };
 
 // Step indicator component
@@ -36,12 +31,13 @@ const StepIndicator = ({ currentStep, steps }) => (
       {steps.map((step, index) => (
         <div key={index} className="flex items-center">
           <div
-            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 ${index + 1 < currentStep
+            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 ${
+              index + 1 < currentStep
                 ? "border-green-500 bg-green-500 text-white"
                 : index + 1 === currentStep
                   ? "border-green-500 bg-green-500 text-white"
                   : "border-gray-300 bg-gray-200 text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400"
-              }`}
+            }`}
           >
             {index + 1 < currentStep ? (
               <CheckCircle className="h-6 w-6" />
@@ -51,10 +47,11 @@ const StepIndicator = ({ currentStep, steps }) => (
           </div>
           <div className="ml-3 text-sm">
             <div
-              className={`font-medium ${index + 1 <= currentStep
+              className={`font-medium ${
+                index + 1 <= currentStep
                   ? "text-green-600 dark:text-green-400"
                   : "text-gray-500 dark:text-gray-400"
-                }`}
+              }`}
             >
               {step.title}
             </div>
@@ -64,10 +61,11 @@ const StepIndicator = ({ currentStep, steps }) => (
           </div>
           {index < steps.length - 1 && (
             <div
-              className={`mx-4 h-0.5 w-12 ${index + 1 < currentStep
+              className={`mx-4 h-0.5 w-12 ${
+                index + 1 < currentStep
                   ? "bg-green-500"
                   : "bg-gray-300 dark:bg-gray-600"
-                }`}
+              }`}
             />
           )}
         </div>
@@ -76,22 +74,19 @@ const StepIndicator = ({ currentStep, steps }) => (
   </div>
 );
 
-
-
 const NewLoans = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(true);
   const [verificationId, setVerificationId] = useState(null);
   const { user } = useAuth();
   const { student } = useStudent();
   const { academicData: academic } = useAcademic();
-  const { addNotification } = useNotificationStore();
+  const { createLoanContract } = useLoan();
 
   const [formData, setFormData] = useState({
+    ...defaultFormData,
     student_id: student.student_id || "SV001",
-    ...defaultFormData
   });
 
   const [studentInfo, setStudentInfo] = useState({
@@ -121,79 +116,6 @@ const NewLoans = () => {
       description: "Xem lại và gửi yêu cầu",
     },
   ];
-  const calculatePaymentDetails = (
-    amount,
-    tenor,
-    paymentMethodId,
-    frequency,
-  ) => {
-    if (!amount || !tenor || !paymentMethodId)
-      return { monthly: 0, totalInterest: 0, totalPayment: 0 };
-
-    const method = paymentMethods.find(
-      (pm) => pm.id === parseInt(paymentMethodId),
-    );
-    if (!method) return { monthly: 0, totalInterest: 0, totalPayment: 0 };
-
-    const principal = parseFloat(amount);
-    const months = parseInt(tenor);
-    const annualRate = method.interestRate;
-    const frequencyMonths = frequency
-      ? parseInt(frequency)
-      : method.id === 2
-        ? 3
-        : 1;
-
-    let periodicPayment = 0;
-    let totalInterest = 0;
-    let totalPayment = 0;
-
-    switch (parseInt(paymentMethodId)) {
-      case 1:
-        totalInterest = principal * annualRate * (months / 12);
-        totalPayment = principal + totalInterest;
-        periodicPayment = 0;
-        break;
-
-      case 2:
-        if (!frequency) {
-          return { monthly: 0, totalInterest: 0, totalPayment: 0 };
-        }
-        const periodicRate = annualRate / (12 / frequencyMonths);
-        const numberOfPayments = Math.floor(months / frequencyMonths);
-        const periodicInterest = principal * periodicRate;
-        totalInterest = periodicInterest * numberOfPayments;
-        totalPayment = principal + totalInterest;
-        periodicPayment = periodicInterest;
-        break;
-
-      case 3:
-        if (!frequency) {
-          return { monthly: 0, totalInterest: 0, totalPayment: 0 };
-        }
-        const effectiveRate = annualRate / (12 / frequencyMonths);
-        const totalPeriods = Math.floor(months / frequencyMonths);
-
-        if (effectiveRate === 0) {
-          periodicPayment = principal / totalPeriods;
-        } else {
-          periodicPayment =
-            (principal *
-              effectiveRate *
-              Math.pow(1 + effectiveRate, totalPeriods)) /
-            (Math.pow(1 + effectiveRate, totalPeriods) - 1);
-        }
-        totalPayment = periodicPayment * totalPeriods;
-        totalInterest = totalPayment - principal;
-        break;
-    }
-
-    return {
-      monthly: Math.round(periodicPayment),
-      totalInterest: Math.round(totalInterest),
-      totalPayment: Math.round(totalPayment),
-    };
-  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -208,8 +130,6 @@ const NewLoans = () => {
 
     if (!formData.loan_tenor) {
       newErrors.loan_tenor = { message: "Thời hạn vay là bắt buộc" };
-    } else if (!validateTenor(parseInt(formData.loan_tenor))) {
-      newErrors.loan_tenor = { message: "Thời hạn vay phải từ 3-60 tháng" };
     }
 
     if (!formData.loan_purpose) {
@@ -333,91 +253,32 @@ const NewLoans = () => {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
+    if (!validateForm()) return;
+    if (currentStep !== 3) {
+      setCurrentStep(3);
+      return;
+    }
 
     try {
-      const submitData = {
-        ...formData,
-
-        loan_amount_requested: parseFloat(formData.loan_amount_requested),
-
-        loan_tenor: parseInt(formData.loan_tenor),
-
-        loan_purpose: parseInt(formData.loan_purpose),
-
-        family_income: parseFloat(formData.family_income),
-
-        payment_method: parseInt(formData.payment_method),
-
-        verification_id: verificationId,
-
-        student_info: studentInfo,
-      };
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      setSubmitSuccess(true);
-
-      setTimeout(() => {
-        setSubmitSuccess(false);
-
-        // Reset form
-
-        setCurrentStep(1);
-
-        // setQrData(null);
-
-        setVerificationSuccess(false);
-
-        setVerificationId(null);
-
-        setFormData({
-          student_id: "SV001",
-
-          loan_amount_requested: "",
-
-          loan_tenor: "",
-
-          loan_purpose: "",
-
-          custom_purpose: "",
-
-          guarantor: "",
-
-          family_income: "",
-
-          payment_method: "",
-
-          payment_frequency: "",
-
-          monthly_installment: 0,
-
-          total_interest: 0,
-
-          total_payment: 0,
-        });
-      }, 3000);
+      createLoanContract.mutate(formData, {
+        onSuccess: (data) => {
+          setStudentInfo({
+            ...studentInfo,
+            studentId: data.student_id,
+          })
+          setSubmitSuccess(true);
+        },
+        onError: (error) => {
+          console.error("Error creating loan contract:", error);
+          setSubmitSuccess(false);
+        },
+      });
     } catch (error) {
       console.error("Error submitting loan request:", error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const handleAddNotification = () => {
-    console.log("Adding new notification");
-    const newNotification = {
-      id: Date.now(), // tạo ID duy nhất
-      title: "Yêu cầu khoản vay mới",
-      message:
-        "Yêu cầu khoản vay của bạn đã được gửi thành công. Vui lòng chờ 1-2 ngày để xử lý.",
-      type: "success", // success | error | warning | info
-      time: "1 phut truoc ", // hoặc dùng dayjs().fromNow()
-      isRead: false,
-      icon: Award, // đảm bảo import đúng
-    };
-    addNotification(newNotification);
-  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-900">
@@ -497,21 +358,16 @@ const NewLoans = () => {
                 ) : (
                   <button
                     onClick={handleSubmit}
-                    disabled={isSubmitting}
+                    disabled={createLoanContract.isPending}
                     className="relative cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {isSubmitting ? (
+                    {createLoanContract.isPending ? (
                       <div className="flex items-center">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Đang gửi...
                       </div>
                     ) : (
-                      <div
-                        onClick={() => {
-                          handleAddNotification();
-                        }}
-                        className="flex items-center"
-                      >
+                      <div className="flex items-center">
                         <Send className="mr-2 h-4 w-4" />
                         Gửi yêu cầu vay
                       </div>

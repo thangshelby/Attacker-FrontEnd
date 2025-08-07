@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 import NotificationModal from "./components/NotificationModal";
 import FloatingChatBot from "./components/chatbot/chatbot";
+import { io } from "socket.io-client";
 
 function App() {
   const { toast: toastState, clearToast, modal } = useAppStore();

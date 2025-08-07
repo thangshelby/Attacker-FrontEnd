@@ -1,14 +1,17 @@
 import { Route, Routes } from "react-router-dom";
 import { Suspense } from "react";
+import ProtectedRoute from "../utils/ProtectedRoute";
+
+//AUTH PAGES
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import VerifyEmailPage from "../pages/auth/VerifyEmail";
+
+//USER PAGES
 import SettingsPage from "../pages/user/SettingPage/SettingPage.jsx";
 import LandingPage from "../pages/user/LandingPage/LandingPage.jsx";
 import NotFoundPage from "../pages/notfound/NotFoundPage";
 import AuthLayout from "../layouts/AuthLayout.jsx";
-import AdminPage from "../pages/admin/AdminPage";
-import ProtectedRoute from "../utils/ProtectedRoute";
 import RootLayout from "../layouts/RootLayout";
 import Home from "../pages/user/Home/Home.jsx";
 import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
@@ -22,8 +25,13 @@ import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
 import ProtectedAcademicProfile from "@/utils/ProtectedAcademicProfile";
 import AcademicProfileNotVerified from "@/pages/user/Profile/Academic/AcademicProfileNotVerified";
-import LoanAdminDashboard from "@/pages/admin/Sidepage";
 
+//ADMIN PAGE
+import AdminLayout from "@/layouts/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import PaymentSchedulePage from "@/pages/admin/PaymentSchedule";
+import RiskAnalyze from "@/pages/admin/RiskAnalyze";
+import OverviewLoans from "@/pages/admin/OverviewLoans";
 const Router = () => {
   return (
     <Suspense
@@ -40,10 +48,16 @@ const Router = () => {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
         </Route>
-        <Route path="/adminn" element={<LoanAdminDashboard />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+ 
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index path="dashboard" element={<AdminDashboard />} />
+            <Route path="loans" element={<OverviewLoans />} />
+            <Route path="payment-schedule" element={<PaymentSchedulePage />} />
+            <Route path="risk-analyze" element={<RiskAnalyze />} /> 
+          </Route>
 
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
@@ -73,9 +87,8 @@ const Router = () => {
             <Route path="loans" element={<MyLoans />} />
             <Route path="history" element={<HistoryTransaction />} />
             <Route path="newloan" element={<NewLoans />} />
-          </Route>
-          <Route path="admin" element={<AdminPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+            </Route>
+            <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* 404 */}

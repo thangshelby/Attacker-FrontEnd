@@ -14,9 +14,7 @@ export const useChatbot = () => {
         citizen_id: user.citizen_id,
       });
     },
-    onSuccess: (data) => {
-      console.log("Message sent successfully:", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("Error sending message:", error);
     },
