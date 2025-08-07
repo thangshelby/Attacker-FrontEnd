@@ -9,9 +9,7 @@ export function useNotification() {
   const { user } = useAuth();
   const citizen_id = user?.citizen_id;
   
-  // Debug: Check if citizen_id exists
-  console.log("User object in useNotification:", user);
-  console.log("Citizen ID:", citizen_id);
+
   
   // 1. Get all notifications
   const allNotifications = useQuery({

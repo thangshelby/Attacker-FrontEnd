@@ -1,10 +1,11 @@
-import { Award, FileText, Users, Calendar, Settings } from "lucide-react";
+import { Award, FileText, Users, Calendar, Settings,CheckCircle } from "lucide-react";
 
 const textToIcon = {
   award: Award,
   "file-text": FileText,
   users: Users,
   calendar: Calendar,
+  "check-circle": CheckCircle,
   settings: Settings,
 };
 

@@ -21,8 +21,6 @@ const Header = () => {
   const notificationRef = useRef(null);
   const { user } = useAuth();
 
-  // Debug: Check user object
-  console.log("User in Header component:", user);
 
   return (
     <header className="flex items-center justify-between bg-white px-6 py-4 shadow-md dark:bg-gray-900">
@@ -30,7 +28,7 @@ const Header = () => {
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           My Website
         </h1>
-        <ThemeToggle />
+        <ThemeToggle /> 
       </div>
 
       <div className="flex items-center gap-4">

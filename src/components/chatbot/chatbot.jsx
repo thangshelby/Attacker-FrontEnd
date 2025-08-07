@@ -1,6 +1,6 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, Loader2 } from "lucide-react";
+import { useChatbot } from "@/hooks/useChatbot";
 
 const FloatingChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,8 +12,8 @@ const FloatingChatBot = () => {
         "Xin chào! 👋 Tôi là trợ lý AI của Student Credit. Tôi có thể giúp bạn về các thông tin tín dụng sinh viên, học bổng và các dịch vụ tài chính. Bạn có câu hỏi gì không?",
     },
   ]);
+  const { sendMessage } = useChatbot();
   const [inputMessage, setInputMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -30,10 +30,8 @@ const FloatingChatBot = () => {
       inputRef.current?.focus();
     }
   }, [isOpen]);
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return;
-
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || sendMessage.isPending) return;
     const userMessage = {
       id: Date.now(),
       type: "user",
@@ -41,49 +39,33 @@ const FloatingChatBot = () => {
     };
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
-    setIsLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:3000/api/v1/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+    sendMessage.mutate(userMessage.content, {
+      onSuccess: (data) => {
         const botMessage = {
           id: Date.now() + 1,
           type: "bot",
-          content: data.response,
+          content:
+            data.response ||
+            "Tôi không hiểu câu hỏi của bạn. Bạn có thể thử lại không?",
         };
         setMessages((prev) => [...prev, botMessage]);
-      } else {
-        throw new Error("Failed to get response");
-      }
-    } catch (error) {
-      const demoResponses = [
-        "Cảm ơn bạn đã hỏi! Về vấn đề này, tôi khuyên bạn nên xem xét các gói vay học phí với lãi suất ưu đãi.",
-        "Student Credit cung cấp nhiều giải pháp phù hợp với sinh viên như bạn.",
-        "Đây là câu hỏi rất hay! Tôi sẽ giúp bạn tìm hiểu về các chương trình hỗ trợ tài chính.",
-      ];
-      const randomResponse =
-        demoResponses[Math.floor(Math.random() * demoResponses.length)];
-      const botMessage = {
-        id: Date.now() + 1,
-        type: "bot",
-        content: randomResponse,
-      };
-      setTimeout(() => setMessages((prev) => [...prev, botMessage]), 1000);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      onError: (error) => {
+        const errorMessage = {
+          id: Date.now() + 1,
+          type: "bot",
+          content: "Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại sau.",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      },
+    });
   };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      sendMessage();
+      handleSendMessage();
     }
   };
 
@@ -95,6 +77,7 @@ const FloatingChatBot = () => {
   ];
 
   const handleQuickAction = (action) => {
+    console.log("Quick action selected:", action.text);
     setInputMessage(action.text);
     inputRef.current?.focus();
   };
@@ -140,9 +123,7 @@ const FloatingChatBot = () => {
                 e.stopPropagation();
                 setIsOpen(false);
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 
-              cursor-pointer
-              transition-colors hover:bg-gray-800 hover:text-white"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-800 hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>
@@ -172,7 +153,7 @@ const FloatingChatBot = () => {
               </div>
             ))}
 
-            {isLoading && (
+            {sendMessage.isPending && (
               <div className="flex items-end justify-start gap-2">
                 <div className="mb-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
                   <Bot className="h-4 w-4 text-white" />
@@ -233,15 +214,15 @@ const FloatingChatBot = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Nhập tin nhắn..."
-                disabled={isLoading}
+                disabled={sendMessage.isPending}
                 className="flex-1 rounded-full border-2 border-gray-700 bg-gray-800 p-3 text-sm text-white placeholder-gray-400 shadow-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:outline-none"
               />
               <button
-                onClick={sendMessage}
-                disabled={!inputMessage.trim() || isLoading}
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || sendMessage.isPending}
                 className="flex h-10 w-10 transform items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg transition-all duration-200 hover:scale-105 hover:from-purple-700 hover:to-pink-700 hover:shadow-xl disabled:from-gray-600 disabled:to-gray-700"
               >
-                {isLoading ? (
+                {sendMessage.isPending ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <Send className="h-5 w-5" />
