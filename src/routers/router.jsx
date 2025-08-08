@@ -25,6 +25,7 @@ import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
 import ProtectedAcademicProfile from "@/utils/ProtectedAcademicProfile";
 import AcademicProfileNotVerified from "@/pages/user/Profile/Academic/AcademicProfileNotVerified";
+import LoanDetail from "@/pages/admin/LoanDetail";
 
 //ADMIN PAGE
 import AdminLayout from "@/layouts/AdminLayout";
@@ -32,6 +33,8 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import PaymentSchedulePage from "@/pages/admin/PaymentSchedule";
 import RiskAnalyze from "@/pages/admin/RiskAnalyze";
 import OverviewLoans from "@/pages/admin/OverviewLoans";
+import MultiAgentDebateSystem from "@/pages/admin/DebateAgent";
+import AIReasoningDashboard from "@/pages/admin/Debate2";
 const Router = () => {
   return (
     <Suspense
@@ -51,14 +54,20 @@ const Router = () => {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
- 
+
+          {/* ADMIN ROUTE */}
           <Route path="admin" element={<AdminLayout />}>
             <Route index path="dashboard" element={<AdminDashboard />} />
             <Route path="loans" element={<OverviewLoans />} />
+            <Route path="loans/:loan_id" element={<LoanDetail />} />
+
             <Route path="payment-schedule" element={<PaymentSchedulePage />} />
-            <Route path="risk-analyze" element={<RiskAnalyze />} /> 
+            <Route path="risk-analyze" element={<RiskAnalyze />} />
+            <Route path="debate" element={<MultiAgentDebateSystem />} />
+            <Route path="debate-2" element={<AIReasoningDashboard />} />
           </Route>
 
+        {/* USER ROUTE */}
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
@@ -87,8 +96,8 @@ const Router = () => {
             <Route path="loans" element={<MyLoans />} />
             <Route path="history" element={<HistoryTransaction />} />
             <Route path="newloan" element={<NewLoans />} />
-            </Route>
-            <Route path="settings" element={<SettingsPage />} />
+          </Route>
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* 404 */}

@@ -1,4 +1,4 @@
-import { gradientBackground } from "../../../assets";
+import { gradientBackground } from "../../../../assets";
 
 export const Rings = () => {
   return (

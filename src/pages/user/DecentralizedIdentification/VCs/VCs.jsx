@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Shield, ArrowRight } from "lucide-react";
-import Step1 from "@/components/dids/Step1";
-import Step2 from "@/components/dids/Step2";
-import Step3 from "@/components/dids/Step3";
+import Step1 from "@/components/user/dids/Step1";
+import Step2 from "@/components/user/dids/Step2";
+import Step3 from "@/components/user/dids/Step3";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";

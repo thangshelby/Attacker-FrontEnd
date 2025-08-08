@@ -1,14 +1,14 @@
 import React from "react";
-import Header from "../../../components/landing/Header";
-import Hero from "../../../components/landing/Hero";
-import Features from "../../../components/landing/Feature";
-import HowToUse from "../../../components/landing/HowToUse";
-import Security from "../../../components/landing/Security";
-import Benefit from "../../../components/landing/Benefit";
-import FAQ from "../../../components/landing/FAQ";
-import Testimonials from "../../../components/landing/Testimonial";
-import CTA from "../../../components/landing/CTA";
-import Footer from "../../../components/landing/Footer";
+import Header from "../../../components/user/landing/Header";
+import Hero from "../../../components/user/landing/Hero";
+import Features from "../../../components/user/landing/Feature";
+import HowToUse from "../../../components/user/landing/HowToUse";
+import Security from "../../../components/user/landing/Security";
+import Benefit from "../../../components/user/landing/Benefit";
+import FAQ from "../../../components/user/landing/FAQ";
+import Testimonials from "../../../components/user/landing/Testimonial";
+import CTA from "../../../components/user/landing/CTA";
+import Footer from "../../../components/user/landing/Footer";
 const LandingPage = () => {
   return (
     <div>

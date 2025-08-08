@@ -1,5 +1,5 @@
 import Section from "./Section";
-import { ctaImg } from "../../assets";
+import { ctaImg } from "../../../assets";
 const CTA = () => {
   return (
     <Section id="cta" className="py-20">

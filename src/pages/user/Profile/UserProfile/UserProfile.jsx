@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@/hooks/useUser";
-import ImageUpload from "@/components/profile/ImageUpload";
+import ImageUpload from "@/components/user/profile/ImageUpload";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 

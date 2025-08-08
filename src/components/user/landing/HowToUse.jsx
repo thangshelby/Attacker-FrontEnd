@@ -1,7 +1,7 @@
 import Section from "./Section";
 import { steps } from "./constants";
 import Button from "../elements/Button";
-import { howToUse } from "../../assets";
+import { howToUse } from "../../../assets";
 
 const HowToUse = () => {
   return (

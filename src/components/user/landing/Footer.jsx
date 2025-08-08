@@ -1,4 +1,4 @@
-import { appLogo } from "../../assets";
+import { appLogo } from "../../../assets";
 import { footerLinks } from "./constants";
 
 const Footer = () => {

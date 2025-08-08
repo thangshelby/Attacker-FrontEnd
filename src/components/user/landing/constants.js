@@ -11,7 +11,7 @@ import {
     benefitIcon3,
     testimonial1,
     testimonial2,
-} from "../../assets";
+} from "../../../assets";
 
 
 export const navigation = [

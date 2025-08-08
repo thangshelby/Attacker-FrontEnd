@@ -4,10 +4,7 @@ import {
   Calendar,
   DollarSign,
   FileText,
-  Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
   Eye,
   ArrowLeft,
   Sparkles,
@@ -19,141 +16,17 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useStudent } from "@/hooks/useStudent";
-// Mock data for loan history
-const mockLoanHistory = [
-  {
-    id: 1,
-    stt: "1",
-    ngayLapHoSo: "2025-08-04",
-    thoiGianLapHoSo: "14:30",
-    soTienVay: "20,000,000",
-    ngayDuyet: "2025-08-05 - 2025-08-06",
-    tinhTrang: "Đang xử lý",
-    status: "processing",
-  },
-  {
-    id: 2,
-    stt: "2",
-    ngayLapHoSo: "2024-02-10",
-    thoiGianLapHoSo: "09:15",
-    soTienVay: "3,500,000",
-    ngayDuyet: "2024-02-15",
-    tinhTrang: "Đang xử lý",
-    status: "processing",
-  },
-  {
-    id: 3,
-    stt: "3",
-    ngayLapHoSo: "2024-03-05",
-    thoiGianLapHoSo: "16:45",
-    soTienVay: "7,200,000",
-    ngayDuyet: "2024-03-12",
-    tinhTrang: "Đang xử lý",
-    status: "processing",
-  },
-  {
-    id: 4,
-    stt: "4",
-    ngayLapHoSo: "2024-04-20",
-    thoiGianLapHoSo: "11:20",
-    soTienVay: "4,800,000",
-    ngayDuyet: "2024-04-22",
-    tinhTrang: "Thất bại",
-    status: "failed",
-  },
-  {
-    id: 5,
-    stt: "5",
-    ngayLapHoSo: "2024-05-18",
-    thoiGianLapHoSo: "13:10",
-    soTienVay: "6,000,000",
-    ngayDuyet: "2024-05-25",
-    tinhTrang: "Thành công",
-    status: "success",
-  },
-  {
-    id: 6,
-    stt: "6",
-    ngayLapHoSo: "2024-06-12",
-    thoiGianLapHoSo: "10:30",
-    soTienVay: "8,500,000",
-    ngayDuyet: "2024-06-18",
-    tinhTrang: "Thành công",
-    status: "success",
-  },
-  {
-    id: 7,
-    stt: "7",
-    ngayLapHoSo: "2024-07-25",
-    thoiGianLapHoSo: "15:45",
-    soTienVay: "2,800,000",
-    ngayDuyet: "2024-07-30",
-    tinhTrang: "Thất bại",
-    status: "failed",
-  },
-  {
-    id: 8,
-    stt: "8",
-    ngayLapHoSo: "2024-08-01",
-    thoiGianLapHoSo: "08:20",
-    soTienVay: "9,200,000",
-    ngayDuyet: "Chưa duyệt",
-    tinhTrang: "Thành công",
-    status: "success",
-  },
-];
-
-// Mock detailed loan data
-
-const StatusBadge = ({ status, text }) => {
-  const getStatusConfig = () => {
-    switch (status) {
-      case "success":
-        return {
-          bg: "bg-green-100 dark:bg-green-900/30",
-          text: "text-green-800 dark:text-green-300",
-          icon: CheckCircle,
-        };
-      case "processing":
-        return {
-          bg: "bg-blue-100 dark:bg-blue-900/30",
-          text: "text-blue-800 dark:text-blue-300",
-          icon: Clock,
-        };
-      case "failed":
-        return {
-          bg: "bg-red-100 dark:bg-red-900/30",
-          text: "text-red-800 dark:text-red-300",
-          icon: XCircle,
-        };
-      default:
-        return {
-          bg: "bg-gray-100 dark:bg-gray-700",
-          text: "text-gray-800 dark:text-gray-300",
-          icon: AlertCircle,
-        };
-    }
-  };
-
-  const { bg, textColor, icon: Icon } = getStatusConfig();
-
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${bg} ${textColor}`}
-    >
-      <Icon className="mr-1 h-3 w-3" />
-      {text}
-    </span>
-  );
-};
+import { useLoan } from "@/hooks/useLoan";
+import StatusBadge from "@/components/shared/StatusBadge";
 
 const LoanHistoryPage = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { user } = useAuth();
-  const { student } = useStudent();
+  const { getLoansByStudentId } = useLoan();
+  const loans = getLoansByStudentId.data;
+
   const mockLoanDetail = {
     id: 1,
     loanAmount: "20,000,000",
@@ -185,11 +58,24 @@ const LoanHistoryPage = () => {
     setSelectedLoan(null);
   };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   // Pagination logic
-  const totalPages = Math.ceil(mockLoanHistory.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = mockLoanHistory.slice(startIndex, endIndex);
 
   if (selectedLoan) {
     return (
@@ -417,20 +303,40 @@ const LoanHistoryPage = () => {
     );
   }
 
+  const handleBackToList = () => {
+    setSelectedLoan(null);
+  };
+
+  if (getLoansByStudentId.isPending || !loans) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
+        <p className="mt-4 text-gray-600">Đang tải dữ liệu</p>
+      </div>
+    );
+  }
+  const totalPages = Math.ceil(loans?.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = loans?.slice(startIndex, endIndex);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
-      <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+      <div className="mx-auto px-4 py-8 lg:px-20 2xl:px-24">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
-            <History className="h-8 w-8 text-white" />
+        <div className="mb-8 flex flex-row items-center justify-start gap-4 text-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg lg:h-12 lg:w-12 2xl:h-16 2xl:w-16">
+            <History className="h-4 w-4 text-white lg:h-6 lg:w-6 2xl:h-8 2xl:w-8" />
           </div>
-          <h1 className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-            My History Transaction
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Lịch sử giao dịch vay vốn của bạn
-          </p>
+
+          <div className="flex h-full flex-col items-start justify-between">
+            <h1 className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text font-bold text-transparent lg:text-xl xl:text-2xl 2xl:text-3xl">
+              Lịch sử vay
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Lịch sử giao dịch vay vốn của bạn
+            </p>
+          </div>
         </div>
 
         {/* Transaction Table */}
@@ -488,56 +394,58 @@ const LoanHistoryPage = () => {
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                    STT
+                    Mã sinh viên
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                    Ngày lập hồ sơ
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                    Thời gian lập hồ sơ
-                  </th>
+
                   <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                     Số tiền vay
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                    Ngày duyệt
+                    Mục đích
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
-                    Tình trạng
+                    Trả góp/tháng
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                    Trạng thái
+                  </th>
+                  <th className="px-6 py-3 text-end text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                    Ngày tạo
+                  </th>
+                  <th className="px-6 py-3 text-end text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
                     Thao tác
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                {currentItems.map((item, index) => (
+                {loans?.map((loan) => (
                   <tr
-                    key={item.id}
+                    key={loan._id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   >
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                      {item.stt}
+                      {loan.student_id}
                     </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {item.ngayLapHoSo}
-                    </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {item.thoiGianLapHoSo}
-                    </td>
+
                     <td className="px-6 py-4 text-sm font-semibold whitespace-nowrap text-green-600 dark:text-green-400">
-                      {item.soTienVay} VND
+                      {formatCurrency(loan.loan_amount_requested)}
                     </td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {item.ngayDuyet}
+                      {loan.loan_purpose || "Không xác định"}
+                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold whitespace-nowrap text-blue-600 dark:text-blue-400">
+                      {formatCurrency(loan.monthly_installment)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={item.status} text={item.tinhTrang} />
+                      <StatusBadge status={loan.status} />
                     </td>
-                    <td className="px-6 py-4 text-sm whitespace-nowrap">
+                    <td className="px-6 py-4 text-end text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
+                      {formatDate(loan.created_at)}
+                    </td>
+                    <td className="px-6 py-4 text-end text-sm whitespace-nowrap">
                       <button
-                        onClick={() => handleViewDetail(item)}
-                        className="inline-flex cursor-pointer items-center rounded-lg bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
+                        onClick={() => handleViewDetail(loan)}
+                        className="inline-flex items-center rounded-lg bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
                       >
                         <Eye className="mr-1 h-4 w-4" />
                         Xem chi tiết
@@ -552,9 +460,8 @@ const LoanHistoryPage = () => {
           {/* Pagination */}
           <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3 dark:border-gray-600 dark:bg-gray-700/50">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {startIndex + 1}-
-              {Math.min(endIndex, mockLoanHistory.length)} of{" "}
-              {mockLoanHistory.length} items
+              Showing {startIndex + 1}-{Math.min(endIndex, loans?.length)} of{" "}
+              {loans?.length} items
             </div>
             <div className="flex space-x-2">
               <button

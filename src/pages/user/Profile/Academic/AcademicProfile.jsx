@@ -15,7 +15,7 @@ import {
   Info,
   AlertCircle,
 } from "lucide-react";
-import DocumentUploadDemo from "@/components/profile/DocumentUpload";
+import DocumentUploadDemo from "@/components/user/profile/DocumentUpload";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";

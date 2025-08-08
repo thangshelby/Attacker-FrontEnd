@@ -1,6 +1,6 @@
 import Section from "./Section";
 import { faqData } from "./constants";
-import { chatBot } from "../../assets";
+import { chatBot } from "../../../assets";
 import { useState } from "react";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
 

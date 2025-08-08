@@ -23,7 +23,7 @@ import {
   Clock,
   Filter,
 } from "lucide-react";
-import { Outlet,useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -44,10 +44,18 @@ const AdminLayout = () => {
       to: "loans",
     },
     {
+      id: "analyticss",
+      label: "Báo Cáo & Phân Tích",
+      icon: PieChart,
+      color: "text-cyan-500",
+      to: "debate",
+    },
+    {
       id: "students",
       label: "Quản Lý Sinh Viên",
       icon: Users,
       color: "text-green-500",
+      to: "debate-2",
     },
     {
       id: "applications",
@@ -84,6 +92,7 @@ const AdminLayout = () => {
       label: "Báo Cáo & Phân Tích",
       icon: PieChart,
       color: "text-cyan-500",
+      to: "debate",
     },
     {
       id: "alerts",
@@ -110,7 +119,6 @@ const AdminLayout = () => {
       color: "text-slate-500",
     },
   ];
-
 
   return (
     <div className="flex h-screen bg-slate-900">
