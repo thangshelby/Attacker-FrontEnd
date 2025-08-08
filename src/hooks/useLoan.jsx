@@ -1,7 +1,16 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { loan } from "@/apis/loan"; // Adjust the import path as necessary
-// import {}
+import { loan } from "@/apis/loan";
+import { useStudent } from "./useStudent";
+import { useState, useEffect } from "react";
+
 export function useLoan() {
+  const { student, isLoading } = useStudent();
+  const [student_id, setStudent_id] = useState("");
+  useEffect(() => {
+    if (student) {
+      setStudent_id(student.student_id);
+    }
+  }, [isLoading]);
   // Fetch all loans
   const {
     data: loans,
@@ -19,6 +28,7 @@ export function useLoan() {
     },
     // refetchOnWindowFocus: false,
   });
+
   const getMASConversation = useQuery({
     queryKey: ["masConversation"],
     queryFn: async (loan_id) => {
@@ -26,16 +36,20 @@ export function useLoan() {
       return data.data.conversation;
     },
     enabled: false, // This will be called manually
-  })
+  });
   // Fetch loan by student ID
-  // const getLoansByStudentId = useQuery({
-  //   queryKey: ["studentLoans", { studentId: user?.student_id }],
-  //   queryFn: (student_id) => loan.getLoanByStudentId(student_id),
-  //   enabled: !!user?.student_id,
-  // });
+  const getLoansByStudentId = useQuery({
+    queryKey: ["loans", student_id],
+    queryFn: async () => {
+      console.log(student_id);
+      const response = await loan.getLoanByStudentId(student_id);
+      return response.data.data.loans;
+    },
+    enabled: !!student_id,
+  });
   // Fetch loan by ID
   // const getLoanById = useQuery({
-  //   queryKey: ["loanById", { id: loanId }],
+  //   queryKey: ["loan", { id: loanId }],
   //   queryFn: (loan_id) => loan.getLoanById(loan_id),
   //   enabled: true,
   // });
@@ -55,7 +69,7 @@ export function useLoan() {
     loans,
     isLoadingLoans,
     loansError,
-    // getLoansByStudentId,
+    getLoansByStudentId,
     // getLoanById,
     createLoanContract,
   };

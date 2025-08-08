@@ -32,6 +32,8 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import PaymentSchedulePage from "@/pages/admin/PaymentSchedule";
 import RiskAnalyze from "@/pages/admin/RiskAnalyze";
 import OverviewLoans from "@/pages/admin/OverviewLoans";
+import MultiAgentDebateSystem from "@/pages/admin/DebateAgent";
+import AIReasoningDashboard from "@/pages/admin/Debate2";
 const Router = () => {
   return (
     <Suspense
@@ -51,12 +53,14 @@ const Router = () => {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
- 
+
           <Route path="admin" element={<AdminLayout />}>
             <Route index path="dashboard" element={<AdminDashboard />} />
             <Route path="loans" element={<OverviewLoans />} />
             <Route path="payment-schedule" element={<PaymentSchedulePage />} />
-            <Route path="risk-analyze" element={<RiskAnalyze />} /> 
+            <Route path="risk-analyze" element={<RiskAnalyze />} />
+            <Route path="debate" element={<MultiAgentDebateSystem />} />
+            <Route path="debate-2" element={<AIReasoningDashboard />} />
           </Route>
 
           <Route path="/" element={<RootLayout />}>
@@ -87,8 +91,8 @@ const Router = () => {
             <Route path="loans" element={<MyLoans />} />
             <Route path="history" element={<HistoryTransaction />} />
             <Route path="newloan" element={<NewLoans />} />
-            </Route>
-            <Route path="settings" element={<SettingsPage />} />
+          </Route>
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* 404 */}
