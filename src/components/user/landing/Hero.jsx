@@ -1,8 +1,8 @@
 import Section from "./Section.jsx";
 import Button from "../elements/Button.jsx";
-import { gradientBackground } from "../../assets";
+import { gradientBackground } from "../../../assets/index.js";
 import { BottomLine } from "./designs/Hero.jsx";
-import { HeroSvg } from "../../assets";
+import { HeroSvg } from "../../../assets/index.js";
 const Hero = () => {
   return (
     <Section

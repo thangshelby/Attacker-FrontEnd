@@ -25,6 +25,7 @@ import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
 import ProtectedAcademicProfile from "@/utils/ProtectedAcademicProfile";
 import AcademicProfileNotVerified from "@/pages/user/Profile/Academic/AcademicProfileNotVerified";
+import LoanDetail from "@/pages/admin/LoanDetail";
 
 //ADMIN PAGE
 import AdminLayout from "@/layouts/AdminLayout";
@@ -54,15 +55,19 @@ const Router = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
 
+          {/* ADMIN ROUTE */}
           <Route path="admin" element={<AdminLayout />}>
             <Route index path="dashboard" element={<AdminDashboard />} />
             <Route path="loans" element={<OverviewLoans />} />
+            <Route path="loans/:loan_id" element={<LoanDetail />} />
+
             <Route path="payment-schedule" element={<PaymentSchedulePage />} />
             <Route path="risk-analyze" element={<RiskAnalyze />} />
             <Route path="debate" element={<MultiAgentDebateSystem />} />
             <Route path="debate-2" element={<AIReasoningDashboard />} />
           </Route>
 
+        {/* USER ROUTE */}
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />

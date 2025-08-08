@@ -4,297 +4,26 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Eye,
-  ArrowLeft,
   Sparkles,
-  CreditCard,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  GraduationCap,
   Search,
   Filter,
   Users,
-  TrendingUp,
-  BarChart3,
-  Bot,
-  Brain,
-  Shield,
-  Calculator,
-  MessageSquare,
-  ThumbsUp,
-  ThumbsDown,
-  Zap,
 } from "lucide-react";
 import { useLoan } from "@/hooks/useLoan";
-import LoanDetail from "./LoanDetail";
+import { useNavigate } from "react-router-dom";
 import StatusBadge from "@/components/shared/StatusBadge";
-// Mock data for loans
-const mockLoans = [
-  {
-    _id: "64a1234567890abcdef12345",
-    student_id: "SV001",
-    loan_amount_requested: 50000000,
-    loan_purpose: 1,
-    monthly_installment: 2500000,
-    status: "pending",
-    created_at: "2024-01-15T10:30:00Z",
-    updated_at: "2024-01-15T10:30:00Z",
-    studentInfo: {
-      name: "Nguyễn Văn A",
-      university: "Đại học Kinh Tế - Luật - ĐHQG TPHCM",
-      faculty: "Công nghệ Thông tin",
-      major: "FINTECH",
-      year: "3",
-      phone: "0901234567",
-      email: "nguyenvana@example.com",
-      address: "123 Nguyễn Văn Cừ, Q.5, TP.HCM",
-      gpa: 3.8,
-    },
-    responses: {
-      academic_repredict: {
-        decision: "approve",
-        reason:
-          "Sinh viên có GPA cao (3.8/4.0) và hoạt động ngoại khóa tích cực",
-        raw_response: "QUYẾT ĐỊNH: APPROVE - GPA cao, hoạt động tốt",
-      },
-      finance_repredict: {
-        decision: "approve",
-        reason: "Thu nhập ổn định 30 triệu/tháng, khả năng trả nợ tốt",
-        raw_response: "QUYẾT ĐỊNH: APPROVE - Thu nhập ổn định",
-      },
-      critical_academic: {
-        critical_response: "Cần xem xét thêm về khả năng học tập dài hạn",
-        recommended_decision: "approve",
-        raw_response: "PHẢN BIỆN: Cần theo dõi thêm nhưng chấp nhận",
-      },
-      critical_finance: {
-        critical_response: "Tỷ lệ vay/thu nhập hợp lý ở mức 83%",
-        recommended_decision: "approve",
-        raw_response: "PHẢN BIỆN: Tỷ lệ hợp lý",
-      },
-      final_decision: {
-        final_result: {
-          decision: "approve",
-          reason:
-            "Đạt tiêu chí học thuật và tài chính với điểm GPA cao và thu nhập ổn định",
-          rule_based_pass: true,
-          agent_support_available: true,
-          hybrid_approach: "objective_rules_with_agent_support",
-        },
-        error: null,
-      },
-    },
-  },
-  {
-    _id: "64a1234567890abcdef12346",
-    student_id: "SV002",
-    loan_amount_requested: 30000000,
-    loan_purpose: 2,
-    monthly_installment: 1500000,
-    status: "rejected",
-    created_at: "2024-01-14T14:20:00Z",
-    updated_at: "2024-01-16T09:15:00Z",
-    studentInfo: {
-      name: "Trần Thị B",
-      university: "Đại học Bách Khoa TP.HCM",
-      faculty: "Khoa học Máy tính",
-      major: "Data Science",
-      year: "2",
-      phone: "0907654321",
-      email: "tranthib@example.com",
-      address: "456 Lý Thường Kiệt, Q.10, TP.HCM",
-      gpa: 2.1,
-    },
-    responses: {
-      academic_repredict: {
-        decision: "reject",
-        reason:
-          "GPA thấp (2.1/4.0), nhiều môn học lại, cần cải thiện kết quả học tập",
-        raw_response: "QUYẾT ĐỊNH: REJECT - GPA thấp, cần cải thiện",
-      },
-      finance_repredict: {
-        decision: "reject",
-        reason:
-          "Thu nhập không ổn định, chỉ 15 triệu/tháng, không đủ đảm bảo trả nợ",
-        raw_response: "QUYẾT ĐỊNH: REJECT - Thu nhập thấp, rủi ro cao",
-      },
-      critical_academic: {
-        critical_response:
-          "Sinh viên cần cải thiện kết quả học tập trước khi vay, có nhiều môn học lại",
-        recommended_decision: "reject",
-        raw_response: "PHẢN BIỆN: Không nên cho vay do kết quả học tập kém",
-      },
-      critical_finance: {
-        critical_response:
-          "Rủi ro cao do thu nhập không đủ đảm bảo, tỷ lệ thu nhập/vay không an toàn",
-        recommended_decision: "reject",
-        raw_response: "PHẢN BIỆN: Rủi ro tài chính cao, không khuyến nghị",
-      },
-      final_decision: {
-        final_result: {
-          decision: "reject",
-          reason:
-            "Không đạt tiêu chuẩn học thuật và tài chính, GPA quá thấp và thu nhập không ổn định",
-          rule_based_pass: false,
-          agent_support_available: true,
-          hybrid_approach: "agent_consensus_reject",
-        },
-        error: null,
-      },
-    },
-  },
-  {
-    _id: "64a1234567890abcdef12347",
-    student_id: "SV003",
-    loan_amount_requested: 40000000,
-    loan_purpose: 1,
-    monthly_installment: 2000000,
-    status: "accepted",
-    created_at: "2024-01-13T09:15:00Z",
-    updated_at: "2024-01-16T11:30:00Z",
-    studentInfo: {
-      name: "Lê Văn C",
-      university: "Đại học Quốc Gia TP.HCM",
-      faculty: "Kinh tế",
-      major: "Tài chính Ngân hàng",
-      year: "4",
-      phone: "0908888999",
-      email: "levanc@example.com",
-      address: "789 Cách Mạng Tháng 8, Q.3, TP.HCM",
-      gpa: 3.9,
-    },
-    responses: {
-      academic_repredict: {
-        decision: "approve",
-        reason:
-          "Thành tích học tập xuất sắc, GPA 3.9/4.0, nhiều giải thưởng học thuật",
-        raw_response: "QUYẾT ĐỊNH: APPROVE - Xuất sắc về mặt học thuật",
-      },
-      finance_repredict: {
-        decision: "approve",
-        reason:
-          "Thu nhập 35 triệu/tháng, tỷ lệ an toàn, có nguồn thu ổn định từ part-time",
-        raw_response: "QUYẾT ĐỊNH: APPROVE - Tài chính rất tốt",
-      },
-      critical_academic: {
-        critical_response:
-          "Sinh viên có tiềm năng rất cao, đáng tin cậy, thành tích ấn tượng",
-        recommended_decision: "approve",
-        raw_response: "PHẢN BIỆN: Rất đáng tin cậy, ứng viên lý tưởng",
-      },
-      critical_finance: {
-        critical_response:
-          "Khả năng trả nợ rất tốt, tỷ lệ thu nhập/vay ở mức an toàn",
-        recommended_decision: "approve",
-        raw_response: "PHẢN BIỆN: An toàn tài chính cao",
-      },
-      final_decision: {
-        final_result: {
-          decision: "approve",
-          reason:
-            "Hoàn toàn đạt yêu cầu, ứng viên lý tưởng với thành tích xuất sắc",
-          rule_based_pass: true,
-          agent_support_available: true,
-          hybrid_approach: "unanimous_approval",
-        },
-        error: null,
-      },
-    },
-  },
-  {
-    _id: "64a1234567890abcdef12348",
-    student_id: "SV004",
-    loan_amount_requested: 25000000,
-    loan_purpose: 3,
-    monthly_installment: 1250000,
-    status: "pending",
-    created_at: "2024-01-16T16:45:00Z",
-    updated_at: "2024-01-16T16:45:00Z",
-    studentInfo: {
-      name: "Phạm Thị D",
-      university: "Đại học Công Nghệ TP.HCM",
-      faculty: "Điện tử Viễn thông",
-      major: "IoT",
-      year: "3",
-      phone: "0909111222",
-      email: "phamthid@example.com",
-      address: "321 Võ Văn Tần, Q.3, TP.HCM",
-      gpa: 3.2,
-    },
-    responses: {
-      academic_repredict: {
-        decision: "approve",
-        reason: "GPA trung bình khá (3.2/4.0), có tham gia dự án nghiên cứu",
-        raw_response: "QUYẾT ĐỊNH: APPROVE - Kết quả học tập ổn",
-      },
-      finance_repredict: {
-        decision: "approve",
-        reason: "Thu nhập 22 triệu/tháng, tỷ lệ chấp nhận được",
-        raw_response: "QUYẾT ĐỊNH: APPROVE - Thu nhập đủ điều kiện",
-      },
-      critical_academic: {
-        critical_response:
-          "Cần theo dõi thêm về khả năng duy trì kết quả học tập",
-        recommended_decision: "approve",
-        raw_response: "PHẢN BIỆN: Chấp nhận nhưng cần theo dõi",
-      },
-      critical_finance: {
-        critical_response: "Tỷ lệ ở mức giới hạn nhưng vẫn chấp nhận được",
-        recommended_decision: "approve",
-        raw_response: "PHẢN BIỆN: Chấp nhận với điều kiện",
-      },
-      final_decision: {
-        final_result: {
-          decision: "approve",
-          reason:
-            "Đạt tiêu chuẩn tối thiểu, cần theo dõi trong quá trình trả nợ",
-          rule_based_pass: true,
-          agent_support_available: true,
-          hybrid_approach: "conditional_approval",
-        },
-        error: null,
-      },
-    },
-  },
-];
 
 const OverviewLoans = () => {
-  const [selectedLoan, setSelectedLoan] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const { loans, isLoadingLoans, loansError } = useLoan();
-
+  const { loans, isLoadingLoans } = useLoan();
+  const navigate = useNavigate();
   useEffect(() => {}, []);
 
   // Filter loans based on search and status
-  const filteredLoans = mockLoans.filter((loan) => {
-    const matchesSearch =
-      loan.student_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.studentInfo?.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || loan.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  // Pagination
-  const totalPages = Math.ceil(filteredLoans.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = filteredLoans.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
-
-  // Calculate stats
-  const stats = {
-    total: mockLoans.length,
-    pending: mockLoans.filter((loan) => loan.status === "pending").length,
-    accepted: mockLoans.filter((loan) => loan.status === "accepted").length,
-    rejected: mockLoans.filter((loan) => loan.status === "rejected").length,
-  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -314,14 +43,10 @@ const OverviewLoans = () => {
   };
 
   const handleViewDetail = (loan) => {
-    setSelectedLoan(loan);
+    navigate(`/admin/loans/${loan._id}`);
   };
 
-  const handleBackToList = () => {
-    setSelectedLoan(null);
-  };
-
-  if (isLoadingLoans) {
+  if (isLoadingLoans || !loans) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
         <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
@@ -329,15 +54,30 @@ const OverviewLoans = () => {
       </div>
     );
   }
+  // Calculate stats
+  const stats = {
+    total: loans.length,
+    pending: loans.filter((loan) => loan.status === "pending").length,
+    accepted: loans.filter((loan) => loan.status === "accepted").length,
+    rejected: loans.filter((loan) => loan.status === "rejected").length,
+  };
 
-  if (selectedLoan) {
-    return (
-      <LoanDetail
-        selectedLoan={selectedLoan}
-        handleBackToList={handleBackToList}
-      />
-    );
-  }
+  const filteredLoans = loans.filter((loan) => {
+    const matchesSearch =
+      loan.student_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loan.studentInfo?.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = !statusFilter || loan.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+  // Pagination
+  const totalPages = Math.ceil(filteredLoans.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = filteredLoans.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">

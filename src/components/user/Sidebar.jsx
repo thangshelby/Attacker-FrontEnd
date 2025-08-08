@@ -2,7 +2,7 @@ import {
   SidebarLayout,
   SidebarItem,
   SidebarDropdownItem,
-} from "../layouts/SidebarLayout";
+} from "../../layouts/SidebarLayout";
 import { useEffect } from "react";
 import {
   Home,
@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);

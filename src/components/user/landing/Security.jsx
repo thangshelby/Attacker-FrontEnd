@@ -1,4 +1,4 @@
-import { PulseDot } from "../../assets/customs/svg/Icon";
+import { PulseDot } from "../../../assets/customs/svg/Icon";
 import Section from "./Section";
 import { security } from "./constants";
 

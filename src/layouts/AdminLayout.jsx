@@ -44,7 +44,7 @@ const AdminLayout = () => {
       to: "loans",
     },
     {
-      id: "analytics",
+      id: "analyticss",
       label: "Báo Cáo & Phân Tích",
       icon: PieChart,
       color: "text-cyan-500",

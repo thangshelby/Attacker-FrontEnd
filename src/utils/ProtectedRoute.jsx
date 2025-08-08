@@ -10,8 +10,11 @@ const ProtectedRoute = () => {
   if (!user) {
     return <Navigate to="/auth/login" replace />;
   }
-  useStudent();
-  useAcademic();
+
+  if (user.role != "Admin") {
+    useStudent();
+    useAcademic();
+  }
   useNotification();
 
   return <Outlet />;

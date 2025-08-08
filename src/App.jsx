@@ -4,13 +4,14 @@ import { ToastContainer } from "react-toastify";
 import { useAppStore } from "./store/appStore";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
-import NotificationModal from "./components/NotificationModal";
-import FloatingChatBot from "./components/chatbot/chatbot";
+import NotificationModal from "./components/user/NotificationModal";
+import FloatingChatBot from "./components/shared/chatbot/chatbot";
 import { io } from "socket.io-client";
+import { useAuthStore } from "./store/authStore";
 
 function App() {
+  const { user } = useAuthStore();
   const { toast: toastState, clearToast, modal } = useAppStore();
-
   useEffect(() => {
     if (toastState) {
       if (toastState.type == "success") {
@@ -29,7 +30,7 @@ function App() {
       <NotificationModal />
       <Router />
       <ToastContainer />
-      <FloatingChatBot />
+      {user && user.role !== "Admin" && <FloatingChatBot />}
     </BrowserRouter>
   );
 }

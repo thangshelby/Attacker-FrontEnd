@@ -3,7 +3,7 @@ import { loan } from "@/apis/loan";
 import { useStudent } from "./useStudent";
 import { useState, useEffect } from "react";
 
-export function useLoan() {
+export function useLoan(loan_id) {
   const { student, isLoading } = useStudent();
   const [student_id, setStudent_id] = useState("");
   useEffect(() => {
@@ -23,25 +23,23 @@ export function useLoan() {
       return data.data.loans;
     },
     onSuccess: (data) => {
-      console.log("Loans fetched successfully:", data.data.loans);
       return data.data.loans;
     },
     // refetchOnWindowFocus: false,
   });
 
   const getMASConversation = useQuery({
-    queryKey: ["masConversation"],
-    queryFn: async (loan_id) => {
+    queryKey: ["masConversation", loan_id],
+    queryFn: async () => {
       const { data } = await loan.getMassConversation(loan_id);
       return data.data.conversation;
     },
-    enabled: false, // This will be called manually
+    enabled: !!loan_id
   });
   // Fetch loan by student ID
   const getLoansByStudentId = useQuery({
     queryKey: ["loans", student_id],
     queryFn: async () => {
-      console.log(student_id);
       const response = await loan.getLoanByStudentId(student_id);
       return response.data.data.loans;
     },
@@ -70,6 +68,7 @@ export function useLoan() {
     isLoadingLoans,
     loansError,
     getLoansByStudentId,
+    getMASConversation,
     // getLoanById,
     createLoanContract,
   };
