@@ -8,25 +8,25 @@ export function useStudent() {
   const { setStudent, user } = useAuthStore();
 
   const { data: studentData } = useQuery({
-    queryKey: ["student"],
-    queryFn: async (citizen_id) => {
-      const { data } = await student.getStudent( user.citizen_id);
+    queryKey: ["student", user?.citizen_id],
+    queryFn: async () => {
+      const { data } = await student.getStudent(user.citizen_id);
       setStudent(data.data.student);
       return data.data.student;
     },
     retry: false,
-    enabled: true,
+    enabled: !!user?.citizen_id,
     onError: (error) => {
       console.error("Error fetching student:", error);
     },
   });
   const getStudentByCitizenId = useQuery({
-    queryKey: ["studentByCitizenId", user.citizen_id],
-    queryFn: async (citizen_id) => {
-      const { data } = await student.getStudentByCitizenId(citizen_id);
+    queryKey: ["studentByCitizenId", user?.citizen_id],
+    queryFn: async () => {
+      const { data } = await student.getStudentByCitizenId(user.citizen_id);
       return data.data.student;
     },
-    enabled: !!user.citizen_id,
+    enabled: !!user?.citizen_id,
     onError: (error) => {
       console.error("Error fetching student by citizen ID:", error);
       setToast({
@@ -42,7 +42,7 @@ export function useStudent() {
   const updateStudent = useMutation({
     mutationFn: (data) =>
       student.updateStudent({
-        citizen_id: user.citizen_id,
+        citizen_id: user?.citizen_id,
         ...data,
       }),
     onSuccess: (data) => {

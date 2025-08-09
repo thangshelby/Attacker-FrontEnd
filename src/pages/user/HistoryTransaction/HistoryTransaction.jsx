@@ -25,7 +25,7 @@ const LoanHistoryPage = () => {
   const itemsPerPage = 10;
   const { user } = useAuth();
   const { getLoansByStudentId } = useLoan();
-  const loans = getLoansByStudentId.data;
+  const loans = getLoansByStudentId?.data;
 
   const mockLoanDetail = {
     id: 1,
@@ -307,15 +307,28 @@ const LoanHistoryPage = () => {
     setSelectedLoan(null);
   };
 
-  if (getLoansByStudentId.isPending || !loans) {
+  if (getLoansByStudentId?.isPending || getLoansByStudentId?.isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
-        <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
-        <p className="mt-4 text-gray-600">Đang tải dữ liệu</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+        <div className="text-center">
+          <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-indigo-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải dữ liệu lịch sử giao dịch...</p>
+        </div>
       </div>
     );
   }
-  const totalPages = Math.ceil(loans?.length / itemsPerPage);
+
+  if (getLoansByStudentId?.isError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+        <div className="text-center">
+          <p className="text-red-600 dark:text-red-400">Có lỗi xảy ra khi tải dữ liệu</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+        </div>
+      </div>
+    );
+  }
+  const totalPages = Math.ceil((loans?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = loans?.slice(startIndex, endIndex);
@@ -418,29 +431,29 @@ const LoanHistoryPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                {loans?.map((loan) => (
+                {loans && loans.length > 0 ? loans.map((loan) => (
                   <tr
                     key={loan._id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   >
                     <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                      {loan.student_id}
+                      {loan?.student_id || "N/A"}
                     </td>
 
                     <td className="px-6 py-4 text-sm font-semibold whitespace-nowrap text-green-600 dark:text-green-400">
-                      {formatCurrency(loan.loan_amount_requested)}
+                      {formatCurrency(loan?.loan_amount_requested || 0)}
                     </td>
                     <td className="px-6 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {loan.loan_purpose || "Không xác định"}
+                      {loan?.loan_purpose || "Không xác định"}
                     </td>
                     <td className="px-6 py-4 text-sm font-semibold whitespace-nowrap text-blue-600 dark:text-blue-400">
-                      {formatCurrency(loan.monthly_installment)}
+                      {formatCurrency(loan?.monthly_installment || 0)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={loan.status} />
+                      <StatusBadge status={loan?.status || "unknown"} />
                     </td>
                     <td className="px-6 py-4 text-end text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {formatDate(loan.created_at)}
+                      {loan?.created_at ? formatDate(loan.created_at) : "N/A"}
                     </td>
                     <td className="px-6 py-4 text-end text-sm whitespace-nowrap">
                       <button
@@ -452,16 +465,27 @@ const LoanHistoryPage = () => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-12 text-center">
+                      <div className="text-gray-500 dark:text-gray-400">
+                        <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                        <p className="text-lg font-medium mb-2">Chưa có lịch sử giao dịch</p>
+                        <p className="text-sm">Bạn chưa có khoản vay nào. Hãy tạo đơn vay đầu tiên của bạn!</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Pagination */}
+          {loans && loans.length > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3 dark:border-gray-600 dark:bg-gray-700/50">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {startIndex + 1}-{Math.min(endIndex, loans?.length)} of{" "}
-              {loans?.length} items
+              Showing {startIndex + 1}-{Math.min(endIndex, loans?.length || 0)} of{" "}
+              {loans?.length || 0} items
             </div>
             <div className="flex space-x-2">
               <button
@@ -497,6 +521,7 @@ const LoanHistoryPage = () => {
               </button>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

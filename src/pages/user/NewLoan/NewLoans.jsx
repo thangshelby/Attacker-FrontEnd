@@ -7,7 +7,7 @@ import {
   Loader2,
   Award,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   defaultFormData,
   paymentMethods,
@@ -80,27 +80,61 @@ const NewLoans = () => {
   const [verificationSuccess, setVerificationSuccess] = useState(true);
   const [verificationId, setVerificationId] = useState(null);
   const { user } = useAuth();
-  const { student } = useStudent();
-  const { academicData: academic } = useAcademic();
+  const { student, isLoading: studentLoading } = useStudent();
+  const { academicData: academic, isLoading: academicLoading } = useAcademic();
   const { createLoanContract } = useLoan();
 
   const [formData, setFormData] = useState({
     ...defaultFormData,
-    student_id: student.student_id || "SV001",
+    student_id: student?.student_id || "SV001",
   });
 
   const [studentInfo, setStudentInfo] = useState({
-    fullName: user.name || "Nguyễn Văn An",
-    studentId: student.student_id || "SV001",
-    major: student.major_name || "Khoa học Máy tính",
+    fullName: user?.name || "Nguyễn Văn An",
+    studentId: student?.student_id || "SV001",
+    major: student?.major_name || "Khoa học Máy tính",
     academicYear: "2021-2025",
-    gpa: academic.gpa || "3.75",
+    gpa: academic?.gpa || "3.75",
     completedCredits: "95",
     totalCredits: "144",
     academicRank: "Giỏi",
     academicStatus: "Đang học",
   });
   const [errors, setErrors] = useState({});
+
+  // Update formData and studentInfo when data from hooks changes
+  useEffect(() => {
+    if (student?.student_id) {
+      setFormData(prev => ({
+        ...prev,
+        student_id: student.student_id,
+      }));
+      
+      setStudentInfo(prev => ({
+        ...prev,
+        studentId: student.student_id,
+        major: student.major_name || prev.major,
+      }));
+    }
+  }, [student]);
+
+  useEffect(() => {
+    if (user?.name) {
+      setStudentInfo(prev => ({
+        ...prev,
+        fullName: user.name,
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (academic?.gpa) {
+      setStudentInfo(prev => ({
+        ...prev,
+        gpa: academic.gpa,
+      }));
+    }
+  }, [academic]);
 
   const steps = [
     {
@@ -265,7 +299,7 @@ const NewLoans = () => {
           setStudentInfo({
             ...studentInfo,
             studentId: data.student_id,
-          })
+          });
           setSubmitSuccess(true);
         },
         onError: (error) => {
@@ -278,7 +312,19 @@ const NewLoans = () => {
     }
   };
 
-
+  // Show loading state while initial data is loading
+  if (studentLoading || academicLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-900">
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-green-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải thông tin sinh viên...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-900">
