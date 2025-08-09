@@ -54,14 +54,28 @@ const formSchema = z.object({
   birth: z.string(),
   gender: z.string(),
   address: z.string(),
+  citizen_card_front: z.string().nullable().optional(),
+  citizen_card_back: z.string().nullable().optional(),
 });
 const UserProfile = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentProcessingSide, setCurrentProcessingSide] = useState(null);
-  const { updateUser } = useUser();
   const { user } = useAuth();
-  const userr = {};
+  const { updateUser } = useUser();
+
+  // Show loading state if user data is not available
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải thông tin người dùng...</p>
+        </div>
+      </div>
+    );
+  }
+  // Use user from useAuth instead of empty object
   const {
     register,
     handleSubmit,
@@ -73,33 +87,34 @@ const UserProfile = () => {
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      name: userr?.name || "",
-      citizen_id: userr?.citizen_id || "",
-      email: userr?.email || "",
-      phone: userr?.phone || "",
-      birth: new Date(userr?.birth || new Date()).toISOString().split("T")[0],
-      gender: userr?.gender || "male",
-      address: userr?.address || "",
-      citizen_card_front: user?.citizen_card_front || null,
-      citizen_card_back: user?.citizen_card_back || null,
+      name: user.name || "",
+      citizen_id: user.citizen_id || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
+      gender: user.gender || "male",
+      address: user.address || "",
+      citizen_card_front: user.citizen_card_front || null,
+      citizen_card_back: user.citizen_card_back || null,
     },
   });
   const watchedValues = watch();
+
+
   useEffect(() => {
     if (
       watchedValues.citizen_card_front &&
-      watchedValues.citizen_card_back
-      // &&!user?.citizen_id
+      watchedValues.citizen_card_back &&
+      user
     ) {
       reset({
         ...user,
-        birth: new Date(user?.birth || new Date()).toISOString().split("T")[0],
-
+        birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
         citizen_card_front: watchedValues.citizen_card_front,
         citizen_card_back: watchedValues.citizen_card_back,
       });
     }
-  }, [watchedValues.citizen_card_back, watchedValues.citizen_card_front, user]);
+  }, [watchedValues.citizen_card_back, watchedValues.citizen_card_front, user, reset]);
 
   const handleImageSelect = (side) => async (imageUrl) => {
     setValue(side, imageUrl);
@@ -249,34 +264,34 @@ const UserProfile = () => {
                 <div className="flex items-center">
                   <div
                     className={`mr-2 h-3 w-3 rounded-full ${
-                      watchedValues.student_card_front
+                      watchedValues.citizen_card_front
                         ? "bg-green-500"
                         : "bg-gray-300"
                     }`}
                   ></div>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Mặt trước {watchedValues.student_card_front ? "✓" : "○"}
+                    Mặt trước {watchedValues.citizen_card_front ? "✓" : "○"}
                   </span>
                 </div>
                 <div className="flex items-center">
                   <div
                     className={`mr-2 h-3 w-3 rounded-full ${
-                      watchedValues.student_card_back
+                      watchedValues.citizen_card_back
                         ? "bg-orange-500"
                         : "bg-gray-300"
                     }`}
                   ></div>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Mặt sau {watchedValues.student_card_back ? "✓" : "○"}
+                    Mặt sau {watchedValues.citizen_card_back ? "✓" : "○"}
                   </span>
                 </div>
               </div>
-              {watchedValues.student_card_front &&
-                watchedValues.student_card_back && (
+              {watchedValues.citizen_card_front &&
+                watchedValues.citizen_card_back && (
                   <div className="mt-2 text-center">
                     <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
                       <CheckCircle className="mr-1 h-3 w-3" />
-                      Thẻ sinh viên đã được upload đầy đủ
+                      Thẻ căn cước công dân đã được upload đầy đủ
                     </span>
                   </div>
                 )}

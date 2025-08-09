@@ -2,15 +2,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
 import { useAppStore } from "@/store/appStore";
 import { user as userAPI } from "../apis/user";
-import { get } from "react-hook-form";
 
 export function useUser() {
   const { user, setUser } = useAuthStore();
   const { setToast } = useAppStore();
 
-  const getUserByCitizenId = useQuery({
+  const getUserByCitizenId = (citizen_id) => useQuery({
     queryKey: ["userByCitizenId", citizen_id],
-    queryFn: async (citizen_id) => {
+    queryFn: async () => {
       const { data } = await userAPI.getUserByCitizenId(citizen_id);
       return data.data.user;
     },
@@ -40,7 +39,7 @@ export function useUser() {
   const getAllUsers = useQuery({
     queryKey: ["allUsers"],
     queryFn: async () => {
-      const { data } = await api.getAllUsers();
+      const { data } = await userAPI.getAllUsers();
       return data.data.users;
     },
     onError: (error) => {
@@ -50,7 +49,7 @@ export function useUser() {
   const getUsersBySchoolName = useQuery({
     queryKey: ["usersBySchoolName", user?.school_name],
     queryFn: async () => {
-      const { data } = await api.getUsersBySchoolName(user?.school_name);
+      const { data } = await userAPI.getUsersBySchoolName(user?.school_name);
       return data.data.users;
     },
     enabled: !!user?.school_name,
@@ -62,7 +61,7 @@ export function useUser() {
   const getUsersBySchoolId = useQuery({
     queryKey: ["usersBySchoolId", user?.school_id],
     queryFn: async () => {
-      const { data } = await api.getUsersBySchoolId(user?.school_id);
+      const { data } = await userAPI.getUsersBySchoolId(user?.school_id);
       return data.data.users;
     },
     enabled: !!user?.school_id,
@@ -74,7 +73,7 @@ export function useUser() {
   const getUsersByRole = useQuery({
     queryKey: ["usersByRole", user?.role],
     queryFn: async () => {
-      const { data } = await api.getUsersByRole(user?.role);
+      const { data } = await userAPI.getUsersByRole(user?.role);
       return data.data.users;
     },
     enabled: !!user?.role,
@@ -86,7 +85,7 @@ export function useUser() {
   const getUserById = useQuery({
     queryKey: ["userById", user?.id],
     queryFn: async () => {
-      const { data } = await api.getUserById(user?.id);
+      const { data } = await userAPI.getUserById(user?.id);
       return data.data.user;
     },
     enabled: !!user?.id,

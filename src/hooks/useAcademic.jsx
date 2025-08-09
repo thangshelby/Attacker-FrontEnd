@@ -11,7 +11,7 @@ export function useAcademic() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["academicRecord"],
+    queryKey: ["academicRecord", student?.student_id],
     queryFn: async () => {
       const { data } = await academic.getAcademicRecord(student.student_id);
       return data.data.academic;

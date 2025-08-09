@@ -11,10 +11,10 @@ export function useLoan(loan_id) {
   const [student_id, setStudent_id] = useState("");
   const { user } = useAuth();
   useEffect(() => {
-    if (student) {
+    if (student?.student_id) {
       setStudent_id(student.student_id);
     }
-  }, [isLoading]);
+  }, [student, isLoading]);
   // Fetch all loans
   const {
     data: loans,
@@ -61,7 +61,7 @@ export function useLoan(loan_id) {
     onSuccess: (data) => {
       return {
         ...data,
-        citizen_id: user.citizen_id,
+        citizen_id: user?.citizen_id,
       };
     },
     onError: (error) => {

@@ -29,7 +29,7 @@ const AcademicProfile = () => {
   const [isProcessSuccess, setIsProcessSuccess] = useState(false);
   const [errors, setErrors] = useState({});
   const { user } = useAuth();
-  const { student } = useStudent(user.citizen_id);
+  const { student } = useStudent();
   const { academicData } = useAcademic();
   const academicContainerRef = useRef(null);
 
@@ -221,26 +221,26 @@ const AcademicProfile = () => {
               <User className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">{user.name}</h2>
-              <p className="text-gray-300">{student.student_id}</p>
+              <h2 className="text-xl font-bold text-white">{user?.name || "Chưa có tên"}</h2>
+              <p className="text-gray-300">{student?.student_id || "Chưa có mã sinh viên"}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div>
               <span className="text-gray-400">Trường đại học:</span>
-              <p className="text-white">{student.university}</p>
+              <p className="text-white">{student?.university || "Chưa có thông tin"}</p>
             </div>
             <div>
               <span className="text-gray-400">Ngành học:</span>
-              <p className="text-white">{student.faculty_name}</p>
+              <p className="text-white">{student?.faculty_name || "Chưa có thông tin"}</p>
             </div>
             <div>
               <span className="text-gray-400">Năm học:</span>
-              <p className="text-white">Năm {academicData.study_year}</p>
+              <p className="text-white">Năm {academicData?.study_year || "N/A"}</p>
             </div>
             <div>
               <span className="text-gray-400">Chuyên ngành:</span>
-              <p className="text-white">{student.major_name}</p>
+              <p className="text-white">{student?.major_name || "Chưa có thông tin"}</p>
             </div>
           </div>
         </div>
@@ -257,7 +257,7 @@ const AcademicProfile = () => {
                       academicData?.current_gpa,
                     )}`}
                   >
-                    {academicData?.current_gpa?.toFixed(2)}
+                    {academicData?.current_gpa?.toFixed(2) || "0.00"}
                   </span>
                 </div>
                 <h3 className="font-medium text-white">GPA Hiện Tại</h3>
@@ -272,7 +272,7 @@ const AcademicProfile = () => {
                 <div className="mb-2 flex items-center justify-between">
                   <Trophy className="h-6 w-6 text-yellow-400" />
                   <span className="text-2xl font-bold text-white">
-                    {academicData?.total_credits_earned}
+                    {academicData?.total_credits_earned || 0}
                   </span>
                 </div>
                 <h3 className="font-medium text-white">Tín Chỉ Tích Lũy</h3>
@@ -285,7 +285,7 @@ const AcademicProfile = () => {
                 <div className="mb-2 flex items-center justify-between">
                   <Award className="h-6 w-6 text-purple-400" />
                   <span className="text-2xl font-bold text-white">
-                    {academicData?.achievement_award_count}
+                    {academicData?.achievement_award_count || 0}
                   </span>
                 </div>
                 <h3 className="font-medium text-white">Thành Tích</h3>
@@ -296,7 +296,7 @@ const AcademicProfile = () => {
                 <div className="mb-2 flex items-center justify-between">
                   <Users className="h-6 w-6 text-green-400" />
                   <span className="text-2xl font-bold text-white">
-                    {academicData?.extracurricular_activity_count}
+                    {academicData?.extracurricular_activity_count || 0}
                   </span>
                 </div>
                 <h3 className="font-medium text-white">Hoạt Động Ngoại Khóa</h3>
@@ -318,12 +318,12 @@ const AcademicProfile = () => {
                     <span className="text-gray-300">Môn học trượt</span>
                     <span
                       className={`font-medium ${
-                        academicData?.failed_course_count > 0
+                        (academicData?.failed_course_count || 0) > 0
                           ? "text-red-400"
                           : "text-green-400"
                       }`}
                     >
-                      {academicData?.failed_course_count} môn
+                      {academicData?.failed_course_count || 0} môn
                     </span>
                   </div>
 
@@ -351,7 +351,7 @@ const AcademicProfile = () => {
                     <div className="flex items-center justify-between border-b border-gray-700 py-3">
                       <span className="text-gray-300">Số học bổng</span>
                       <span className="font-medium text-yellow-400">
-                        {academicData?.scholarship_count} học bổng
+                        {academicData?.scholarship_count || 0} học bổng
                       </span>
                     </div>
                   )}
@@ -394,7 +394,7 @@ const AcademicProfile = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-purple-400">
-                          {academicData?.achievement_award_count}
+                          {academicData?.achievement_award_count || 0}
                         </div>
                         <div className="text-gray-400">Giải thưởng</div>
                       </div>
@@ -435,7 +435,10 @@ const AcademicProfile = () => {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-400">
                 Cập nhật lần cuối:{" "}
-                {new Date(academicData?.updated_at).toLocaleDateString("vi-VN")}
+                {academicData?.updated_at 
+                  ? new Date(academicData.updated_at).toLocaleDateString("vi-VN")
+                  : "Chưa có dữ liệu"
+                }
               </p>
             </div>
           </div>
