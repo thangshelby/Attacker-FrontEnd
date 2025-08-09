@@ -9,8 +9,8 @@ export function useStudent() {
 
   const { data: studentData } = useQuery({
     queryKey: ["student"],
-    queryFn: async () => {
-      const { data } = await student.getStudent(user.citizen_id);
+    queryFn: async (citizen_id) => {
+      const { data } = await student.getStudent( user.citizen_id);
       setStudent(data.data.student);
       return data.data.student;
     },
@@ -20,15 +20,31 @@ export function useStudent() {
       console.error("Error fetching student:", error);
     },
   });
+  const getStudentByCitizenId = useQuery({
+    queryKey: ["studentByCitizenId", user.citizen_id],
+    queryFn: async (citizen_id) => {
+      const { data } = await student.getStudentByCitizenId(citizen_id);
+      return data.data.student;
+    },
+    enabled: !!user.citizen_id,
+    onError: (error) => {
+      console.error("Error fetching student by citizen ID:", error);
+      setToast({
+        type: "error",
+        message: "Không tìm thấy sinh viên với mã số công dân này.",
+      });
+    },
+  });
   const getStudent = useQuery({
     queryKey: ["student"],
     queryFn: () => student.getStudent(),
   });
   const updateStudent = useMutation({
-    mutationFn: (data) => student.updateStudent({
-      citizen_id: user.citizen_id,
-      ...data,
-    }),
+    mutationFn: (data) =>
+      student.updateStudent({
+        citizen_id: user.citizen_id,
+        ...data,
+      }),
     onSuccess: (data) => {
       setToast({
         type: "success",
@@ -44,8 +60,7 @@ export function useStudent() {
 
   const updateStudentDIDById = useMutation({
     mutationFn: (id, data) => student.updateStudentById(id, data),
-    onSuccess: (data) => {
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("Error updating student DID:", error);
     },
@@ -54,6 +69,7 @@ export function useStudent() {
   return {
     student: studentData,
     getStudent,
+    getStudentByCitizenId,
     updateStudent,
     updateStudentDIDById,
   };

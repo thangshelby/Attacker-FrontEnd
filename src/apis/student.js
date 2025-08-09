@@ -1,8 +1,8 @@
 import api from "@/apis/api";
 
 export const student = {
-  getStudent: (id) =>
-    api.get(`/students/${id}`, {
+  getStudentByCitizenId: (citizen_id) =>
+    api.get(`/students/${citizen_id}`, {
       withCredentials: true,
     }),
   updateStudent: ( data) =>

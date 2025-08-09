@@ -1,14 +1,19 @@
 import api from "./api";
 
 export const user = {
+  getUserByCitizenId: (citizen_id) =>
+    api.get(`/users/citizen/${citizen_id}`, {
+      withCredentials: true,
+    }),
   updateUser: (data) =>
     api.put(`/users/update_user`, data, {
       withCredentials: true,
     }),
-  // getUserById: (id) =>
-  //   axios.get(`/api/users/${id}`, {
-  //     withCredentials: true,
-  //   }),
+
+  getUserById: (id) =>
+    axios.get(`/api/users/${id}`, {
+      withCredentials: true,
+    }),
   // getAllUsers: () => {
   //   return axios.get("/api/users/all_users", {
   //     withCredentials: true,

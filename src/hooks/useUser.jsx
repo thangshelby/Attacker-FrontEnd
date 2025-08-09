@@ -2,11 +2,27 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/authStore";
 import { useAppStore } from "@/store/appStore";
 import { user as userAPI } from "../apis/user";
+import { get } from "react-hook-form";
 
 export function useUser() {
   const { user, setUser } = useAuthStore();
   const { setToast } = useAppStore();
 
+  const getUserByCitizenId = useQuery({
+    queryKey: ["userByCitizenId", citizen_id],
+    queryFn: async (citizen_id) => {
+      const { data } = await userAPI.getUserByCitizenId(citizen_id);
+      return data.data.user;
+    },
+    enabled: !!citizen_id,
+    onError: (error) => {
+      console.error("Error fetching user by citizen ID:", error);
+      setToast({
+        type: "error",
+        message: "Không tìm thấy người dùng với mã số công dân này.",
+      });
+    },
+  });
   const updateUser = useMutation({
     mutationFn: (data) => userAPI.updateUser(data),
     onSuccess: (data) => {
@@ -80,6 +96,7 @@ export function useUser() {
   });
 
   return {
+    getUserByCitizenId,
     updateUser,
     getUsersBySchoolName,
     getUserById,

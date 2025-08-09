@@ -12,6 +12,10 @@ export const useAppStore = create((set) => ({
   expanded: true,
   setExpanded: (expanded) => set({ expanded }),
 
+  loan: null,
+  setLoan: (loan) => set({ loan }),
+  clearLoan: () => set({ loan: null }),
+
   loading: false,
   error: null,
   isSidebarOpen: false,

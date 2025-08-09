@@ -9,7 +9,7 @@ const StatusBadge = ({ status }) => {
           bg: "bg-green-100 dark:bg-green-900/30",
           text: "text-green-800 dark:text-green-300",
           icon: CheckCircle,
-          label: "Đã duyệt",
+          label: "Chấp nhận",
         };
       case "pending":
         return {
