@@ -32,7 +32,7 @@ import {
 import AgentOpinions from "@/components/admin/loandetail/AgentOpinions";
 import AgentDebate from "@/components/admin/loandetail/AgentDebate";
 import DecisionBadge from "@/components/admin/loandetail/DecisionBade";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 // Sample data
 const sampleLoanData = {
   _id: "689493432f3ceb2fda6fba9c",
@@ -120,13 +120,12 @@ const sampleLoanData = {
     both_conditions_met: true,
   },
 };
+import { useAppStore } from "@/store/appStore";
 import { useLoan } from "@/hooks/useLoan";
-const loanPurposes = {
-  1: "Học phí",
-  2: "Sinh hoạt phí",
-  3: "Mua sách/thiết bị",
-  4: "Khác",
-};
+import { useUser } from "@/hooks/useUser";
+import { useStudent } from "@/hooks/useStudent";
+import { useAcademic } from "@/hooks/useAcademic";
+
 import OverviewSection from "@/components/admin/loandetail/Overview";
 
 const LoanDetail = () => {
@@ -135,9 +134,16 @@ const LoanDetail = () => {
   const [expandedAgent, setExpandedAgent] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { getMASConversation } = useLoan("6894930bdcb9c4dc32a9fc62");
+  
+  
+  const {loan} = useAppStore();
+  const user= useUser.getUserByCitizenId();
+  const { student } = useStudent();
+  const { academicData } = useAcademic();
   const navigate = useNavigate();
+  const { getMASConversation } = useLoan(loan?.loan_id);
   const masConversation = getMASConversation.data;
+  
 
   useEffect(() => {
     const timer = setTimeout(() => setShowNotification(true), 1000);

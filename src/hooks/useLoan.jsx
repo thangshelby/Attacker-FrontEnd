@@ -2,10 +2,14 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { loan } from "@/apis/loan";
 import { useStudent } from "./useStudent";
 import { useState, useEffect } from "react";
+import { useAuth } from "./useAuth";
+import { queryClient } from "../apis/react-query";
+
 
 export function useLoan(loan_id) {
   const { student, isLoading } = useStudent();
   const [student_id, setStudent_id] = useState("");
+  const { user } = useAuth();
   useEffect(() => {
     if (student) {
       setStudent_id(student.student_id);
@@ -34,7 +38,7 @@ export function useLoan(loan_id) {
       const { data } = await loan.getMassConversation(loan_id);
       return data.data.conversation;
     },
-    enabled: !!loan_id
+    enabled: !!loan_id,
   });
   // Fetch loan by student ID
   const getLoansByStudentId = useQuery({
@@ -55,11 +59,29 @@ export function useLoan(loan_id) {
   const createLoanContract = useMutation({
     mutationFn: (data) => loan.create(data),
     onSuccess: (data) => {
-      console.log("Loan contract created successfully:", data);
-      //   const { data } = data;
+      return {
+        ...data,
+        citizen_id: user.citizen_id,
+      };
     },
     onError: (error) => {
       console.error("Error creating loan contract:", error);
+    },
+  });
+
+  const updateLoanContract = useMutation({
+    mutationFn: (data) => {
+      return loan.update(data.loan_id, {
+        ...data,  
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["loans"]);
+      queryClient.invalidateQueries(["masConversation", data.loan_id]);
+      return data;
+    },
+    onError: (error) => {
+      console.error("Error updating loan contract:", error);
     },
   });
 
@@ -71,5 +93,6 @@ export function useLoan(loan_id) {
     getMASConversation,
     // getLoanById,
     createLoanContract,
+    updateLoanContract,
   };
 }

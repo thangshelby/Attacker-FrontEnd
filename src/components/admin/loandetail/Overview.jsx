@@ -14,6 +14,7 @@ import {
   ChevronRight
 } from "lucide-react";
 
+
 // Modern Minimalist Overview
 const OverviewSection = ({ selectedLoan, formatCurrency }) => {
   const decisionConfig = {
