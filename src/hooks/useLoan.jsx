@@ -59,10 +59,9 @@ export function useLoan(loan_id) {
   const createLoanContract = useMutation({
     mutationFn: (data) => loan.create(data),
     onSuccess: (data) => {
-      return {
-        ...data,
-        citizen_id: user?.citizen_id,
-      };
+      console.log("useLoan - Loan creation successful:", data);
+      // Don't modify the response, just return as-is
+      return data;
     },
     onError: (error) => {
       console.error("Error creating loan contract:", error);
