@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Loader2 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 const FloatingChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth(); // Get user context for citizen_id
   
   console.log('FloatingChatBot render - isOpen:', isOpen);
+  console.log('User context:', user);
   
 
   const [messages, setMessages] = useState([
@@ -43,16 +46,25 @@ const FloatingChatBot = () => {
 
     try {
       console.log('Sending message to API:', userMessage.content);
+      console.log('User citizen_id:', user?.citizen_id);
       
-      // Call Express API that connects to Python service via gRPC
+      // Prepare request payload with optional citizen_id
+      const requestPayload = {
+        message: userMessage.content
+      };
+      
+      // Add citizen_id if user is logged in
+      if (user?.citizen_id) {
+        requestPayload.citizen_id = user.citizen_id;
+      }
+      
+      // Call Python FastAPI service directly
       const response = await fetch('http://localhost:8000/api/v1/chat', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json' 
         },
-        body: JSON.stringify({ 
-          message: userMessage.content
-        })
+        body: JSON.stringify(requestPayload)
       });
 
       console.log('API Response status:', response.status);
@@ -63,13 +75,24 @@ const FloatingChatBot = () => {
 
       const data = await response.json();
       console.log('API Response data:', data);
+      console.log('Debug info:', data.debug_info);
       
-      // FastAPI trả về format khác, không có success field
+      // FastAPI response format
       if (data.answer) {
+        let botResponse = data.answer;
+        
+        // Add debug info if in development
+        if (import.meta.env.DEV && data.debug_info) {
+          const debugInfo = data.debug_info;
+          console.log(`🤖 Bot Strategy: ${debugInfo.classification}`);
+          console.log(`👤 User Context: ${debugInfo.user_context_available ? 'Available' : 'Not Available'}`);
+          console.log(`🆔 Citizen ID: ${debugInfo.citizen_id_provided || 'None'}`);
+        }
+        
         const botMessage = { 
           id: Date.now() + 1, 
           type: 'bot', 
-          content: data.answer || 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau! 😊'
+          content: botResponse || 'Xin lỗi, tôi không thể trả lời lúc này. Vui lòng thử lại sau! 😊'
         };
         setTimeout(() => setMessages(prev => [...prev, botMessage]), 1000);
       } else {
@@ -127,7 +150,6 @@ const FloatingChatBot = () => {
         pointerEvents: 'auto',
         width: '80px',
         height: '80px',
-        backgroundColor: 'rgba(255, 0, 0, 0.1)', // Temporary red background to see the container
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
