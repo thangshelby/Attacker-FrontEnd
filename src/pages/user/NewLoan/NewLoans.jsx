@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   defaultFormData,
   paymentMethods,
@@ -22,6 +23,7 @@ import { useAcademic } from "@/hooks/useAcademic";
 import Step1 from "@/components/newloan/Step1";
 import Step2 from "@/components/newloan/Step2";
 import Step3 from "@/components/newloan/Step3";
+import Step3_5 from "@/components/newloan/Step3_5";
 import Step4 from "@/components/newloan/Step4";
 import { useLoan } from "@/hooks/useLoan";
 const validateAmount = (amount) => {
@@ -89,6 +91,7 @@ const NewLoans = () => {
   const [loanId, setLoanId] = useState(null);
   const [masPollingInterval, setMasPollingInterval] = useState(null);
   const [masProcessingTime, setMasProcessingTime] = useState(0);
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { student, isLoading: studentLoading, error: studentError } = useStudent();
   const { academicData: academic, isLoading: academicLoading } = useAcademic();
@@ -167,6 +170,10 @@ const NewLoans = () => {
     {
       title: "Xem thông tin",
       description: "Xem lại và gửi yêu cầu",
+    },
+    {
+      title: "Xác thực OTP",
+      description: "Xác nhận qua email",
     },
     {
       title: "Kết quả đánh giá",
@@ -313,15 +320,19 @@ const NewLoans = () => {
       return;
     }
 
-    console.log("🚀 Submitting loan with formData:", formData);
+    // From Step 3, move to Step 4 (OTP) without calling API yet
+    console.log("📧 Moving to OTP verification step");
+    setCurrentStep(4);
+  };
+
+  // New function to handle loan creation after OTP verification
+  const handleLoanCreation = async () => {
+    console.log("🚀 Creating loan after OTP verification with formData:", formData);
     console.log("🔍 Student ID being sent:", formData.student_id);
-    console.log("⏳ createLoanContract.isPending:", createLoanContract.isPending);
 
     setIsProcessing(true);
 
     try {
-      console.log("🚀 Starting loan contract creation with formData:", formData);
-      
       createLoanContract.mutate(formData, {
         onSuccess: (response) => {
           console.log("✅ Loan created successfully - Full response:", response);
@@ -335,13 +346,6 @@ const NewLoans = () => {
           });
           setSubmitSuccess(true);
           setIsProcessing(false);
-          
-          // Move to processing step and wait 45 seconds
-          setCurrentStep(4);
-          setProcessingStep(0);
-          
-          // Start 45-second processing with progress bar
-          startProcessingWithTimer();
         },
         onError: (error) => {
           console.error("❌ Error creating loan contract:", error);
@@ -356,7 +360,8 @@ const NewLoans = () => {
         },
       });
     } catch (error) {
-      console.error("Error submitting loan request:", error);
+      console.error("❌ Caught error in handleLoanCreation:", error);
+      setSubmitSuccess(false);
       setIsProcessing(false);
     }
   };
@@ -503,10 +508,20 @@ const NewLoans = () => {
             <Step3 formData={formData} studentInfo={studentInfo} />
           )}
 
-          {/* Step 4: PDF Generation */}
-          {currentStep === 4 && <Step4 formData={formData} studentInfo={studentInfo} />}
+          {/* Step 4: OTP Verification */}
+          {currentStep === 4 && (
+            <Step3_5 
+              formData={formData} 
+              onNext={() => setCurrentStep(5)}
+              onBack={() => setCurrentStep(3)}
+              onOtpVerified={handleLoanCreation}
+            />
+          )}
 
-          {/* Navigation Buttons - Hide on step 4 */}
+          {/* Step 5: PDF Generation */}
+          {currentStep === 5 && <Step4 formData={formData} studentInfo={studentInfo} />}
+
+          {/* Navigation Buttons - Hide on step 4 (OTP) and step 5 (Success) */}
           {currentStep < 4 && (
           <div className="bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
             <div className="flex justify-between">

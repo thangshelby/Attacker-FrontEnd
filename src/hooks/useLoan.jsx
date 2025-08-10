@@ -59,6 +59,15 @@ export function useLoan(loan_id) {
     mutationFn: (data) => loan.create(data),
     onSuccess: (data) => {
       console.log("useLoan - Loan creation successful:", data);
+      
+      // Invalidate all loan-related queries to refresh data
+      queryClient.invalidateQueries(["loans"]);
+      
+      // Also invalidate student-specific loans if we have student_id
+      if (student_id) {
+        queryClient.invalidateQueries(["loans", student_id]);
+      }
+      
       // Don't modify the response, just return as-is
       return data;
     },
@@ -73,10 +82,12 @@ export function useLoan(loan_id) {
         ...data,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries(["loans"]);
-      queryClient.invalidateQueries(["masConversation", data.loan_id]);
-      return data;
+      if (variables?.loan_id) {
+        queryClient.invalidateQueries(["masConversation", variables.loan_id]);
+      }
+      return response;
     },
     onError: (error) => {
       console.error("Error updating loan contract:", error);
@@ -100,19 +111,23 @@ export function useStudentLoans(student_id) {
     data: loans,
     isLoading: isLoadingLoans,
     error: loansError,
+    refetch,
   } = useQuery({
     queryKey: ["loans", student_id],
     queryFn: async () => {
-      console.log(student_id)
+      console.log("Fetching loans for student_id:", student_id)
       const response = await loan.getLoanByStudentId(student_id);
-      console.log(response)
+      console.log("Student loans response:", response)
       return response.data.data.loans;
     },
     enabled: !!student_id,
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    staleTime: 0, // Consider data stale immediately for fresh loans
   });
   return {
     loans,
     isLoadingLoans,
     loansError,
+    refetch,
   };
 }

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { queryClient } from "@/apis/react-query";
 import {
   FileText,
   Download,
@@ -14,6 +16,7 @@ import {
 } from "lucide-react";
 
 const Step4 = ({ formData, studentInfo }) => {
+  const navigate = useNavigate();
   const [isPrinting, setIsPrinting] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
 
@@ -348,6 +351,33 @@ const Step4 = ({ formData, studentInfo }) => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
+          <button
+            onClick={() => {
+              // Invalidate loan queries to ensure fresh data in history page
+              queryClient.invalidateQueries(["loans"]);
+              if (studentInfo?.studentId) {
+                queryClient.invalidateQueries(["loans", studentInfo.studentId]);
+              }
+              console.log("💾 Cache invalidated before navigating to history");
+              navigate("/history");
+            }}
+            className="flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:from-blue-600 hover:to-blue-700 hover:shadow-xl"
+          >
+            <History className="mr-2 h-5 w-5" />
+            Xem lịch sử vay
+          </button>
+          
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center justify-center rounded-xl border-2 border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <User className="mr-2 h-5 w-5" />
+            Về trang chủ
+          </button>
         </div>
       </div>
     </div>

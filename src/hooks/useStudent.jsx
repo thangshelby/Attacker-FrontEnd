@@ -18,7 +18,7 @@ export function useStudent() {
       return data.data.student;
     },
     retry: false,
-    enabled: !!user?.citizen_id,
+    enabled: !!user?.citizen_id && user?.role !== 'Admin',
     onError: (error) => {
       console.error("Error fetching student:", error);
     },
@@ -29,7 +29,7 @@ export function useStudent() {
       const { data } = await student.getStudentByCitizenId(user.citizen_id);
       return data.data.student;
     },
-    enabled: !!user?.citizen_id,
+    enabled: !!user?.citizen_id && user?.role !== 'Admin',
     onError: (error) => {
       console.error("Error fetching student by citizen ID:", error);
       setToast({

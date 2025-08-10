@@ -17,7 +17,7 @@ export function useAcademic() {
       return data.data.academic;
     },
     retry: false,
-    enabled: !!student?.student_id, // Only run if student ID is available
+    enabled: !!student?.student_id && user?.role !== 'Admin', // Only run if student ID is available and not admin
   });
 
   return {

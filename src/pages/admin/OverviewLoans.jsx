@@ -105,14 +105,16 @@ const OverviewLoans = () => {
     rejected: loans?.filter((loan) => loan.status === "rejected").length || 0,
   };
 
-  const filteredLoans = loans.filter((loan) => {
-    const matchesSearch =
-      loan.student_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.studentInfo?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      loan.citizen_id.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredLoans = loans?.filter((loan) => {
+    if (!loan) return false; // Safety check
+    const matchesSearch = searchTerm === "" || (
+      (loan.student_id && loan.student_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (loan.studentInfo?.name && loan.studentInfo.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (loan.citizen_id && loan.citizen_id.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
     const matchesStatus = !statusFilter || loan.status === statusFilter;
     return matchesSearch && matchesStatus;
-  });
+  }) || []; // Fallback to empty array
 
   // Pagination
   const totalPages = Math.ceil(filteredLoans.length / itemsPerPage);
@@ -298,38 +300,43 @@ const OverviewLoans = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                {currentItems.map((loan) => (
+                {currentItems.map((loan) => {
+                  if (!loan || !loan._id) {
+                    console.warn("⚠️ Invalid loan object:", loan);
+                    return null;
+                  }
+                  return (
                   <tr
                     key={loan._id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   >
                     <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                      {loan.student_id}
+                      {loan.student_id || "N/A"}
                     </td>
                     <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
                       {loan.studentInfo?.name || "Nguyen Van A"}
                     </td>
 
                     <td className="px-4 py-4 text-sm font-semibold whitespace-nowrap text-green-600 dark:text-green-400">
-                      {formatCurrency(loan.loan_amount_requested)}
+                      {loan.loan_amount_requested ? formatCurrency(loan.loan_amount_requested) : "N/A"}
                     </td>
                     <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {loan.loan_tenor} tháng
+                      {loan.loan_tenor || "N/A"} tháng
                     </td>
 
                     <td className="px-4 py-4 text-sm font-semibold whitespace-nowrap text-purple-600 dark:text-purple-400">
-                      {formatCurrency(loan.total_payment)}
+                      {loan.total_payment ? formatCurrency(loan.total_payment) : "N/A"}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <StatusBadge status={loan.status} />
+                      <StatusBadge status={loan.status || "unknown"} />
                     </td>
                     <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                      {formatDate(loan.created_at)}
+                      {loan.created_at ? formatDate(loan.created_at) : "N/A"}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        {/* View Conversation Button */}
-                        <button
+                        {/* View Conversation Button - Temporarily disabled */}
+                        {/* <button
                           onClick={() => {
                             setSelectedLoan(loan);
                             setShowConversationModal(true);
@@ -338,7 +345,7 @@ const OverviewLoans = () => {
                           title="Xem cuộc tranh luận của các Agent"
                         >
                           <Eye className="h-3 w-3" />
-                        </button>
+                        </button> */}
 
                         {/* Action buttons for pending loans */}
                         {loan.status === "pending" && (
@@ -388,7 +395,8 @@ const OverviewLoans = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -468,6 +476,7 @@ const OverviewLoans = () => {
         />
       )}
 
+      {/* Temporarily disabled - causing React hooks error
       {showConversationModal && (
         <ConversationModal
           loan={selectedLoan}
@@ -476,7 +485,7 @@ const OverviewLoans = () => {
             setSelectedLoan(null);
           }}
         />
-      )}
+      )} */}
     </div>
   );
 };
@@ -568,57 +577,115 @@ const Modal = ({ modal, reason, setreason, onConfirm, onCancel, loading }) => {
 };
 
 const ConversationModal = ({ loan, onClose }) => {
-  // Placeholder data - bạn sẽ copy nội dung thực tế vào đây
+  const { getMASConversation } = useLoan(loan?._id);
+  const masConversation = getMASConversation.data;
+  
+  // Loading state
+  if (getMASConversation.isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl bg-slate-800 p-6 text-center">
+          <div className="h-8 w-8 mx-auto animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+          <p className="mt-4 text-white">Đang tải cuộc tranh luận...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // No conversation found
+  if (!masConversation) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl bg-slate-800 p-6 text-center">
+          <AlertCircle className="h-12 w-12 mx-auto text-yellow-400 mb-4" />
+          <h3 className="text-lg font-semibold text-white mb-2">Chưa có cuộc tranh luận</h3>
+          <p className="text-slate-400 mb-4">Khoản vay này chưa được xử lý bởi hệ thống Multi-Agent.</p>
+          <button
+            onClick={onClose}
+            className="rounded-lg bg-slate-700 px-4 py-2 text-slate-300 transition-colors hover:bg-slate-600"
+          >
+            Đóng
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Parse conversation data and map to display format
+  const conversationData = JSON.parse(masConversation.result_stringify || "{}");
+  
+  // Map the conversation data to display format
+  const agents = [];
+  
+  // Academic Agent
+  if (conversationData.responses?.academic_repredict) {
+    agents.push({
+      name: "Academic Agent",
+      icon: Brain,
+      color: "text-blue-500",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
+      borderColor: "border-blue-200 dark:border-blue-800",
+      decision: conversationData.responses.academic_repredict.decision || "unknown",
+      reason: conversationData.responses.academic_repredict.reason || "Không có lý do"
+    });
+  }
+  
+  // Finance Agent
+  if (conversationData.responses?.finance_repredict) {
+    agents.push({
+      name: "Finance Agent",
+      icon: DollarSign,
+      color: "text-green-500",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
+      borderColor: "border-green-200 dark:border-green-800",
+      decision: conversationData.responses.finance_repredict.decision || "unknown",
+      reason: conversationData.responses.finance_repredict.reason || "Không có lý do"
+    });
+  }
+  
+  // Critical Academic Agent
+  if (conversationData.responses?.critical_academic) {
+    agents.push({
+      name: "Critical Agent for Academic",
+      icon: Shield,
+      color: "text-orange-500",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20",
+      borderColor: "border-orange-200 dark:border-orange-800",
+      decision: conversationData.responses.critical_academic.decision || "unknown",
+      reason: conversationData.responses.critical_academic.reason || "Không có lý do"
+    });
+  }
+  
+  // Critical Finance Agent
+  if (conversationData.responses?.critical_finance) {
+    agents.push({
+      name: "Critical Agent for Finance",
+      icon: Shield,
+      color: "text-orange-500",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20",
+      borderColor: "border-orange-200 dark:border-orange-800",
+      decision: conversationData.responses.critical_finance.decision || "unknown",
+      reason: conversationData.responses.critical_finance.reason || "Không có lý do"
+    });
+  }
+  
+  // Decision Agent
+  if (conversationData.responses?.final_decision) {
+    agents.push({
+      name: "Decision Agent",
+      icon: Gavel,
+      color: "text-purple-500",
+      bgColor: "bg-purple-50 dark:bg-purple-900/20",
+      borderColor: "border-purple-200 dark:border-purple-800",
+      decision: conversationData.responses.final_decision.decision || "unknown",
+      reason: conversationData.responses.final_decision.reason || "Không có lý do"
+    });
+  }
+  
   const mockConversation = {
-    agents: [
-      {
-        name: "Academic Agent",
-        icon: Brain,
-        color: "text-blue-500",
-        bgColor: "bg-blue-50 dark:bg-blue-900/20",
-        borderColor: "border-blue-200 dark:border-blue-800",
-        decision: "reject",
-        reason: "[Sau khi phân tích phản biện nhận được, tôi nhận thấy phản biện tập trung chủ yếu vào việc chỉ ra các yếu tố rủi ro dài hạn, khả năng duy trì thành tích học tập, và các yếu tố tài chính gia đình chưa được đánh giá đầy đủ. Tuy nhiên, các luận điểm này vẫn chưa đủ mạnh để thay đổi quyết định ban đầu.\n\nCụ thể:\n\n1. Về điểm căn cứ trong phản biện:\n- Phản biện đúng khi nhấn mạnh rằng tỷ lệ thu nhập vay vốn (7.8%) là cao, cho thấy gánh nặng tài chính lớn. Tuy nhiên, phản biện chưa xem xét đến khả năng sinh viên sẽ có mức lương cao hơn sau khi tốt nghiệp, đặc biệt trong ngành Công Nghệ Tài Chính, ngành có triển vọng nghề nghiệp tốt.\n- Phản biện cũng đúng khi đề cập đến thiếu dữ liệu về khả năng tài chính của mẹ bảo lãnh, nhưng không đủ để phủ nhận các yếu tố tích cực về thành tích học tập và ý chí tự lập của sinh viên.\n\n2. Yếu tố đã bỏ qua trong đánh giá ban đầu:\n- Khả năng sinh viên có thể tăng thu nhập sau khi ra trường, dựa trên dự báo ngành nghề.\n- Các nguồn hỗ trợ khác như học bổng, việc làm thêm ổn định, hoặc các khoản hỗ trợ tài chính khác.\n- Khả năng sinh viên có thể điều chỉnh các khoản chi tiêu để phù hợp với khả năng tài chính.\n\n3. Dữ liệu cần xem xét lại:\n- Chính xác hơn về khả năng tài chính của mẹ bảo lãnh.\n- Dự báo về mức lương sau tốt nghiệp của sinh viên.\n- Các khoản chi tiêu thực tế của sinh viên trong quá trình học.\n\n**Quyết định sau phản biện:**\n\nQUYẾT ĐỊNH: REJECT  \nLÝ DO: Mặc dù phản biện đúng khi]",
-      },
-      {
-        name: "Finance Agent", 
-        icon: DollarSign,
-        color: "text-green-500",
-        bgColor: "bg-green-50 dark:bg-green-900/20",
-        borderColor: "border-green-200 dark:border-green-800",
-        decision: "approve",
-        reason: "[QUYẾT ĐỊNH: APPROVE\n\nLÝ DO:  \nSau khi xem xét phản biện, tôi nhận thấy các điểm sau:\n\n1. Tính chính xác của số liệu thu nhập:  \n- Thu nhập 2,340,000 VND/tháng của sinh viên có thể chỉ là thu nhập tạm thời hoặc chưa phản ánh khả năng tài chính dài hạn. Tuy nhiên, trong bối cảnh sinh viên còn 1-2 năm học nữa và có khả năng tăng thu nhập sau khi ra trường, tỷ lệ vay trên thu nhập hiện tại không hoàn toàn phản ánh rủi ro thực tế.  \n- Việc sinh viên có việc làm thêm và bảo lãnh từ mẹ cho thấy khả năng hỗ trợ tài chính, giảm thiểu rủi ro về khả năng trả nợ.\n\n2. Khả năng trả nợ trong tương lai:  \n- Dự kiến sau tốt nghiệp, mức lương trung bình ngành Công Nghệ Tài Chính khoảng 8-12 triệu VND/tháng, đủ để trả khoản vay trong vòng 1-2 năm tới.  \n- Nếu ngân hàng có các chính sách cho vay linh hoạt, như thời hạn vay dài hơn hoặc các khoản trả góp phù hợp, gánh nặng tài chính sẽ giảm xuống đáng kể.\n\n3. Rủi ro vĩ mô và khả năng duy trì thành tích học tập:  \n- Mặc dù không tham gia hoạt động ngoại khóa, sinh viên có ý chí tự lập, có việc làm thêm, và đang theo học tại trường uy tín, điều này cho thấy khả năng duy trì thành tích và khả năng thích nghi tốt.  \n- Rủi ro thất nghiệp hoặc khó khăn tài chính trong tương lai có thể được giảm thiểu nếu ngân hàng xem xét các yếu tố như khả năng tăng thu nhập sau khi ra trường.\n\n4. Chính sách và chiến lược ngân hàng:  \n- Trong bối cảnh ngân hàng muốn mở rộng]",
-      },
-      {
-        name: "Critical Agent for Academic",
-        icon: Shield,
-        color: "text-orange-500", 
-        bgColor: "bg-orange-50 dark:bg-orange-900/20",
-        borderColor: "border-orange-200 dark:border-orange-800",
-        decision: "reject",
-        reason: "[PHẢN BIỆN: Lý do đề xuất phê duyệt tập trung chủ yếu vào thành tích học tập, ý chí tự lập và khả năng thích nghi của sinh viên, nhưng thiếu phân tích về các yếu tố rủi ro dài hạn như khả năng duy trì thành tích học tập trong tương lai, tác động của việc làm thêm đến sức khỏe và hiệu quả học tập, cũng như khả năng sinh viên có thể đối mặt với các biến động tài chính hoặc thay đổi trong môi trường xã hội. Ngoài ra, dữ liệu về năng lực tài chính gia đình và các yếu tố xã hội khác chưa được đánh giá đầy đủ để xác định mức độ rủi ro tài chính lâu dài. Việc dựa vào một số yếu tố tích cực mà không xem xét các yếu tố tiềm ẩn có thể dẫn đến quyết định quá lạc quan, thiếu sự cân nhắc về các rủi ro có thể phát sinh trong tương lai.\n\nKHUYẾN NGHỊ: REJECT]",
-      },
-      {
-        name: "Critical Agent for Finance",
-        icon: Shield,
-        color: "text-orange-500", 
-        bgColor: "bg-orange-50 dark:bg-orange-900/20",
-        borderColor: "border-orange-200 dark:border-orange-800",
-        decision: "approve",
-        reason: "[PHẢN BIỆN:  \nLập luận từ chối dựa trên tỷ lệ thu nhập vay vốn (7.8%) là một chỉ số rõ ràng cho thấy gánh nặng tài chính lớn đối với sinh viên hiện tại. Tuy nhiên, có một số điểm cần xem xét kỹ hơn để đảm bảo tính chính xác và toàn diện của quyết định:\n\n1. Tính chính xác của số liệu thu nhập:  \n- Thu nhập 2,340,000 VND/tháng của sinh viên có thể chỉ là thu nhập tạm thời hoặc chưa phản ánh khả năng tài chính dài hạn. Nếu sinh viên có nguồn thu khác (gia đình hỗ trợ, học bổng, việc làm thêm ổn định), khả năng trả nợ có thể cao hơn dự kiến.  \n- Ngoài ra, thu nhập này có thể chưa phản ánh các khoản chi tiêu thực tế, dẫn đến việc tỷ lệ vay trên thu nhập bị đánh giá quá cao.\n\n2. Thiếu thông tin về khả năng trả nợ trong tương lai:  \n- Dù hiện tại thu nhập chưa đủ để đảm bảo khả năng trả nợ, nhưng nếu sinh viên dự kiến ra trường trong 1-2 năm tới với mức lương dự kiến 8-12 triệu VND/tháng, khả năng trả nợ sẽ khả thi hơn.  \n- Quyết định chưa xem xét đến khả năng tăng thu nhập sau khi ra trường, điều này làm giảm tính toàn diện của phân tích.\n\n3. Giả định về thời hạn vay và khả năng chi tiêu:  \n- Phân tích giả định vay trong 12 tháng, nhưng không rõ rõ thời hạn vay thực tế. Nếu vay dài hạn hơn, gánh nặng có thể phân tán, giảm áp lực tức thì.  \n- Ngoài ra, việc tính toán khoản trả hàng tháng chưa rõ lãi suất cụ thể, dẫn đến ước lượng chưa chính xác.\n\n4. Rủi ro về khả năng tài chính gia đình và bảo lãnh:  \n- Mặc dù mẹ bảo lãnh, nhưng không có dữ liệu về khả năng tài chính của mẹ để đảm bảo trả nợ nếu sinh viên gặp khó khăn.  \n- Điều này làm tăng rủi ro không thể kiểm soát, đặc biệt trong bối cảnh kinh tế biến động.\n\nTổng thể, quyết định từ chối dựa trên tỷ lệ thu nhập vay vốn là hợp lý trong bối cảnh hiện tại, nhưng thiếu các yếu tố dự phòng về khả năng tăng]",
-      },
-      {
-        name: "Decision Agent",
-        icon: Gavel,
-        color: "text-purple-500",
-        bgColor: "bg-purple-50 dark:bg-purple-900/20", 
-        borderColor: "border-purple-200 dark:border-purple-800",
-        decision: "approve",
-        reason: "[Chấp thuận khoản vay]",
-      }
-    ],
-    finalDecision: "approve",
-    summary: "[Chấp thuận khoản vay]"
+    agents: agents,
+    finalDecision: conversationData.responses?.final_decision?.decision || "unknown",
+    summary: conversationData.responses?.final_decision?.reason || "Không có thông tin tổng kết"
   };
 
   return (

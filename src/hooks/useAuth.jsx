@@ -7,35 +7,13 @@ import { useAppStore } from "../store/appStore";
 
 export function useAuth() {
   const navigate = useNavigate();
-  const { setUser, setError } = useAuthStore();
+  const { setUser, setError, user } = useAuthStore();
   const { setToast } = useAppStore();
 
-  const {
-    data: currentUser,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: async () => {
-      const { data } = await auth.getCurrentUser();
-      setUser(data.data.user);
-      if (data.data.user.kyc_status === "Pending") {
-        navigate("/auth/verify-email");
-        return data.data.user;
-      } else if (data.data.user.role === "Admin") {
-        navigate("/admin");
-        return data.data.user;
-      }
-      setToast({
-        type: "success",
-        message: "Welcome back !",
-      });
-      navigate("/");
-      return data.data.user;
-    },
-    retry: false,
-    enabled: true,
-  });
+  // Simplified: No complex query logic, just use what's in store
+  const currentUser = user;
+  const isLoading = false;
+  const error = null;
 
   const login = useMutation({
     mutationFn: auth.login,
@@ -44,14 +22,8 @@ export function useAuth() {
       queryClient.setQueryData(["currentUser"], data.data.user);
       const token = data.data.accessToken;
       localStorage.setItem("token", token);
-      if (data.data.user.kyc_status === "Pending") {
-        navigate("/auth/verify-email");
-        setToast({
-          type: "info",
-          message: "Please verify your email to continue.",
-        });
-        return;
-      }
+      
+      // Demo mode: Skip email verification, direct login
       if (data.data.user.role === "Admin") {
         navigate("/admin");
         setToast({
@@ -80,10 +52,12 @@ export function useAuth() {
       queryClient.setQueryData(["currentUser"], data.data.user);
       const token = data.data.accessToken;
       localStorage.setItem("token", token);
-      navigate("/auth/verify-email");
+      
+      // Demo mode: Skip email verification, direct to dashboard
+      navigate("/");
       setToast({
         type: "success",
-        message: "Registration successful! Please verify your email.",
+        message: "Registration successful! Welcome!",
       });
     },
     onError: (error) => {

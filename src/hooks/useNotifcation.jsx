@@ -2,11 +2,11 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { notification } from "../apis/notification"; // Sửa đường dẫn nếu khác
 import { queryClient } from "../apis/react-query";
 import { useAppStore } from "../store/appStore";
-import { useAuth } from "./useAuth";
+import { useAuthStore } from "../store/authStore";
 
 export function useNotification() {
   const { setToast } = useAppStore();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const citizen_id = user?.citizen_id;
 
   // 1. Get all notifications
