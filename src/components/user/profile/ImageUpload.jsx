@@ -1,16 +1,45 @@
 import React, { useState, useCallback } from "react";
 import { CheckCircle, Camera, Upload, X } from "lucide-react";
-import { uploadImage } from "@/utils";
+
+// Mock upload function for demo
+const uploadImage = async (file) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const url = URL.createObjectURL(file);
+      resolve({ url });
+    }, 1000);
+  });
+};
 
 // Image Upload Component
 const ImageUpload = ({
-  label,
-  onImageSelect,
+  label = "Upload Image",
+  onImageSelect = () => {},
   selectedImage,
-  setIsProcessing,
-  side,
+  setIsProcessing = () => {},
+  side = "left",
 }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [isScanSuccess, setIsScanSuccess] = useState(false);
+
+
+  const handleScan = () => {
+    if (selectedImage) {
+      setIsScanning(true);
+      // Stop scanning after animation completes
+      const timer = setTimeout(
+        () => {
+          setIsScanning(false);
+          setIsScanSuccess(true);
+          setIsProcessing(false, side);
+        },
+        Math.random() * 4000 + 1500,
+      ); // Random duration between 1s and 3s
+
+      return () => clearTimeout(timer);
+    }
+  };
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -39,7 +68,7 @@ const ImageUpload = ({
         onImageSelect(imageUploaded.url);
       }
     },
-    [onImageSelect],
+    [onImageSelect, setIsProcessing, side],
   );
 
   const handleFileSelect = useCallback(
@@ -55,14 +84,18 @@ const ImageUpload = ({
         onImageSelect(imageUploaded.url);
       }
     },
-    [onImageSelect],
+    [onImageSelect, setIsProcessing, side],
   );
 
   const removeImage = useCallback(() => {
+    setIsProcessing(false, side);
+    setIsScanSuccess(false);
+    setIsScanning(false);
+    setIsDragging(false);
     onImageSelect(null);
+    setIsScanning(false);
   }, [onImageSelect]);
 
-  const onSubmit = () => {};
   return (
     <div className="space-y-3">
       <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -105,46 +138,109 @@ const ImageUpload = ({
         </div>
       ) : (
         <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700">
-          <div className="relative flex items-center justify-between">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-            />
-            <div className="flex items-center space-x-3">
+          <div className="relative overflow-hidden rounded-lg">
+            {/* Image Container */}
+            <div className="relative">
               <img
-                className="h-full w-full rounded-lg object-cover"
+                className="h-64 w-full rounded-lg object-cover"
                 src={selectedImage}
+                alt="Uploaded"
               />
+
+              {/* Scan Effect Overlay */}
+              {isScanning && (
+                <>
+                  {/* Scan line */}
+                  <div
+                    className="animate-scan-line absolute right-0 left-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-80"
+                    style={{
+                      boxShadow:
+                        "0 0 20px #00bcd4, 0 0 40px #00bcd4, 0 0 60px #00bcd4",
+                      animation: "scanLine 2s ease-in-out infinite",
+                    }}
+                  />
+
+                  {/* Grid overlay */}
+                  <div
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage: `
+                        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)
+                      `,
+                      backgroundSize: "20px 20px",
+                    }}
+                  />
+
+                  {/* Corner brackets */}
+                  <div className="absolute top-2 left-2 h-6 w-6 animate-pulse border-t-2 border-l-2 border-cyan-400" />
+                  <div className="absolute top-2 right-2 h-6 w-6 animate-pulse border-t-2 border-r-2 border-cyan-400" />
+                  <div className="absolute bottom-2 left-2 h-6 w-6 animate-pulse border-b-2 border-l-2 border-cyan-400" />
+                  <div className="absolute right-2 bottom-2 h-6 w-6 animate-pulse border-r-2 border-b-2 border-cyan-400" />
+
+                  {/* Scanning text */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+                    <div className="bg-opacity-70 animate-pulse rounded bg-black px-3 py-1 font-mono text-sm text-cyan-400">
+                      SCANNING...
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="z-50 bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
+          <div className="mt-4 rounded-lg bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
             <div className="flex justify-start space-x-3">
               <button
                 type="button"
                 onClick={removeImage}
-                className="cursor-pointer rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                disabled={isScanning}
+                className={`cursor-pointer rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 ${
+                  isScanning ? "cursor-not-allowed opacity-50" : ""
+                }`}
               >
                 <X className="mr-2 inline h-4 w-4" />
                 Hủy bỏ
               </button>
-              {/* <button
-                type="submit"
-                onClick={onSubmit}
-                className="relative rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500/50"
-              >
-                <div className="flex items-center">
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Lưu thông tin
-                </div>
-              </button> */}
+
+              {!isScanning && (
+                <button
+                  onClick={handleScan}
+                  disabled={!selectedImage || isScanSuccess}
+                  type="button"
+                  className={`relative rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white ${isScanSuccess ? "cursor-not-allowed opacity-50" : "cursor-pointer shadow-sm transition-all duration-200 hover:from-indigo-600 hover:to-purple-700 hover:opacity-90 focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 focus:ring-offset-white dark:hover:bg-indigo-600 dark:focus:ring-indigo-500/20 dark:focus:ring-offset-gray-800"} `}
+                >
+                  <p className="flex items-center">
+                    {isScanSuccess && <CheckCircle className="mr-2 h-4 w-4" />}
+                    Scan thông tin
+                  </p>
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Custom CSS for scan animation */}
+      <style jsx>{`
+        @keyframes scanLine {
+          0% {
+            top: 0;
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            top: 100%;
+            opacity: 0;
+          }
+        }
+      `}</style>
     </div>
   );
 };

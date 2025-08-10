@@ -78,7 +78,7 @@ const StepIndicator = ({ currentStep, steps }) => (
 );
 
 const NewLoans = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(4);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(true);
   const [verificationId, setVerificationId] = useState(null);

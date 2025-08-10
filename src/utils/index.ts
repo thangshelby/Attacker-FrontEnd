@@ -1,34 +1,8 @@
 import api from "../apis/api";
 import moment from "moment";
-export const truncate = (
-  text: string,
-  startChars: number,
-  endChars: number,
-  maxLength: number,
-) => {
-  if (text.length > maxLength) {
-    var start = text.substring(0, startChars);
-    var end = text.substring(text.length - endChars, text.length);
-    while (start.length + end.length < maxLength) {
-      start = start + ".";
-    }
-    return start + end;
-  }
-  return text;
+export const truncate = (text: string) => {
+  return `${text.slice(0, 6)}...${text.slice(-4)}`;
 };
-
-export function formatDate(dateString: string) {
-  const date = new Date(dateString);
-
-  return date.toLocaleString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
 
 export function getUploadElapsedTime(uploadTimeISO: string): string {
   const now = moment();

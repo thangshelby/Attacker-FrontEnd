@@ -14,6 +14,7 @@ export function useStudent() {
       const { data } = await student.getStudentByCitizenId(user.citizen_id);
       console.log("Student API response:", data);
       setStudent(data.data.student);
+      console.log('Student data fetched:', data.data.student);
       return data.data.student;
     },
     retry: false,

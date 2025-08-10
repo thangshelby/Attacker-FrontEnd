@@ -94,7 +94,6 @@ const NotificationDropdown = ({
   onMarkAllAsRead,
   onClose,
 }) => {
-  console.log(notifications)
   const getTypeStyles = (type) => {
     switch (type) {
       case "success":
