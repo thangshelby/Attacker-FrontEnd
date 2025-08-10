@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useLoan } from "@/hooks/useLoan";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useAppStore } from "@/store/appStore";
 
@@ -53,6 +54,7 @@ const OverviewLoans = () => {
       // Close modal and reset form
       setOpenModal(false);
       setreason("");
+      toast.success('Cập nhật khoản vay thành công')
       
       // Optionally show success notification
       console.log(`Loan ${newStatus} successfully`);
