@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { queryClient } from "../apis/react-query";
 
-
 export function useLoan(loan_id) {
   const { student, isLoading } = useStudent();
   const [student_id, setStudent_id] = useState("");
@@ -59,10 +58,9 @@ export function useLoan(loan_id) {
   const createLoanContract = useMutation({
     mutationFn: (data) => loan.create(data),
     onSuccess: (data) => {
-      return {
-        ...data,
-        citizen_id: user?.citizen_id,
-      };
+      console.log("useLoan - Loan creation successful:", data);
+      // Don't modify the response, just return as-is
+      return data;
     },
     onError: (error) => {
       console.error("Error creating loan contract:", error);
@@ -72,7 +70,7 @@ export function useLoan(loan_id) {
   const updateLoanContract = useMutation({
     mutationFn: (data) => {
       return loan.update(data.loan_id, {
-        ...data,  
+        ...data,
       });
     },
     onSuccess: (data) => {
@@ -94,5 +92,27 @@ export function useLoan(loan_id) {
     // getLoanById,
     createLoanContract,
     updateLoanContract,
+  };
+}
+
+export function useStudentLoans(student_id) {
+  const {
+    data: loans,
+    isLoading: isLoadingLoans,
+    error: loansError,
+  } = useQuery({
+    queryKey: ["loans", student_id],
+    queryFn: async () => {
+      console.log(student_id)
+      const response = await loan.getLoanByStudentId(student_id);
+      console.log(response)
+      return response.data.data.loans;
+    },
+    enabled: !!student_id,
+  });
+  return {
+    loans,
+    isLoadingLoans,
+    loansError,
   };
 }

@@ -7,11 +7,14 @@ export function useStudent() {
   const { setToast } = useAppStore();
   const { setStudent, user } = useAuthStore();
 
-  const { data: studentData } = useQuery({
+  const { data: studentData, isLoading, error } = useQuery({
     queryKey: ["student", user?.citizen_id],
     queryFn: async () => {
-      const { data } = await student.getStudent(user.citizen_id);
+      console.log("Fetching student with citizen_id:", user.citizen_id);
+      const { data } = await student.getStudentByCitizenId(user.citizen_id);
+      console.log("Student API response:", data);
       setStudent(data.data.student);
+      console.log('Student data fetched:', data.data.student);
       return data.data.student;
     },
     retry: false,
@@ -68,6 +71,8 @@ export function useStudent() {
 
   return {
     student: studentData,
+    isLoading,
+    error,
     getStudent,
     getStudentByCitizenId,
     updateStudent,

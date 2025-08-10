@@ -1,16 +1,18 @@
 export const defaultFormData = {
   student_id: "",
   loan_amount_requested: "",
-  loan_tenor: "",
   guarantor: "",
-  loan_purpose: "",
-  custom_purpose: "",
   family_income: "",
-  payment_method: "",
+  existing_debt: "false",
+  has_part_time_job: "false",
+  loan_purpose: "",
+  // Hidden fields for calculation
+  loan_tenor: 12,
+  payment_method: 1,
   payment_frequency: "",
-  monthly_installment: 0,
   total_interest: 0,
   total_payment: 0,
+  monthly_installment: 0,
 };
 
 export const loanPeriod = [
@@ -25,6 +27,7 @@ export const loanPeriod = [
 ];
 
 export const studentGurantor = [
+  { value: "", label: "Chọn người bảo lãnh" },
   { value: "parent", label: "Bố-Mẹ" },
   { value: "brother-sister", label: "Anh trai-Chị gái" },
   { value: "uncle", label: "Chú/Bác" },

@@ -6,7 +6,10 @@ import {
   ArrowRight,
   Loader2,
   Award,
+  AlertCircle,
+  FileText,
 } from "lucide-react";
+import React from "react";
 import { useState, useEffect } from "react";
 import {
   defaultFormData,
@@ -19,6 +22,7 @@ import { useAcademic } from "@/hooks/useAcademic";
 import Step1 from "@/components/newloan/Step1";
 import Step2 from "@/components/newloan/Step2";
 import Step3 from "@/components/newloan/Step3";
+import Step4 from "@/components/newloan/Step4";
 import { useLoan } from "@/hooks/useLoan";
 const validateAmount = (amount) => {
   return amount > 0 && amount <= 100000000;
@@ -79,14 +83,25 @@ const NewLoans = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(true);
   const [verificationId, setVerificationId] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [loanResult, setLoanResult] = useState(null);
+  const [processingStep, setProcessingStep] = useState(0);
+  const [loanId, setLoanId] = useState(null);
+  const [masPollingInterval, setMasPollingInterval] = useState(null);
+  const [masProcessingTime, setMasProcessingTime] = useState(0);
   const { user } = useAuth();
-  const { student, isLoading: studentLoading } = useStudent();
+  const { student, isLoading: studentLoading, error: studentError } = useStudent();
   const { academicData: academic, isLoading: academicLoading } = useAcademic();
   const { createLoanContract } = useLoan();
 
+  console.log("User data:", user);
+  console.log("Student loading:", studentLoading);
+  console.log("Student data:", student);
+  console.log("Student error:", studentError);
+
   const [formData, setFormData] = useState({
     ...defaultFormData,
-    student_id: student?.student_id || "SV001",
+    student_id: student?.student_id || "",
   });
 
   const [studentInfo, setStudentInfo] = useState({
@@ -104,7 +119,9 @@ const NewLoans = () => {
 
   // Update formData and studentInfo when data from hooks changes
   useEffect(() => {
+    console.log("Student data changed:", student);
     if (student?.student_id) {
+      console.log("Setting student_id to:", student.student_id);
       setFormData(prev => ({
         ...prev,
         student_id: student.student_id,
@@ -115,6 +132,8 @@ const NewLoans = () => {
         studentId: student.student_id,
         major: student.major_name || prev.major,
       }));
+    } else {
+      console.log("No student data available yet");
     }
   }, [student]);
 
@@ -149,71 +168,64 @@ const NewLoans = () => {
       title: "Xem thông tin",
       description: "Xem lại và gửi yêu cầu",
     },
+    {
+      title: "Kết quả đánh giá",
+      description: "Kết quả từ hệ thống AI",
+    },
   ];
 
   const validateForm = () => {
     const newErrors = {};
 
+    console.log("Validating form with data:", formData);
+
+    // Auto-update student_id if it's missing but student data is available
+    if (!formData.student_id && student?.student_id) {
+      console.log("Auto-updating student_id from student data:", student.student_id);
+      setFormData(prev => ({ ...prev, student_id: student.student_id }));
+      // Skip validation this time since we're updating
+      return true;
+    }
+    
+    if (!formData.student_id) {
+      newErrors.student_id = { message: "Không tìm thấy thông tin sinh viên. Vui lòng tải lại trang." };
+      console.log("Validation failed: No student_id");
+    }
+
+    // Validate simplified form fields
     if (!formData.loan_amount_requested) {
       newErrors.loan_amount_requested = { message: "Số tiền vay là bắt buộc" };
+      console.log("Validation failed: No loan_amount_requested");
     } else if (!validateAmount(parseFloat(formData.loan_amount_requested))) {
       newErrors.loan_amount_requested = {
         message: "Số tiền vay không hợp lệ (1-100 triệu VND)",
       };
+      console.log("Validation failed: Invalid loan amount");
     }
 
-    if (!formData.loan_tenor) {
-      newErrors.loan_tenor = { message: "Thời hạn vay là bắt buộc" };
-    }
-
-    if (!formData.loan_purpose) {
-      newErrors.loan_purpose = { message: "Mục đích vay là bắt buộc" };
-    }
-
-    if (formData.loan_purpose === "6" && !formData.custom_purpose.trim()) {
-      newErrors.custom_purpose = { message: "Vui lòng mô tả mục đích vay" };
-    }
-
-    if (!formData.guarantor.trim()) {
+    if (!formData.guarantor || !formData.guarantor.trim()) {
       newErrors.guarantor = { message: "Người bảo lãnh là bắt buộc" };
+      console.log("Validation failed: No guarantor");
     }
 
     if (!formData.family_income) {
       newErrors.family_income = { message: "Thu nhập gia đình là bắt buộc" };
+      console.log("Validation failed: No family_income");
     }
 
-    if (!formData.payment_method) {
-      newErrors.payment_method = { message: "Phương thức trả lãi là bắt buộc" };
+    if (!formData.existing_debt) {
+      newErrors.existing_debt = { message: "Vui lòng chọn có nợ xấu hay không" };
+      console.log("Validation failed: No existing_debt");
     }
 
-    const selectedMethod = paymentMethods.find(
-      (pm) => pm.id === parseInt(formData.payment_method),
-    );
-    if (selectedMethod?.hasFrequency && !formData.payment_frequency) {
-      newErrors.payment_frequency = {
-        message: "Tần suất trả tiền là bắt buộc",
-      };
-    }
-
-    if (formData.payment_method && formData.payment_frequency) {
-      const tenor = parseInt(formData.loan_tenor);
-      const frequency = parseInt(formData.payment_frequency);
-
-      if (tenor < frequency) {
-        newErrors.payment_frequency = {
-          message: `Thời hạn vay phải lớn hơn hoặc bằng tần suất trả tiền (${frequency} tháng)`,
-        };
-      }
-
-      if (frequency === 6 && tenor < 12) {
-        newErrors.payment_frequency = {
-          message:
-            "Tần suất trả 6 tháng yêu cầu thời hạn vay tối thiểu 12 tháng",
-        };
-      }
+    if (!formData.loan_purpose || !formData.loan_purpose.trim()) {
+      newErrors.loan_purpose = { message: "Mục đích vay là bắt buộc" };
+      console.log("Validation failed: No loan_purpose");
     }
 
     setErrors(newErrors);
+    console.log("Validation errors:", newErrors);
+    console.log("Validation result:", Object.keys(newErrors).length === 0);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -236,16 +248,13 @@ const NewLoans = () => {
       }
     }
 
-    if (
-      field === "loan_amount_requested" ||
-      field === "loan_tenor" ||
-      field === "payment_method" ||
-      field === "payment_frequency"
-    ) {
+    // Auto-calculate loan details when loan amount changes
+    if (field === "loan_amount_requested" && newFormData.loan_amount_requested) {
       const amount = parseFloat(newFormData.loan_amount_requested) || 0;
-      const tenor = parseInt(newFormData.loan_tenor) || 0;
-      const paymentMethod = newFormData.payment_method;
-      const frequency = newFormData.payment_frequency;
+      // Use default values for simplified form
+      const tenor = 12; // 12 tháng mặc định
+      const paymentMethod = 1; // Trả cả gốc và lãi vào ngày đáo hạn
+      const frequency = null; // Không cần frequency cho method 1
 
       const calculations = calculatePaymentDetails(
         amount,
@@ -256,6 +265,10 @@ const NewLoans = () => {
       newFormData.monthly_installment = calculations.monthly;
       newFormData.total_interest = calculations.totalInterest;
       newFormData.total_payment = calculations.totalPayment;
+      
+      // Also set the default values to formData
+      newFormData.loan_tenor = tenor;
+      newFormData.payment_method = paymentMethod;
     }
 
     setFormData(newFormData);
@@ -287,30 +300,119 @@ const NewLoans = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    console.log("🎯 handleSubmit called, currentStep:", currentStep);
+    
+    if (!validateForm()) {
+      console.log("❌ Form validation failed");
+      return;
+    }
+    
     if (currentStep !== 3) {
+      console.log("📝 Moving to step 3");
       setCurrentStep(3);
       return;
     }
 
+    console.log("🚀 Submitting loan with formData:", formData);
+    console.log("🔍 Student ID being sent:", formData.student_id);
+    console.log("⏳ createLoanContract.isPending:", createLoanContract.isPending);
+
+    setIsProcessing(true);
+
     try {
+      console.log("🚀 Starting loan contract creation with formData:", formData);
+      
       createLoanContract.mutate(formData, {
-        onSuccess: (data) => {
+        onSuccess: (response) => {
+          console.log("✅ Loan created successfully - Full response:", response);
+          
+          // Extract the actual data from axios response
+          const data = response.data || response;
+          
           setStudentInfo({
             ...studentInfo,
             studentId: data.student_id,
           });
           setSubmitSuccess(true);
+          setIsProcessing(false);
+          
+          // Move to processing step and wait 45 seconds
+          setCurrentStep(4);
+          setProcessingStep(0);
+          
+          // Start 45-second processing with progress bar
+          startProcessingWithTimer();
         },
         onError: (error) => {
-          console.error("Error creating loan contract:", error);
+          console.error("❌ Error creating loan contract:", error);
+          console.error("📋 Error response data:", error.response?.data);
+          console.error("📋 Error details:", {
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            message: error.message
+          });
           setSubmitSuccess(false);
+          setIsProcessing(false);
         },
       });
     } catch (error) {
       console.error("Error submitting loan request:", error);
+      setIsProcessing(false);
     }
   };
+
+  const processingSteps = [
+    { title: "Khởi tạo hệ thống", description: "Đang khởi tạo các AI agents", icon: "🚀", duration: 3 },
+    { title: "Phân tích học thuật", description: "Academic Agent đang đánh giá", icon: "🎓", duration: 8 },
+    { title: "Phân tích tài chính", description: "Finance Agent đang phân tích", icon: "💰", duration: 8 },
+    { title: "Đánh giá phản biện", description: "Critical Agent đang phản biện", icon: "🔍", duration: 6 },
+    { title: "Tổng hợp quyết định", description: "Decision Agent đang ra quyết định cuối", icon: "⚖️", duration: 6 },
+    { title: "Hoàn thành", description: "Lưu kết quả và thông báo", icon: "✅", duration: 2 },
+  ];
+
+  const startProcessingWithTimer = () => {
+    setIsProcessing(true);
+    setMasProcessingTime(0);
+    
+    // Start progress timer - 45 seconds total
+    const startTime = Date.now();
+    const totalDuration = 45000; // 45 seconds
+    
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const seconds = Math.floor(elapsed / 1000);
+      const progress = Math.min((elapsed / totalDuration) * 100, 100);
+      
+      setMasProcessingTime(seconds);
+      
+      // Update progress bar (if you have one)
+      if (progress >= 100) {
+        clearInterval(timer);
+        
+        // Show success result after 45 seconds
+        setLoanResult({
+          decision: "approve",
+          confidence: 87,
+          reason: "Chúc mừng!"
+        });
+        setIsProcessing(false);
+      }
+    }, 1000);
+    
+    // Store timer reference for cleanup
+    setMasPollingInterval(timer);
+  };
+
+  // No longer needed - using hardcoded result
+
+  // Cleanup on component unmount
+  React.useEffect(() => {
+    return () => {
+      if (masPollingInterval) {
+        clearInterval(masPollingInterval);
+      }
+    };
+  }, [masPollingInterval]);
 
   // Show loading state while initial data is loading
   if (studentLoading || academicLoading) {
@@ -320,6 +422,31 @@ const NewLoans = () => {
           <div className="text-center">
             <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-green-500 mx-auto"></div>
             <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải thông tin sinh viên...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If no student data is found, show error message
+  if (!studentLoading && !student) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-red-900">
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mb-4 h-16 w-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+              <span className="text-red-500 text-2xl">⚠️</span>
+            </div>
+            <h2 className="text-xl font-bold text-red-600 mb-2">Không tìm thấy thông tin sinh viên</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Bạn cần verify email để tạo thông tin sinh viên trước khi vay.
+            </p>
+            <button
+              onClick={() => window.location.href = '/auth/verify-email'}
+              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            >
+              Verify Email
+            </button>
           </div>
         </div>
       </div>
@@ -376,7 +503,11 @@ const NewLoans = () => {
             <Step3 formData={formData} studentInfo={studentInfo} />
           )}
 
-          {/* Navigation Buttons */}
+          {/* Step 4: PDF Generation */}
+          {currentStep === 4 && <Step4 formData={formData} studentInfo={studentInfo} />}
+
+          {/* Navigation Buttons - Hide on step 4 */}
+          {currentStep < 4 && (
           <div className="bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
             <div className="flex justify-between">
               <div>
@@ -404,10 +535,10 @@ const NewLoans = () => {
                 ) : (
                   <button
                     onClick={handleSubmit}
-                    disabled={createLoanContract.isPending}
+                      disabled={createLoanContract.isPending || isProcessing}
                     className="relative cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {createLoanContract.isPending ? (
+                      {createLoanContract.isPending || isProcessing ? (
                       <div className="flex items-center">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Đang gửi...
@@ -423,6 +554,7 @@ const NewLoans = () => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

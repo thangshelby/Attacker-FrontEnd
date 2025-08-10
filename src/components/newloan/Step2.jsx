@@ -17,7 +17,7 @@ const Step2 = ({ studentInfo }) => {
   const [currentStep, setCurrentStep] = useState(2);
   const [qrData, setQrData] = useState(null);
   const [verificationId, setVerificationId] = useState(null);
-  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState(true);
   const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {

@@ -15,18 +15,20 @@ import {
   MapPin,
   GraduationCap,
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useLoan } from "@/hooks/useLoan";
+import { useStudentLoans } from "@/hooks/useLoan";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { useAuth } from "@/hooks/useAuth";
+import { useStudent } from "@/hooks/useStudent";
+
 
 const LoanHistoryPage = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { user } = useAuth();
-  const { getLoansByStudentId } = useLoan();
-  const loans = getLoansByStudentId?.data;
-
+  const { student } = useStudent();
+  console.log(user,student)
+  const { loans, isLoadingLoans, loansError } = useStudentLoans(student?.student_id);
   const mockLoanDetail = {
     id: 1,
     loanAmount: "20,000,000",
@@ -306,8 +308,8 @@ const LoanHistoryPage = () => {
   const handleBackToList = () => {
     setSelectedLoan(null);
   };
-
-  if (getLoansByStudentId?.isPending || getLoansByStudentId?.isLoading) {
+ 
+  if (isLoadingLoans) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
         <div className="text-center">
@@ -318,16 +320,16 @@ const LoanHistoryPage = () => {
     );
   }
 
-  if (getLoansByStudentId?.isError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
-        <div className="text-center">
-          <p className="text-red-600 dark:text-red-400">Có lỗi xảy ra khi tải dữ liệu</p>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+  if (loansError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+          <div className="text-center">
+            <p className="text-red-600 dark:text-red-400">Có lỗi xảy ra khi tải dữ liệu</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+          </div>
         </div>
-      </div>
-    );
-  }
+      );
+    }
   const totalPages = Math.ceil((loans?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;

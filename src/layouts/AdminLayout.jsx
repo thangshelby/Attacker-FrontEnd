@@ -44,7 +44,7 @@ const AdminLayout = () => {
       to: "loans",
     },
     {
-      id: "analyticss",
+      id: "analytics",
       label: "Báo Cáo & Phân Tích",
       icon: PieChart,
       color: "text-cyan-500",
@@ -58,67 +58,21 @@ const AdminLayout = () => {
       to: "debate-2",
     },
     {
-      id: "applications",
-      label: "Đơn Xin Vay Mới",
-      icon: CreditCard,
-      color: "text-orange-500",
-    },
-    {
-      id: "risk",
-      label: "Phân Tích Rủi Ro",
-      icon: AlertTriangle,
-      color: "text-red-500",
-    },
-    {
-      id: "payments",
-      label: "Theo Dõi Thanh Toán",
-      icon: DollarSign,
-      color: "text-emerald-500",
-    },
-    {
-      id: "approval",
-      label: "Phê Duyệt Khoản Vay",
-      icon: UserCheck,
-      color: "text-indigo-500",
-    },
-    {
-      id: "schedule",
-      label: "Lịch Thanh Toán",
-      icon: Calendar,
-      color: "text-pink-500",
-    },
-    {
-      id: "analytics",
-      label: "Báo Cáo & Phân Tích",
-      icon: PieChart,
-      color: "text-cyan-500",
-      to: "debate",
-    },
-    {
-      id: "alerts",
-      label: "Cảnh Báo & Thông Báo",
-      icon: Bell,
-      color: "text-yellow-500",
-    },
-    {
-      id: "compliance",
-      label: "Tuân Thủ & Kiểm Soát",
-      icon: Shield,
-      color: "text-gray-500",
-    },
-    {
-      id: "support",
-      label: "Hỗ Trợ Khách Hàng",
-      icon: MessageSquare,
-      color: "text-teal-500",
-    },
-    {
       id: "settings",
-      label: "Cài Đặt Hệ Thống",
+      label: "Cài Đặt",
       icon: Settings,
-      color: "text-slate-500",
+      color: "text-gray-500",
+      to: "settings",
     },
   ];
+
+  const handleLogout = () => {
+    // Clear any stored auth tokens
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // Navigate to login page
+    navigate('/login');
+  };
 
   return (
     <div className="flex h-screen bg-slate-900">
@@ -173,6 +127,19 @@ const AdminLayout = () => {
             );
           })}
         </nav>
+
+        {/* Logout Button */}
+        <div className="border-t border-slate-700 p-4">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center space-x-3 rounded-lg p-3 text-gray-400 transition-colors hover:bg-red-600 hover:text-white"
+          >
+            <X size={20} className="text-red-500" />
+            {sidebarOpen && (
+              <span className="text-sm font-medium">Đăng Xuất</span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}

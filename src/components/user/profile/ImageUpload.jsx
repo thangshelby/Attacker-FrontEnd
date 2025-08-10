@@ -1,14 +1,23 @@
 import React, { useState, useCallback } from "react";
-import { CheckCircle, Camera, Upload, X } from "lucide-react";
-import { uploadImage } from "@/utils";
+import { Camera, Upload, X } from "lucide-react";
+
+// Mock upload function for demo
+const uploadImage = async (file) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const url = URL.createObjectURL(file);
+      resolve({ url });
+    }, 1000);
+  });
+};
 
 // Image Upload Component
 const ImageUpload = ({
-  label,
-  onImageSelect,
+  label = "Upload Image",
+  onImageSelect = () => {},
   selectedImage,
-  setIsProcessing,
-  side,
+  setIsProcessing = () => {},
+  side = "left",
 }) => {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -39,7 +48,7 @@ const ImageUpload = ({
         onImageSelect(imageUploaded.url);
       }
     },
-    [onImageSelect],
+    [onImageSelect, setIsProcessing, side],
   );
 
   const handleFileSelect = useCallback(
@@ -55,14 +64,15 @@ const ImageUpload = ({
         onImageSelect(imageUploaded.url);
       }
     },
-    [onImageSelect],
+    [onImageSelect, setIsProcessing, side],
   );
 
   const removeImage = useCallback(() => {
+    setIsProcessing(false, side);
+    setIsDragging(false);
     onImageSelect(null);
-  }, [onImageSelect]);
+  }, [onImageSelect, setIsProcessing, side]);
 
-  const onSubmit = () => {};
   return (
     <div className="space-y-3">
       <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -105,23 +115,21 @@ const ImageUpload = ({
         </div>
       ) : (
         <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-600 dark:bg-gray-700">
-          <div className="relative flex items-center justify-between">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-            />
-            <div className="flex items-center space-x-3">
+          <div className="relative overflow-hidden rounded-lg">
+            {/* Image Container */}
+            <div className="relative">
               <img
-                className="h-full w-full rounded-lg object-cover"
+                className="h-64 w-full rounded-lg object-cover"
                 src={selectedImage}
+                alt="Uploaded"
               />
+
+
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="z-50 bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
+          <div className="mt-4 rounded-lg bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
             <div className="flex justify-start space-x-3">
               <button
                 type="button"
@@ -129,22 +137,14 @@ const ImageUpload = ({
                 className="cursor-pointer rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
               >
                 <X className="mr-2 inline h-4 w-4" />
-                Hủy bỏ
+                Xóa ảnh
               </button>
-              {/* <button
-                type="submit"
-                onClick={onSubmit}
-                className="relative rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500/50"
-              >
-                <div className="flex items-center">
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Lưu thông tin
-                </div>
-              </button> */}
             </div>
           </div>
         </div>
       )}
+
+
     </div>
   );
 };

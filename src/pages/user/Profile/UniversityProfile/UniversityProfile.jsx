@@ -58,9 +58,10 @@ const universitySchema = z.object({
   faculty_name: z.string().min(1, "Vui lòng chọn khoa"),
   major_name: z.string().min(1, "Chuyên ngành là bắt buộc"),
   year_of_study: z
-    .number()
-    .min(1, "Năm học phải từ 1 đến 6")
-    .max(6, "Năm học phải từ 1 đến 6"),
+    .string()
+    .min(1, "Năm học là bắt buộc")
+    .transform((val) => parseInt(val))
+    .refine((val) => val >= 1 && val <= 6, "Năm học phải từ 1 đến 6"),
   class_id: z.string().optional(),
   has_parttime_job: z.boolean().optional(),
   has_supporter: z.boolean().optional(),
@@ -73,7 +74,6 @@ const UniversityProfile = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentProcessingSide, setCurrentProcessingSide] = useState(null);
   const { student, updateStudent } = useStudent();
-  const studentt = {};
   const {
     register,
     watch,
@@ -85,16 +85,16 @@ const UniversityProfile = () => {
     mode: "onChange",
     resolver: zodResolver(universitySchema),
     defaultValues: {
-      student_id: studentt?.student_id || "",
-      university: studentt?.university || "",
-      faculty_name: studentt?.faculty_name || "",
-      major_name: studentt?.major_name || "",
-      year_of_study: studentt?.year_of_study || 1,
-      class_id: studentt?.class_id || "",
-      has_parttime_job: studentt?.has_parttime_job || false,
-      has_supporter: studentt?.has_supporter || false,
-      student_card_front: student?.student_card_front || null,
-      student_card_back: student?.student_card_back || null,
+      student_id: "",
+      university: "",
+      faculty_name: "",
+      major_name: "",
+      year_of_study: "",
+      class_id: "",
+      has_parttime_job: false,
+      has_supporter: false,
+      student_card_front: null,
+      student_card_back: null,
     },
   });
 
@@ -103,23 +103,7 @@ const UniversityProfile = () => {
     (uni) => uni.id === watchedValues.university,
   );
 
-  useEffect(() => {
-    if (
-      watchedValues.student_card_front &&
-      watchedValues.student_card_back
-      //  && !student.student_id
-    ) {
-      reset({
-        ...student,
-        student_card_front: watchedValues.student_card_front,
-        student_card_back: watchedValues.student_card_back,
-      });
-    }
-  }, [
-    watchedValues.student_card_back,
-    watchedValues.student_card_front,
-    student,
-  ]);
+  // Removed hardcode logic - let users input their own information
 
   const handleImageSelect = (side) => async (imageUrl) => {
     setValue(side, imageUrl);
@@ -393,12 +377,10 @@ const UniversityProfile = () => {
                 >
                   <input
                     type="number"
-                    {...register("year_of_study", {
-                      valueAsNumber: true,
-                    })}
+                    {...register("year_of_study")}
                     min={1}
                     max={6}
-                    placeholder="Năm thứ mấy"
+                    placeholder="Năm thứ mấy (1-6)"
                     className="w-full rounded-xl border border-gray-300 px-4 py-3 shadow-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                   />
                 </FormField>
