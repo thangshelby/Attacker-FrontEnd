@@ -14,9 +14,14 @@ import {
   paymentMethods,
   paymentFrequencies,
 } from "@/constants/newloan";
-const Step3 = ({ formData, studentInfo }) => {
-  const [verificationId, setVerificationId] = useState(null);
+import api from "@/apis/api";
+import { useAppStore } from "@/store/appStore";
+import { useEffect } from "react";
 
+const Step3 = ({ formData, studentInfo }) => {
+  // useEffect()
+  const [verificationId, setVerificationId] = useState(null);
+  const { loan } = useAppStore();
   const selectedPurpose = loanPurposes.find(
     (p) => p.id === parseInt(formData.loan_purpose),
   );
@@ -38,6 +43,7 @@ const Step3 = ({ formData, studentInfo }) => {
     );
   };
   const selectedPaymentMethod = getSelectedPaymentMethod();
+ 
 
   return (
     <div>

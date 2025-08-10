@@ -341,7 +341,7 @@ Sau khi thảo luận sâu, hội đồng AI đã đạt được đồng thuậ
     if (message.type === "user") {
       return (
         <div className="mb-4 flex justify-end">
-          <div className="max-w-2xl rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 text-white shadow-lg">
+          <div className="max-w-[1000px] rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 text-white shadow-lg">
             <p className="whitespace-pre-wrap">{message.content}</p>
             <div className="mt-2 flex items-center justify-end gap-2 text-xs opacity-70">
               <span>
@@ -379,7 +379,7 @@ Sau khi thảo luận sâu, hội đồng AI đã đạt được đồng thuậ
               )}
             </div>
             <div className="rounded-2xl rounded-tl-sm border border-slate-700 bg-slate-800/70 px-4 py-3 shadow-lg">
-              <div className="prose prose-sm prose-invert max-w-none">
+              <div className="prose prose-sm prose-invert max-w-[1000px]">
                 <div className="whitespace-pre-wrap text-slate-200">
                   {message.content}
                 </div>
@@ -426,7 +426,7 @@ Sau khi thảo luận sâu, hội đồng AI đã đạt được đồng thuậ
                 </p>
               </div>
             </div>
-            <div className="prose prose-sm prose-invert max-w-none">
+            <div className="prose prose-sm prose-invert max-w-[1000px]">
               <div className="whitespace-pre-wrap text-slate-200">
                 {message.content}
               </div>
@@ -597,7 +597,7 @@ Sau khi thảo luận sâu, hội đồng AI đã đạt được đồng thuậ
                 Submit a loan application and watch our AI agents discuss and
                 analyze in real-time
               </p>
-              <div className="mx-auto max-w-md rounded-lg bg-slate-800 p-4 text-left">
+              <div className="mx-auto max-w-[1000px] rounded-lg bg-slate-800 p-4 text-left">
                 <h4 className="mb-2 font-medium">Try asking:</h4>
                 <ul className="space-y-1 text-sm text-slate-300">
                   <li>• "Phân tích hồ sơ vay của sinh viên Nguyễn Văn A"</li>
