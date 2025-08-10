@@ -22,6 +22,7 @@ import { useAcademic } from "@/hooks/useAcademic";
 import Step1 from "@/components/newloan/Step1";
 import Step2 from "@/components/newloan/Step2";
 import Step3 from "@/components/newloan/Step3";
+import Step4 from "@/components/newloan/Step4";
 import { useLoan } from "@/hooks/useLoan";
 const validateAmount = (amount) => {
   return amount > 0 && amount <= 100000000;
@@ -78,7 +79,7 @@ const StepIndicator = ({ currentStep, steps }) => (
 );
 
 const NewLoans = () => {
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(true);
   const [verificationId, setVerificationId] = useState(null);
@@ -502,123 +503,8 @@ const NewLoans = () => {
             <Step3 formData={formData} studentInfo={studentInfo} />
           )}
 
-          {/* Step 4: Results */}
-          {currentStep === 4 && (
-            <div className="p-6">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
-                <h2 className="flex items-center text-lg font-semibold text-white">
-                  <Award className="mr-2 h-5 w-5" />
-                  Bước 4: Kết quả đánh giá từ hệ thống AI
-                </h2>
-              </div>
-
-              <div className="space-y-6 p-6">
-                {isProcessing ? (
-                  <div className="text-center py-16">
-                    <h3 className="text-3xl font-bold text-gray-800 mb-16">
-                      Đang xử lý...
-                    </h3>
-                    
-                    {/* Beautiful Progress Bar */}
-                    <div className="max-w-2xl mx-auto mb-12">
-                      <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                        {/* Main progress bar */}
-                        <div 
-                          className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 rounded-full transition-all duration-700 ease-out relative shadow-lg"
-                          style={{ width: `${Math.min((masProcessingTime / 45) * 100, 100)}%` }}
-                        >
-                          {/* Animated shine effect */}
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
-                          
-                          {/* Moving light effect */}
-                          <div className="absolute inset-0 overflow-hidden">
-                            <div className="h-full w-8 bg-gradient-to-r from-transparent via-white/60 to-transparent transform translate-x-0 animate-pulse opacity-80"></div>
-                          </div>
-                        </div>
-                        
-                        {/* Background animated waves */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 via-indigo-100/50 to-purple-100/50 animate-pulse opacity-30"></div>
-                      </div>
-                      
-                      {/* Elegant dots indicator */}
-                      <div className="flex justify-center mt-6 space-x-3">
-                        {[...Array(8)].map((_, i) => (
-                          <div 
-                            key={i} 
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                              (masProcessingTime / 45) * 8 > i 
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg animate-pulse' 
-                                : 'bg-gray-300'
-                            }`}
-                          ></div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="text-gray-600 text-xl font-medium">
-                      Hệ thống đang phân tích hồ sơ của bạn
-                    </p>
-                    <p className="text-gray-500 text-lg mt-3">
-                      Vui lòng chờ trong giây lát...
-                    </p>
-                  </div>
-                                ) : loanResult ? (
-                  <div className="text-center py-20 relative overflow-hidden rounded-3xl">
-                    {/* Background Animation */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-3xl"></div>
-                    
-                    {/* Floating Particles */}
-                    <div className="absolute inset-0 rounded-3xl">
-                      {[...Array(12)].map((_, i) => (
-                        <div 
-                          key={i}
-                          className={`absolute w-2 h-2 bg-green-400 rounded-full opacity-70`}
-                          style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                          }}
-                        ></div>
-                      ))}
-                    </div>
-                    
-                    {/* Main Content */}
-                    <div className="relative z-10">
-                      {/* Success Icon */}
-                      <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center shadow-2xl">
-                        <div className="text-6xl text-white">✓</div>
-                      </div>
-                      
-                      {/* Main Title */}
-                      <h1 className="text-7xl font-black bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-6">
-                        🎉 CHÚC MỪNG! 🎉
-                      </h1>
-                      
-                      {/* Subtitle */}
-                      <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-green-200 p-8 max-w-2xl mx-auto mb-8">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                          🏆 KHOẢN VAY CỦA BẠN ĐÃ ĐƯỢC PHÊ DUYỆT 🏆
-                        </h2>
-                        <p className="text-xl text-gray-600 font-medium">
-                          Hồ sơ của bạn đã được phê duyệt thành công!
-                        </p>
-                        
-                      </div>
-                 
-                       
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 mb-4">
-                      <FileText className="h-16 w-16 mx-auto" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">Đang tải kết quả...</h3>
-                    <p className="text-gray-600">Vui lòng chờ trong giây lát.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Step 4: PDF Generation */}
+          {currentStep === 4 && <Step4 formData={formData} studentInfo={studentInfo} />}
 
           {/* Navigation Buttons - Hide on step 4 */}
           {currentStep < 4 && (

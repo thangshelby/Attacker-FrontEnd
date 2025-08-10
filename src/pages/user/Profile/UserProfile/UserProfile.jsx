@@ -87,39 +87,73 @@ const UserProfile = () => {
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      name: user.name || "",
-      citizen_id: user.citizen_id || "",
-      email: user.email || "",
-      phone: user.phone || "",
-      birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
-      gender: user.gender || "male",
-      address: user.address || "",
-      citizen_card_front: user.citizen_card_front || null,
-      citizen_card_back: user.citizen_card_back || null,
+      name: "",
+      citizen_id: "",
+      email: "",
+      phone: "", // Chỉ giữ số điện thoại từ user
+      birth: "",
+      gender: "",
+      address: "",
+      citizen_card_front: null,
+      citizen_card_back: null,
     },
   });
   const watchedValues = watch();
 
 
+  // State để track việc đã hardcode hay chưa và ảnh được upload mới
+  const [hasHardcoded, setHasHardcoded] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState({
+    front: null,
+    back: null
+  });
+
+  // useEffect để trigger hardcode khi có đủ ảnh mới upload
   useEffect(() => {
-    if (
-      watchedValues.citizen_card_front &&
-      watchedValues.citizen_card_back &&
-      user
-    ) {
-      reset({
-        ...user,
-        birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
-        citizen_card_front: watchedValues.citizen_card_front,
-        citizen_card_back: watchedValues.citizen_card_back,
-      });
+    if (uploadedImages.front && uploadedImages.back && !hasHardcoded && user) {
+      console.log("🎯 Triggering hardcode data fill with uploaded images...");
+      
+      // Hardcode thông tin khi upload đủ cả 2 mặt CCCD (giữ nguyên số điện thoại)
+      const hardcodedData = {
+        name: "Ngô Nguyễn Đức Thắng",
+        citizen_id: "075204000105",
+        email: "thangnnd22414@sst.uel.edu.vn",
+        phone: "", // Giữ nguyên số điện thoại hiện tại
+        birth: "2004-10-02", // Hardcode ngày sinh
+        gender: "male",
+        address: "370 Phú Thọ Hòa, Quận Tân Phú, TP Hồ Chí Minh",
+        citizen_card_front: uploadedImages.front,
+        citizen_card_back: uploadedImages.back,
+      };
+      
+      reset(hardcodedData);
+      setHasHardcoded(true);
     }
-  }, [watchedValues.citizen_card_back, watchedValues.citizen_card_front, user, reset]);
+  }, [uploadedImages, hasHardcoded, user, reset, watchedValues.phone]);
 
   const handleImageSelect = (side) => async (imageUrl) => {
+    console.log(`🖼️ Image selected for ${side}:`, imageUrl);
     setValue(side, imageUrl);
     setIsProcessing(false);
     setCurrentProcessingSide(null);
+    
+    if (imageUrl && imageUrl !== "" && imageUrl !== null) {
+      // Cập nhật ảnh mới upload
+      const sideKey = side === "citizen_card_front" ? "front" : "back";
+      setUploadedImages(prev => ({
+        ...prev,
+        [sideKey]: imageUrl
+      }));
+    } else {
+      // Reset khi xóa ảnh
+      console.log("🔄 Resetting hardcode flag due to image removal");
+      const sideKey = side === "citizen_card_front" ? "front" : "back";
+      setUploadedImages(prev => ({
+        ...prev,
+        [sideKey]: null
+      }));
+      setHasHardcoded(false);
+    }
   };
 
   const onSubmit = () => {

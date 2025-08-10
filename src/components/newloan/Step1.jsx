@@ -169,39 +169,6 @@ const Step1 = ({ formData, errors, handleInputChange }) => {
             </div>
           </FormField>
 
-          {/* Có đi làm thêm không */}
-          <FormField
-            label="Bạn có đi làm thêm không?"
-            icon={Briefcase}
-            error={errors.has_part_time_job}
-            required
-            description="Việc làm thêm giúp đánh giá khả năng tài chính của bạn"
-          >
-            <div className="flex space-x-6">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="has_part_time_job"
-                  value="true"
-                  checked={formData.has_part_time_job === "true"}
-                  onChange={(e) => handleInputChange("has_part_time_job", e.target.value)}
-                  className="h-4 w-4 text-green-600 focus:ring-green-500"
-                />
-                <span className="text-gray-700 dark:text-gray-300">Có</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="has_part_time_job"
-                  value="false"
-                  checked={formData.has_part_time_job === "false"}
-                  onChange={(e) => handleInputChange("has_part_time_job", e.target.value)}
-                  className="h-4 w-4 text-green-600 focus:ring-green-500"
-                />
-                <span className="text-gray-700 dark:text-gray-300">Không</span>
-              </label>
-            </div>
-          </FormField>
 
           {/* Mục đích vay */}
           <FormField
