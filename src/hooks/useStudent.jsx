@@ -10,11 +10,8 @@ export function useStudent() {
   const { data: studentData, isLoading, error } = useQuery({
     queryKey: ["student", user?.citizen_id],
     queryFn: async () => {
-      console.log("Fetching student with citizen_id:", user.citizen_id);
       const { data } = await student.getStudentByCitizenId(user.citizen_id);
-      console.log("Student API response:", data);
       setStudent(data.data.student);
-      console.log('Student data fetched:', data.data.student);
       return data.data.student;
     },
     retry: false,
@@ -57,7 +54,7 @@ export function useStudent() {
       setStudent(data.data.student);
     },
     onError: (error) => {
-      console.error("Error updating student:", error);
+      console.error("Error updating student:", error);  
     },
   });
 

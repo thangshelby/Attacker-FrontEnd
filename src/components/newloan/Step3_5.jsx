@@ -8,6 +8,7 @@ import {
   Lock,
 } from "lucide-react";
 import api from "@/apis/api";
+import { useAuth } from "@/hooks/useAuth";
 
 const Step3_5 = ({ onNext, onBack, formData, onOtpVerified }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -16,11 +17,10 @@ const Step3_5 = ({ onNext, onBack, formData, onOtpVerified }) => {
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const { user } = useAuth();
   const inputRefs = useRef([]);
   const handleSendMail = async () => {
-    const response = await api.get(
-      `/users/send_otp/thangnnd22414@st.uel.edu.vn`,
-    );
+    const response = await api.get(`/users/send_otp/${user?.email || ""}`);
     console.log(response);
   };
   useEffect(() => {
@@ -32,7 +32,7 @@ const Step3_5 = ({ onNext, onBack, formData, onOtpVerified }) => {
     if (timer > 0) {
       const interval = setInterval(() => {
         setTimer((prev) => prev - 1);
-      }, 1000);
+      }, 5000);
       return () => clearInterval(interval);
     } else {
       setCanResend(true);
@@ -145,7 +145,7 @@ const Step3_5 = ({ onNext, onBack, formData, onOtpVerified }) => {
           <div className="mt-3 inline-flex items-center rounded-full border border-blue-200 bg-blue-100 px-4 py-2 dark:border-blue-800 dark:bg-blue-900/30">
             <Mail className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400" />
             <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-              thangnnd22414@st.uel.edu.vn
+              {user?.email || "Email của bạn"}
             </span>
           </div>
         </div>

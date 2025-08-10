@@ -27,13 +27,11 @@ const LoanHistoryPage = () => {
   const itemsPerPage = 10;
   const { user } = useAuth();
   const { student } = useStudent();
-  console.log(user,student)
   const { loans, isLoadingLoans, loansError, refetch } = useStudentLoans(student?.student_id);
 
   // Refetch data when component mounts to ensure fresh data
   useEffect(() => {
     if (student?.student_id && refetch) {
-      console.log("📱 History page mounted - refetching loan data");
       refetch();
     }
   }, [student?.student_id, refetch]);

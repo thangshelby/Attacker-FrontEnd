@@ -346,7 +346,7 @@ const OverviewLoans = () => {
                         {loan.student_id || "N/A"}
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400">
-                        {loan.studentInfo?.name || "Nguyen Van A"}
+                        {loan.name || "Nguyen Van A"}
                       </td>
 
                       <td className="px-4 py-4 text-sm font-semibold whitespace-nowrap text-green-600 dark:text-green-400">
