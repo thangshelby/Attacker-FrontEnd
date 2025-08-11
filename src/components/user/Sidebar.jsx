@@ -11,14 +11,11 @@ import {
   BadgeInfo,
   SchoolIcon,
   NotebookPen,
-  Wallet,
   History,
   CreditCard,
   LifeBuoy,
   Settings,
   ShieldCheck,
-  ShieldUser,
-  BanknoteArrowUp,
   LogOut,
 } from "lucide-react";
 import { useState } from "react";

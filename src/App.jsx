@@ -5,14 +5,21 @@ import { useAppStore } from "./store/appStore";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import NotificationModal from "./components/user/NotificationModal";
-
+import { initSocket, disconnectSocket } from "./services/socket";
 import FloatingChatBot from "./components/user/chatbot/chatbot";
-import { io } from "socket.io-client";
 import { useAuthStore } from "./store/authStore";
 
 function App() {
   const { user } = useAuthStore();
   const { toast: toastState, clearToast, modal } = useAppStore();
+  useEffect(() => {
+    initSocket(user?.citizen_id || "default_citizen_id");
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [user]);
+
   useEffect(() => {
     if (toastState) {
       if (toastState.type == "success") {

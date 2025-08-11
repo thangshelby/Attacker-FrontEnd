@@ -3,10 +3,15 @@ import { useNotification } from "@/hooks/useNotifcation";
 import { Bell, X, CheckCircle } from "lucide-react";
 import { getIcon } from "@/utils/getIcon";
 import { getUploadElapsedTime } from "@/utils";
+import { getSocket } from "@/services/socket";
+import { queryClient } from "@/apis/react-query";
+import { useAuth } from "@/hooks/useAuth";
 
 const HeaderNotification = forwardRef((_, notificationRef) => {
+  // const {handleNewNotification, emitNewNotification} = useNotifcationRealTime();
   const { notifications, updateNotification, markAllAsRead } =
     useNotification();
+  const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -30,6 +35,40 @@ const HeaderNotification = forwardRef((_, notificationRef) => {
       setUnreadCount(notifications.filter((n) => !n.is_read).length);
     }
   }, [notifications]);
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handleNoti = (data) => {
+      console.log("📢 Notification:", data);
+      queryClient.setQueryData(
+        ["notifications", user?.citizen_id],
+        (oldData) => {
+          const newNotifications = [...(oldData || []), data];
+          return newNotifications;
+        },
+      );
+      setUnreadCount((prev) => prev + 1);
+      queryClient.invalidateQueries(["notifications", user?.citizen_id]);
+    };
+
+    socket?.on("notification", (newNoti) => {
+      console.log("📢 Notification:", newNoti);
+      queryClient.setQueryData(
+        ["notifications", user?.citizen_id],
+        (oldData) => {
+          const newNotifications = [...(oldData || []), newNoti.data];
+          return newNotifications;
+        },
+      );
+      setUnreadCount((prev) => prev + 1);
+      console.log("Updated unread count:", unreadCount);
+      queryClient.invalidateQueries(["notifications", user?.citizen_id]);
+    });
+
+    return () => {
+      socket?.off("notification", handleNoti);
+    };
+  }, []);
 
   const handleMarkAsRead = (id) => {
     updateNotification.mutate({
@@ -94,7 +133,6 @@ const NotificationDropdown = ({
   onMarkAllAsRead,
   onClose,
 }) => {
-  console.log(notifications)
   const getTypeStyles = (type) => {
     switch (type) {
       case "success":
