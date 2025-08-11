@@ -27,7 +27,6 @@ export const loan = {
     });
   },
   update:(loan_id, data) => {
-    console.log("Updating loan with ID:", loan_id, "and data:", data);
     return api.put(`/loans/${loan_id}`, data, {
       withCredentials: true,
     });

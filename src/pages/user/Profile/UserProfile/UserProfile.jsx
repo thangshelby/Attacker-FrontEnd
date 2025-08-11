@@ -17,35 +17,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@/hooks/useUser";
-import ImageUpload from "@/components/user/profile/ImageUpload";
+import ImageUpload from "@/components/shared/ImageUpload";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import FormField from "@/components/shared/FormField";
 
-// const FormField = ({
-//   label,
-//   icon: Icon,
-//   error,
-//   children,
-//   required = false,
-// }) => (
-//   <div className="space-y-2">
-//     <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
-//       {Icon && <Icon className="mr-2 h-4 w-4 text-blue-500" />}
-//       {label}
-//       {required && <span className="ml-1 text-red-500">*</span>}
-//     </label>
-//     <div className="relative">
-//       {children}
-//       {error && (
-//         <div className="mt-1 flex items-center text-sm text-red-600">
-//           <AlertCircle className="mr-1 h-4 w-4" />
-//           {error.message}
-//         </div>
-//       )}
-//     </div>
-//   </div>
-// );
 const formSchema = z.object({
   name: z.string(),
   citizen_id: z.string(),
@@ -68,10 +44,12 @@ const UserProfile = () => {
   // Show loading state if user data is not available
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="text-center">
-          <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải thông tin người dùng...</p>
+          <div className="mx-auto h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Đang tải thông tin người dùng...
+          </p>
         </div>
       </div>
     );
@@ -101,7 +79,6 @@ const UserProfile = () => {
   });
   const watchedValues = watch();
 
-
   useEffect(() => {
     if (
       watchedValues.citizen_card_front &&
@@ -115,7 +92,12 @@ const UserProfile = () => {
         citizen_card_back: watchedValues.citizen_card_back,
       });
     }
-  }, [watchedValues.citizen_card_back, watchedValues.citizen_card_front, user, reset]);
+  }, [
+    watchedValues.citizen_card_back,
+    watchedValues.citizen_card_front,
+    user,
+    reset,
+  ]);
 
   const handleImageSelect = (side) => async (imageUrl) => {
     setValue(side, imageUrl);

@@ -3,25 +3,29 @@ import { useAuthStore } from "../store/authStore";
 import { useAppStore } from "@/store/appStore";
 import { user as userAPI } from "../apis/user";
 
-export function useUser() {
+export function useUser(citizen_id) {
   const { user, setUser } = useAuthStore();
   const { setToast } = useAppStore();
 
-  const getUserByCitizenId = (citizen_id) => useQuery({
-    queryKey: ["userByCitizenId", citizen_id],
-    queryFn: async () => {
-      const { data } = await userAPI.getUserByCitizenId(citizen_id);
-      return data.data.user;
-    },
-    enabled: !!citizen_id,
-    onError: (error) => {
-      console.error("Error fetching user by citizen ID:", error);
-      setToast({
-        type: "error",
-        message: "Không tìm thấy người dùng với mã số công dân này.",
-      });
-    },
-  });
+  const {
+    selectedUser,
+    isLoading: isLoadingUser,
+  } = () =>
+    useQuery({
+      queryKey: ["userByCitizenId", citizen_id],
+      queryFn: async () => {
+        const { data } = await userAPI.getUserByCitizenId(citizen_id);
+        return data.data.user;
+      },
+      enabled: !!citizen_id,
+      onError: (error) => {
+        console.error("Error fetching user by citizen ID:", error);
+        setToast({
+          type: "error",
+          message: "Không tìm thấy người dùng với mã số công dân này.",
+        });
+      },
+    });
   const updateUser = useMutation({
     mutationFn: (data) => userAPI.updateUser(data),
     onSuccess: (data) => {
@@ -95,7 +99,8 @@ export function useUser() {
   });
 
   return {
-    getUserByCitizenId,
+    selectedUser,
+    isLoadingUser,
     updateUser,
     getUsersBySchoolName,
     getUserById,

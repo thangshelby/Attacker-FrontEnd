@@ -15,7 +15,8 @@ import {
   Loader2,
   Info,
 } from "lucide-react";
-import ImageUpload from "@/components/user/profile/ImageUpload";
+
+import ImageUpload from "@/components/shared/ImageUpload";
 import { useStudent } from "@/hooks/useStudent";
 import { useForm } from "react-hook-form";
 import { z } from "zod";

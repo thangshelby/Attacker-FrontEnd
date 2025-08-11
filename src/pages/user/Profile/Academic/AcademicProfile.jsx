@@ -29,8 +29,8 @@ const AcademicProfile = () => {
   const [isProcessSuccess, setIsProcessSuccess] = useState(false);
   const [errors, setErrors] = useState({});
   const { user } = useAuth();
-  const { student } = useStudent();
-  const { academicData } = useAcademic();
+  const { student } = useStudent(user?.citizen_id);
+  const { academicData } = useAcademic(student?.student_id);
   const academicContainerRef = useRef(null);
 
   useEffect(() => {
@@ -221,26 +221,38 @@ const AcademicProfile = () => {
               <User className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">{user?.name || "Chưa có tên"}</h2>
-              <p className="text-gray-300">{student?.student_id || "Chưa có mã sinh viên"}</p>
+              <h2 className="text-xl font-bold text-white">
+                {user?.name || "Chưa có tên"}
+              </h2>
+              <p className="text-gray-300">
+                {student?.student_id || "Chưa có mã sinh viên"}
+              </p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div>
               <span className="text-gray-400">Trường đại học:</span>
-              <p className="text-white">{student?.university || "Chưa có thông tin"}</p>
+              <p className="text-white">
+                {student?.university || "Chưa có thông tin"}
+              </p>
             </div>
             <div>
               <span className="text-gray-400">Ngành học:</span>
-              <p className="text-white">{student?.faculty_name || "Chưa có thông tin"}</p>
+              <p className="text-white">
+                {student?.faculty_name || "Chưa có thông tin"}
+              </p>
             </div>
             <div>
               <span className="text-gray-400">Năm học:</span>
-              <p className="text-white">Năm {academicData?.study_year || "N/A"}</p>
+              <p className="text-white">
+                Năm {academicData?.study_year || "N/A"}
+              </p>
             </div>
             <div>
               <span className="text-gray-400">Chuyên ngành:</span>
-              <p className="text-white">{student?.major_name || "Chưa có thông tin"}</p>
+              <p className="text-white">
+                {student?.major_name || "Chưa có thông tin"}
+              </p>
             </div>
           </div>
         </div>
@@ -435,10 +447,11 @@ const AcademicProfile = () => {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-400">
                 Cập nhật lần cuối:{" "}
-                {academicData?.updated_at 
-                  ? new Date(academicData.updated_at).toLocaleDateString("vi-VN")
-                  : "Chưa có dữ liệu"
-                }
+                {academicData?.updated_at
+                  ? new Date(academicData.updated_at).toLocaleDateString(
+                      "vi-VN",
+                    )
+                  : "Chưa có dữ liệu"}
               </p>
             </div>
           </div>

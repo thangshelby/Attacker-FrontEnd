@@ -3,42 +3,24 @@ import { student } from "@/apis/student";
 import { useAppStore } from "@/store/appStore";
 import { useAuthStore } from "@/store/authStore";
 
-export function useStudent() {
+export function useStudent(citizen_id) {
   const { setToast } = useAppStore();
   const { setStudent, user } = useAuthStore();
 
   const { data: studentData } = useQuery({
-    queryKey: ["student", user?.citizen_id],
+    queryKey: ["student", citizen_id],
     queryFn: async () => {
-      const { data } = await student.getStudent(user.citizen_id);
+      const { data } = await student.getStudent(citizen_id);
       setStudent(data.data.student);
       return data.data.student;
     },
-    retry: false,
-    enabled: !!user?.citizen_id,
+    // retry: true,
+    enabled: !!citizen_id,
     onError: (error) => {
       console.error("Error fetching student:", error);
     },
   });
-  const getStudentByCitizenId = useQuery({
-    queryKey: ["studentByCitizenId", user?.citizen_id],
-    queryFn: async () => {
-      const { data } = await student.getStudentByCitizenId(user.citizen_id);
-      return data.data.student;
-    },
-    enabled: !!user?.citizen_id,
-    onError: (error) => {
-      console.error("Error fetching student by citizen ID:", error);
-      setToast({
-        type: "error",
-        message: "Không tìm thấy sinh viên với mã số công dân này.",
-      });
-    },
-  });
-  const getStudent = useQuery({
-    queryKey: ["student"],
-    queryFn: () => student.getStudent(),
-  });
+
   const updateStudent = useMutation({
     mutationFn: (data) =>
       student.updateStudent({
@@ -68,9 +50,11 @@ export function useStudent() {
 
   return {
     student: studentData,
-    getStudent,
-    getStudentByCitizenId,
     updateStudent,
     updateStudentDIDById,
   };
 }
+
+// export function updateStudentDID(citizen_id, data) {
+
+// }`

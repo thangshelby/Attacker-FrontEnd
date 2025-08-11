@@ -1,20 +1,8 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { loan } from "@/apis/loan";
-import { useStudent } from "./useStudent";
-import { useState, useEffect } from "react";
-import { useAuth } from "./useAuth";
 import { queryClient } from "../apis/react-query";
 
-export function useLoan(loan_id) {
-  const { student, isLoading } = useStudent();
-  const [student_id, setStudent_id] = useState("");
-  const { user } = useAuth();
-  useEffect(() => {
-    if (student?.student_id) {
-      setStudent_id(student.student_id);
-    }
-  }, [student, isLoading]);
-  // Fetch all loans
+export function useLoans() {
   const {
     data: loans,
     isLoading: isLoadingLoans,
@@ -28,26 +16,17 @@ export function useLoan(loan_id) {
     onSuccess: (data) => {
       return data.data.loans;
     },
-    // refetchOnWindowFocus: false,
   });
 
-  const getMASConversation = useQuery({
-    queryKey: ["masConversation", loan_id],
-    queryFn: async () => {
-      const { data } = await loan.getMassConversation(loan_id);
-      return data.data.conversation;
-    },
-    enabled: !!loan_id,
-  });
-  // Fetch loan by student ID
-  const getLoansByStudentId = useQuery({
-    queryKey: ["loans", student_id],
-    queryFn: async () => {
-      const response = await loan.getLoanByStudentId(student_id);
-      return response.data.data.loans;
-    },
-    enabled: !!student_id,
-  });
+  // const getMASConversation = useQuery({
+  //   queryKey: ["masConversation", loan_id],
+  //   queryFn: async () => {
+  //     const { data } = await loan.getMassConversation(loan_id);
+  //     return data.data.conversation;
+  //   },
+  //   enabled: !!loan_id,
+  // });
+
   // Fetch loan by ID
   // const getLoanById = useQuery({
   //   queryKey: ["loan", { id: loanId }],
@@ -55,55 +34,81 @@ export function useLoan(loan_id) {
   //   enabled: true,
   // });
 
-  const createLoanContract = useMutation({
-    mutationFn: (data) => loan.create(data),
-    onSuccess: (data) => {
-      console.log("useLoan - Loan creation successful:", data);
-      
-      // Invalidate all loan-related queries to refresh data
-      queryClient.invalidateQueries(["loans"]);
-      
-      // Also invalidate student-specific loans if we have student_id
-      if (student_id) {
-        queryClient.invalidateQueries(["loans", student_id]);
-      }
-      
-      // Don't modify the response, just return as-is
-      return data;
-    },
-    onError: (error) => {
-      console.error("Error creating loan contract:", error);
-    },
-  });
-
-  const updateLoanContract = useMutation({
-    mutationFn: (data) => {
-      return loan.update(data.loan_id, {
-        ...data,
-      });
-    },
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries(["loans"]);
-      if (variables?.loan_id) {
-        queryClient.invalidateQueries(["masConversation", variables.loan_id]);
-      }
-      return response;
-    },
-    onError: (error) => {
-      console.error("Error updating loan contract:", error);
-    },
-  });
-
   return {
     loans,
     isLoadingLoans,
     loansError,
-    getLoansByStudentId,
-    getMASConversation,
-    // getLoanById,
-    createLoanContract,
-    updateLoanContract,
+    // getMASConversation,
   };
+}
+
+export function useLoan(loan_id) {
+  const {
+    data: selectedLoan,
+    isLoading: isLoadingLoan,
+    error: loanError,
+  } = useQuery({
+    queryKey: ["loan", loan_id],
+    queryFn: async () => {
+      const { data } = await loan.getLoanById(loan_id);
+      return data.data.loan;
+    },
+    enabled: !!loan_id,
+    onError: (error) => {
+      console.error("Error fetching loan:", error);
+    },
+  });
+  return {
+    selectedLoan,
+    isLoading: isLoadingLoan,
+    error: loanError,
+  };
+}
+
+export function useCreateLoan() {
+  const { mutate: createLoan, isPending: createLoanPending } = useMutation({
+    mutationFn: (data) => loan.create(data),
+    onSuccess: (newLoan, variables) => {
+      // Invalidate all loans queries
+      queryClient.invalidateQueries({ queryKey: ["loans"] });
+      
+      // If we have student_id, also invalidate student-specific loans
+      if (variables.student_id) {
+        queryClient.invalidateQueries({ queryKey: ["loans", variables.student_id] });
+      }
+    },
+    onError: (error) => {
+      console.error("Error creating loan:", error);
+    },
+  });
+  return { createLoan, createLoanPending };
+}
+
+export function useUpdateLoan() {
+  const { mutate: updateLoan, isPending: updateLoanPending } = useMutation({
+    mutationFn: async ({ loan_id, data }) => {
+      const response = await loan.update(loan_id, data);
+      return response.data.loan;
+    },
+    onSuccess: (updatedLoan, variables) => {
+      // Invalidate all loans queries
+      queryClient.invalidateQueries({ queryKey: ["loans"] });
+      
+      // // Also invalidate specific loan if we have the ID
+      // if (variables.loan_id) {
+      //   queryClient.invalidateQueries({ queryKey: ["loan", variables.loan_id] });
+      // }
+      
+      // // If we have student_id, also invalidate student-specific loans
+      // if (updatedLoan?.student_id) {
+      //   queryClient.invalidateQueries({ queryKey: ["loans", updatedLoan.student_id] });
+      // }
+    },
+    onError: (error) => {
+      console.error("Error updating loan:", error);
+    },
+  });
+  return { updateLoan, updateLoanPending };
 }
 
 export function useStudentLoans(student_id) {
@@ -115,9 +120,7 @@ export function useStudentLoans(student_id) {
   } = useQuery({
     queryKey: ["loans", student_id],
     queryFn: async () => {
-      console.log("Fetching loans for student_id:", student_id)
       const response = await loan.getLoanByStudentId(student_id);
-      console.log("Student loans response:", response)
       return response.data.data.loans;
     },
     enabled: !!student_id,

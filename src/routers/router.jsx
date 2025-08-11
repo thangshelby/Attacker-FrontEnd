@@ -24,7 +24,7 @@ import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
 import LoanNew from "../pages/user/UserLoan/LoanNew.jsx";
 import ProtectedAcademicProfile from "@/utils/ProtectedAcademicProfile";
 import AcademicProfileNotVerified from "@/pages/user/Profile/Academic/AcademicProfileNotVerified";
-import LoanDetail from "@/pages/admin/LoanDetail";
+import UserLoanDetail from "@/pages/user/UserLoan/LoanDetail";
 
 //ADMIN PAGE
 import AdminLayout from "@/layouts/AdminLayout";
@@ -34,6 +34,8 @@ import RiskAnalyze from "@/pages/admin/RiskAnalyze";
 import OverviewLoans from "@/pages/admin/OverviewLoans";
 import MultiAgentDebateSystem from "@/pages/admin/DebateAgent";
 import AIReasoningDashboard from "@/pages/admin/Debate2";
+import AdminLoanDetail from "@/pages/admin/LoanDetail";
+
 const Router = () => {
   return (
     <Suspense
@@ -60,7 +62,7 @@ const Router = () => {
           <Route path="admin" element={<AdminLayout />}>
             <Route index path="dashboard" element={<AdminDashboard />} />
             <Route path="loans" element={<OverviewLoans />} />
-            <Route path="loans/:loan_id" element={<LoanDetail />} />
+            <Route path="loans/:loan_id" element={<AdminLoanDetail />} />
 
             <Route path="payment-schedule" element={<PaymentSchedulePage />} />
             <Route path="risk-analyze" element={<RiskAnalyze />} />
@@ -95,6 +97,7 @@ const Router = () => {
             <Route path="DIDs" element={<DIDs />} />
             <Route path="VCs" element={<VCs />} />
 
+            <Route path="loans/:loan_id" element={<UserLoanDetail />} />
             <Route path="history" element={<LoanHistory />} />
             <Route path="newloan" element={<LoanNew />} />
           </Route>

@@ -1,11 +1,12 @@
 import api from "@/apis/api";
 
 export const student = {
-  getStudentByCitizenId: (citizen_id) =>
-    api.get(`/students/${citizen_id}`, {
+  getStudent: (citizen_id) => {
+    return api.get(`/students/${citizen_id}`, {
       withCredentials: true,
-    }),
-  updateStudent: ( data) =>
+    });
+  },
+  updateStudent: (data) =>
     api.put(`/students/update_student`, data, {
       withCredentials: true,
     }),

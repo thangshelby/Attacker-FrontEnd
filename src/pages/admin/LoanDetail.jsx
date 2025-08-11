@@ -32,7 +32,7 @@ import {
 import AgentOpinions from "@/components/admin/loandetail/AgentOpinions";
 import AgentDebate from "@/components/admin/loandetail/AgentDebate";
 import DecisionBadge from "@/components/admin/loandetail/DecisionBade";
-import { useNavigate,useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 // Sample data
 const sampleLoanData = {
   _id: "689493432f3ceb2fda6fba9c",
@@ -120,30 +120,30 @@ const sampleLoanData = {
     both_conditions_met: true,
   },
 };
-import { useAppStore } from "@/store/appStore";
-import { useLoan } from "@/hooks/useLoan";
+import { useLoans } from "@/hooks/useLoan";
 import { useUser } from "@/hooks/useUser";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
-
+import { useLoan } from "@/hooks/useLoan";
 import OverviewSection from "@/components/admin/loandetail/Overview";
 
-const LoanDetail = () => {
+const AdminLoanDetail = () => {
   const [selectedLoan] = useState(sampleLoanData);
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedAgent, setExpandedAgent] = useState(null);
   const [showNotification, setShowNotification] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
-  
-  const {loan} = useAppStore();
-  const user= useUser.getUserByCitizenId();
-  const { student } = useStudent();
+
+  const location = useLocation();
+  const selectedLoanId = location.pathname.split("/").pop();
+  const { loan } = useLoan(selectedLoanId);
+  const { selectedUser } = useUser(loan?.citizen_id);
+
+  const { student } = useStudent(loan?.citizen_id);
   const { academicData } = useAcademic();
   const navigate = useNavigate();
-  const { getMASConversation } = useLoan(loan?.loan_id);
+  const { getMASConversation } = useLoans(loan?.loan_id);
   const masConversation = getMASConversation.data;
-  
 
   useEffect(() => {
     const timer = setTimeout(() => setShowNotification(true), 1000);
@@ -182,9 +182,9 @@ const LoanDetail = () => {
     // // a.download = `loan-${selectedLoan.loan_id.slice(-8)}.json`;
     // a.click();
   };
-  if (getMASConversation.isLoading || !masConversation) {
-    return <div>Loading...</div>;
-  }
+  // if (getMASConversation.isLoading || !masConversation) {
+  //   return <div>Loading...</div>;
+  // }
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Notification Toast */}
@@ -206,7 +206,7 @@ const LoanDetail = () => {
           onExport={handleExport}
           isFullscreen={isFullscreen}
           onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
-          handleBackToList={()=>{
+          handleBackToList={() => {
             navigate("/admin/loans");
           }}
         />
@@ -280,7 +280,11 @@ const Header = ({
       {/* Action buttons */}
       <div className="flex items-center space-x-3">
         {[
-          { icon: Maximize2, action: onToggleFullscreen, tooltip: "Toàn màn hình" },
+          {
+            icon: Maximize2,
+            action: onToggleFullscreen,
+            tooltip: "Toàn màn hình",
+          },
           { icon: Download, action: onExport, tooltip: "Xuất dữ liệu" },
           { icon: Share, action: () => {}, tooltip: "Chia sẻ" },
           { icon: Bell, action: () => {}, tooltip: "Thông báo" },
@@ -305,7 +309,7 @@ const Header = ({
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-lg">
             <FileText className="h-6 w-6 text-white" />
           </div>
-          
+
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-xl font-bold text-transparent">
@@ -320,7 +324,8 @@ const Header = ({
               </button>
             </div>
             <p className="text-sm text-slate-400">
-              {selectedLoan.studentInfo?.name} • {formatDate(selectedLoan.created_at)}
+              {selectedLoan.studentInfo?.name} •{" "}
+              {formatDate(selectedLoan.created_at)}
             </p>
           </div>
         </div>
@@ -328,17 +333,21 @@ const Header = ({
         {/* Center: Amount & Status */}
         <div className="flex items-center space-x-6">
           <div className="text-center">
-            <div className="text-sm font-medium text-slate-400 mb-1">Số tiền vay</div>
+            <div className="mb-1 text-sm font-medium text-slate-400">
+              Số tiền vay
+            </div>
             <div className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-lg font-bold text-transparent">
               {formatCurrency(selectedLoan.loan_amount_requested)}
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <DecisionBadge decision={selectedLoan.decision} size="medium" />
             <div className="flex items-center rounded-full border border-slate-600 bg-slate-700/50 px-3 py-1.5 text-sm text-slate-300">
               <Timer className="mr-2 h-3 w-3" />
-              <span className="font-medium">{selectedLoan.processing_time}s</span>
+              <span className="font-medium">
+                {selectedLoan.processing_time}s
+              </span>
             </div>
           </div>
         </div>
@@ -376,14 +385,16 @@ const MinimalHeader = ({
           <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translate-x-1" />
           <span className="font-medium">Danh sách</span>
         </button>
-        
+
         <div className="h-6 w-px bg-slate-600"></div>
-        
+
         <div className="flex items-center space-x-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500">
             <FileText className="h-4 w-4 text-white" />
           </div>
-          <span className="font-semibold text-white">#{selectedLoan.loan_id.slice(-8)}</span>
+          <span className="font-semibold text-white">
+            #{selectedLoan.loan_id.slice(-8)}
+          </span>
           <button
             onClick={onCopyLoanId}
             className="rounded p-1 transition-colors hover:bg-slate-700"
@@ -470,7 +481,6 @@ const TabNavigation = ({ activeTab, setActiveTab, selectedLoan }) => {
     </div>
   );
 };
-
 
 const RuleBasedSection = ({ selectedLoan }) => {
   const ruleData = selectedLoan.rule_based;
@@ -695,4 +705,4 @@ if (typeof document !== "undefined") {
   document.head.appendChild(styleSheet);
 }
 
-export default LoanDetail;
+export default AdminLoanDetail;

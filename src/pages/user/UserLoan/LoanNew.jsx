@@ -19,70 +19,24 @@ import { useAcademic } from "@/hooks/useAcademic";
 import Step1 from "@/components/user/newloan/Step1";
 import Step2 from "@/components/user/newloan/Step2";
 import Step3 from "@/components/user/newloan/Step3";
-import { useLoan } from "@/hooks/useLoan";
+import Step4 from "@/components/user/newloan/Step4";
+import Step5 from "@/components/user/newloan/Step5";
+import StepIndicator from "@/components/user/newloan/StepIndicator";
+import { useCreateLoan } from "@/hooks/useLoan";
 const validateAmount = (amount) => {
   return amount > 0 && amount <= 100000000;
 };
-
-// Step indicator component
-const StepIndicator = ({ currentStep, steps }) => (
-  <div className="mb-8">
-    <div className="flex items-center justify-center">
-      {steps.map((step, index) => (
-        <div key={index} className="flex items-center">
-          <div
-            className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200 ${
-              index + 1 < currentStep
-                ? "border-green-500 bg-green-500 text-white"
-                : index + 1 === currentStep
-                  ? "border-green-500 bg-green-500 text-white"
-                  : "border-gray-300 bg-gray-200 text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-400"
-            }`}
-          >
-            {index + 1 < currentStep ? (
-              <CheckCircle className="h-6 w-6" />
-            ) : (
-              <span className="font-semibold">{index + 1}</span>
-            )}
-          </div>
-          <div className="ml-3 text-sm">
-            <div
-              className={`font-medium ${
-                index + 1 <= currentStep
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {step.title}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {step.description}
-            </div>
-          </div>
-          {index < steps.length - 1 && (
-            <div
-              className={`mx-4 h-0.5 w-12 ${
-                index + 1 < currentStep
-                  ? "bg-green-500"
-                  : "bg-gray-300 dark:bg-gray-600"
-              }`}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-);
 
 const NewLoans = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [verificationSuccess, setVerificationSuccess] = useState(true);
-  const [verificationId, setVerificationId] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
-  const { student, isLoading: studentLoading } = useStudent();
+
+  const { student, isLoading: studentLoading } = useStudent(user?.citizen_id);
   const { academicData: academic, isLoading: academicLoading } = useAcademic();
-  const { createLoanContract } = useLoan();
+  const { createLoan, createLoanPending } = useCreateLoan();
 
   const [formData, setFormData] = useState({
     ...defaultFormData,
@@ -105,12 +59,12 @@ const NewLoans = () => {
   // Update formData and studentInfo when data from hooks changes
   useEffect(() => {
     if (student?.student_id) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         student_id: student.student_id,
       }));
-      
-      setStudentInfo(prev => ({
+
+      setStudentInfo((prev) => ({
         ...prev,
         studentId: student.student_id,
         major: student.major_name || prev.major,
@@ -120,7 +74,7 @@ const NewLoans = () => {
 
   useEffect(() => {
     if (user?.name) {
-      setStudentInfo(prev => ({
+      setStudentInfo((prev) => ({
         ...prev,
         fullName: user.name,
       }));
@@ -129,27 +83,12 @@ const NewLoans = () => {
 
   useEffect(() => {
     if (academic?.gpa) {
-      setStudentInfo(prev => ({
+      setStudentInfo((prev) => ({
         ...prev,
         gpa: academic.gpa,
       }));
     }
   }, [academic]);
-
-  const steps = [
-    {
-      title: "Thu thập thông tin",
-      description: "Điền thông tin khoản vay",
-    },
-    {
-      title: "Xác minh học tập",
-      description: "Xác minh kết quả học tập",
-    },
-    {
-      title: "Xem thông tin",
-      description: "Xem lại và gửi yêu cầu",
-    },
-  ];
 
   const validateForm = () => {
     const newErrors = {};
@@ -285,31 +224,44 @@ const NewLoans = () => {
       setCurrentStep(currentStep - 1);
     }
   };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-    if (currentStep !== 3) {
-      setCurrentStep(3);
-      return;
-    }
+  const handleLoanCreation = async () => {
+    setIsProcessing(true);
 
     try {
-      createLoanContract.mutate(formData, {
-        onSuccess: (data) => {
+      createLoan(formData, {
+        onSuccess: (response) => {
+          // Extract the actual data from axios response
+          const data = response.data || response;
+
           setStudentInfo({
             ...studentInfo,
             studentId: data.student_id,
           });
           setSubmitSuccess(true);
+          setIsProcessing(false);
         },
         onError: (error) => {
-          console.error("Error creating loan contract:", error);
           setSubmitSuccess(false);
+          setIsProcessing(false);
         },
       });
     } catch (error) {
-      console.error("Error submitting loan request:", error);
+      setSubmitSuccess(false);
+      setIsProcessing(false);
     }
+  };
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    if (currentStep !== 3) {
+      setCurrentStep(3);
+      return;
+    }
+
+    // From Step 3, move to Step 4 (OTP) without calling API yet
+    setCurrentStep(4);
   };
 
   // Show loading state while initial data is loading
@@ -318,8 +270,10 @@ const NewLoans = () => {
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-900">
         <div className="flex min-h-screen items-center justify-center">
           <div className="text-center">
-            <div className="h-16 w-16 animate-spin rounded-full border-t-2 border-green-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tải thông tin sinh viên...</p>
+            <div className="mx-auto h-16 w-16 animate-spin rounded-full border-t-2 border-green-500"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Đang tải thông tin sinh viên...
+            </p>
           </div>
         </div>
       </div>
@@ -343,7 +297,7 @@ const NewLoans = () => {
         </div>
 
         {/* Step Indicator */}
-        <StepIndicator currentStep={currentStep} steps={steps} />
+        <StepIndicator currentStep={currentStep} />
 
         {/* Success Message */}
         {submitSuccess && (
@@ -375,54 +329,71 @@ const NewLoans = () => {
           {currentStep === 3 && (
             <Step3 formData={formData} studentInfo={studentInfo} />
           )}
+          {/* Step 4: OTP Verification */}
+          {currentStep === 4 && (
+            <Step4
+              formData={formData}
+              onNext={() => setCurrentStep(5)}
+              onBack={() => {
+                setCurrentStep(3);
+              }}
+              onOtpVerified={handleLoanCreation}
+            />
+          )}
+          {/* Step 5: PDF Generation */}
+          {currentStep === 5 && (
+            <Step5 formData={formData} studentInfo={studentInfo} />
+          )}
 
-          {/* Navigation Buttons */}
-          <div className="bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
-            <div className="flex justify-between">
-              <div>
-                {currentStep > 1 && (
-                  <button
-                    onClick={handlePrevStep}
-                    className="flex cursor-pointer items-center rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Quay lại
-                  </button>
-                )}
-              </div>
+          {/* Navigation Buttons - Hide on step 4 (OTP) and step 5 (Success) */}
+          {currentStep < 4 && (
+            <div className="bg-gray-50 px-6 py-4 dark:bg-gray-700/50">
+              <div className="flex justify-between">
+                <div>
+                  {currentStep > 1 && (
+                    <button
+                      onClick={handlePrevStep}
+                      className="flex cursor-pointer items-center rounded-xl border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
+                    >
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Quay lại
+                    </button>
+                  )}
+                </div>
 
-              <div className="flex space-x-3">
-                {currentStep < 3 ? (
-                  <button
-                    onClick={handleNextStep}
-                    // disabled={currentStep === 2}
-                    className="flex cursor-pointer items-center rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {currentStep === 2 ? "Chờ xác minh" : "Tiếp tục"}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={createLoanContract.isPending}
-                    className="relative cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {createLoanContract.isPending ? (
-                      <div className="flex items-center">
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Đang gửi...
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <Send className="mr-2 h-4 w-4" />
-                        Gửi yêu cầu vay
-                      </div>
-                    )}
-                  </button>
-                )}
+                <div className="flex space-x-3">
+                  {currentStep < 3 ? (
+                    <button
+                      onClick={handleNextStep}
+                      // disabled={currentStep === 2}
+                      className="flex cursor-pointer items-center rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {currentStep === 2 ? "Chờ xác minh" : "Tiếp tục"}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSubmit}
+                      disabled={createLoanPending || isProcessing}
+                      className="relative cursor-pointer rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {createLoanPending || isProcessing ? (
+                        <div className="flex items-center">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Đang gửi...
+                        </div>
+                      ) : (
+                        <div className="flex items-center">
+                          <Send className="mr-2 h-4 w-4" />
+                          Gửi yêu cầu vay
+                        </div>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

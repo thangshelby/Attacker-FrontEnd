@@ -3,21 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { useStudent } from "./useStudent";
 
-export function useAcademic() {
-  const { student } = useStudent();
-  const { user } = useAuth();
+export function useAcademic(student_id) {
   const {
     data: academicData,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["academicRecord", student?.student_id],
+    queryKey: ["academicRecord", student_id],
     queryFn: async () => {
-      const { data } = await academic.getAcademicRecord(student.student_id);
+      const { data } = await academic.getAcademicRecord(student_id);
       return data.data.academic;
     },
     retry: false,
-    enabled: !!student?.student_id, // Only run if student ID is available
+    enabled: !!student_id, // Only run if student ID is available
   });
 
   return {

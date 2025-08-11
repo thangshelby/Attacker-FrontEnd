@@ -1,5 +1,8 @@
 import React from "react";
+import {
+  CheckCircle,
 
+} from "lucide-react";
 const StepIndicator = ({ currentStep }) => {
   const steps = [
     {
