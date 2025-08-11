@@ -5,7 +5,8 @@ import { useAppStore } from "./store/appStore";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import NotificationModal from "./components/user/NotificationModal";
-import FloatingChatBot from "./components/shared/chatbot/chatbot";
+
+import FloatingChatBot from "./components/user/chatbot/chatbot";
 import { io } from "socket.io-client";
 import { useAuthStore } from "./store/authStore";
 

@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { queryClient } from "../apis/react-query";
 
-
 export function useLoan(loan_id) {
   const { student, isLoading } = useStudent();
   const [student_id, setStudent_id] = useState("");
@@ -59,10 +58,18 @@ export function useLoan(loan_id) {
   const createLoanContract = useMutation({
     mutationFn: (data) => loan.create(data),
     onSuccess: (data) => {
-      return {
-        ...data,
-        citizen_id: user?.citizen_id,
-      };
+      console.log("useLoan - Loan creation successful:", data);
+      
+      // Invalidate all loan-related queries to refresh data
+      queryClient.invalidateQueries(["loans"]);
+      
+      // Also invalidate student-specific loans if we have student_id
+      if (student_id) {
+        queryClient.invalidateQueries(["loans", student_id]);
+      }
+      
+      // Don't modify the response, just return as-is
+      return data;
     },
     onError: (error) => {
       console.error("Error creating loan contract:", error);
@@ -72,13 +79,15 @@ export function useLoan(loan_id) {
   const updateLoanContract = useMutation({
     mutationFn: (data) => {
       return loan.update(data.loan_id, {
-        ...data,  
+        ...data,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries(["loans"]);
-      queryClient.invalidateQueries(["masConversation", data.loan_id]);
-      return data;
+      if (variables?.loan_id) {
+        queryClient.invalidateQueries(["masConversation", variables.loan_id]);
+      }
+      return response;
     },
     onError: (error) => {
       console.error("Error updating loan contract:", error);
@@ -94,5 +103,31 @@ export function useLoan(loan_id) {
     // getLoanById,
     createLoanContract,
     updateLoanContract,
+  };
+}
+
+export function useStudentLoans(student_id) {
+  const {
+    data: loans,
+    isLoading: isLoadingLoans,
+    error: loansError,
+    refetch,
+  } = useQuery({
+    queryKey: ["loans", student_id],
+    queryFn: async () => {
+      console.log("Fetching loans for student_id:", student_id)
+      const response = await loan.getLoanByStudentId(student_id);
+      console.log("Student loans response:", response)
+      return response.data.data.loans;
+    },
+    enabled: !!student_id,
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    staleTime: 0, // Consider data stale immediately for fresh loans
+  });
+  return {
+    loans,
+    isLoadingLoans,
+    loansError,
+    refetch,
   };
 }

@@ -18,11 +18,10 @@ import Dashboard from "../pages/user/Dashboard/Dashboard.jsx";
 import UserProfile from "@/pages/user/Profile/UserProfile/UserProfile";
 import UniversityProfile from "../pages/user/Profile/UniversityProfile/UniversityProfile.jsx";
 import AcademicProfile from "../pages/user/Profile/Academic/AcademicProfile.jsx";
-import MyLoans from "../pages/user/MyLoan/MyLoan.jsx";
-import HistoryTransaction from "../pages/user/HistoryTransaction/HistoryTransaction.jsx";
+import LoanHistory from "../pages/user/UserLoan/LoanHistory.jsx";
 import DIDs from "../pages/user/DecentralizedIdentification/DIDs/DIDs.jsx";
 import VCs from "../pages/user/DecentralizedIdentification/VCs/VCs.jsx";
-import NewLoans from "../pages/user/NewLoan/NewLoans.jsx";
+import LoanNew from "../pages/user/UserLoan/LoanNew.jsx";
 import ProtectedAcademicProfile from "@/utils/ProtectedAcademicProfile";
 import AcademicProfileNotVerified from "@/pages/user/Profile/Academic/AcademicProfileNotVerified";
 import LoanDetail from "@/pages/admin/LoanDetail";
@@ -45,6 +44,7 @@ const Router = () => {
       }
     >
       <Routes>
+        {/* PUBLIC ROUTES */}
         <Route path="/landing" element={<LandingPage />} />
 
         <Route path="/auth" element={<AuthLayout />}>
@@ -52,10 +52,11 @@ const Router = () => {
           <Route path="register" element={<RegisterPage />} />
         </Route>
 
+        {/* PROTECTED ROUTES */}
         <Route element={<ProtectedRoute />}>
           <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
 
-          {/* ADMIN ROUTE */}
+          {/* ADMIN ROUTES */}
           <Route path="admin" element={<AdminLayout />}>
             <Route index path="dashboard" element={<AdminDashboard />} />
             <Route path="loans" element={<OverviewLoans />} />
@@ -67,7 +68,8 @@ const Router = () => {
             <Route path="debate-2" element={<AIReasoningDashboard />} />
           </Route>
 
-        {/* USER ROUTE */}
+          {/* USER ROUTE */}
+
           <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
@@ -93,9 +95,8 @@ const Router = () => {
             <Route path="DIDs" element={<DIDs />} />
             <Route path="VCs" element={<VCs />} />
 
-            <Route path="loans" element={<MyLoans />} />
-            <Route path="history" element={<HistoryTransaction />} />
-            <Route path="newloan" element={<NewLoans />} />
+            <Route path="history" element={<LoanHistory />} />
+            <Route path="newloan" element={<LoanNew />} />
           </Route>
           <Route path="settings" element={<SettingsPage />} />
         </Route>

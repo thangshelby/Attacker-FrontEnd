@@ -20,31 +20,32 @@ import { useUser } from "@/hooks/useUser";
 import ImageUpload from "@/components/user/profile/ImageUpload";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import FormField from "@/components/shared/FormField";
 
-const FormField = ({
-  label,
-  icon: Icon,
-  error,
-  children,
-  required = false,
-}) => (
-  <div className="space-y-2">
-    <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
-      {Icon && <Icon className="mr-2 h-4 w-4 text-blue-500" />}
-      {label}
-      {required && <span className="ml-1 text-red-500">*</span>}
-    </label>
-    <div className="relative">
-      {children}
-      {error && (
-        <div className="mt-1 flex items-center text-sm text-red-600">
-          <AlertCircle className="mr-1 h-4 w-4" />
-          {error.message}
-        </div>
-      )}
-    </div>
-  </div>
-);
+// const FormField = ({
+//   label,
+//   icon: Icon,
+//   error,
+//   children,
+//   required = false,
+// }) => (
+//   <div className="space-y-2">
+//     <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
+//       {Icon && <Icon className="mr-2 h-4 w-4 text-blue-500" />}
+//       {label}
+//       {required && <span className="ml-1 text-red-500">*</span>}
+//     </label>
+//     <div className="relative">
+//       {children}
+//       {error && (
+//         <div className="mt-1 flex items-center text-sm text-red-600">
+//           <AlertCircle className="mr-1 h-4 w-4" />
+//           {error.message}
+//         </div>
+//       )}
+//     </div>
+//   </div>
+// );
 const formSchema = z.object({
   name: z.string(),
   citizen_id: z.string(),

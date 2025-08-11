@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   History,
   Calendar,
@@ -15,17 +15,19 @@ import {
   MapPin,
   GraduationCap,
 } from "lucide-react";
+import { useStudentLoans } from "@/hooks/useLoan";
 import { useAuth } from "@/hooks/useAuth";
 import { useLoan } from "@/hooks/useLoan";
 import StatusBadge from "@/components/shared/StatusBadge";
 
-const LoanHistoryPage = () => {
+const LoanHistory = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { user } = useAuth();
   const { getLoansByStudentId } = useLoan();
   const loans = getLoansByStudentId?.data;
+
 
   const mockLoanDetail = {
     id: 1,
@@ -307,7 +309,8 @@ const LoanHistoryPage = () => {
     setSelectedLoan(null);
   };
 
-  if (getLoansByStudentId?.isPending || getLoansByStudentId?.isLoading) {
+ 
+  if (isLoadingLoans) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
         <div className="text-center">
@@ -318,20 +321,28 @@ const LoanHistoryPage = () => {
     );
   }
 
-  if (getLoansByStudentId?.isError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
-        <div className="text-center">
-          <p className="text-red-600 dark:text-red-400">Có lỗi xảy ra khi tải dữ liệu</p>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+
+  if (loansError) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+          <div className="text-center">
+            <p className="text-red-600 dark:text-red-400">Có lỗi xảy ra khi tải dữ liệu</p>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Vui lòng thử lại sau</p>
+          </div>
         </div>
-      </div>
-    );
-  }
-  const totalPages = Math.ceil((loans?.length || 0) / itemsPerPage);
+      );
+    }
+  // Sort loans by created_at (newest first) before pagination
+  const sortedLoans = loans?.sort((a, b) => {
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+    return dateB - dateA; // Newest first (descending order)
+  });
+
+  const totalPages = Math.ceil((sortedLoans?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentItems = loans?.slice(startIndex, endIndex);
+  const currentItems = sortedLoans?.slice(startIndex, endIndex);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
@@ -431,7 +442,8 @@ const LoanHistoryPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                {loans && loans.length > 0 ? loans.map((loan) => (
+
+                {currentItems && currentItems.length > 0 ? currentItems.map((loan) => (
                   <tr
                     key={loan._id}
                     className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
@@ -481,11 +493,12 @@ const LoanHistoryPage = () => {
           </div>
 
           {/* Pagination */}
-          {loans && loans.length > 0 && (
+
+          {sortedLoans && sortedLoans.length > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3 dark:border-gray-600 dark:bg-gray-700/50">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Showing {startIndex + 1}-{Math.min(endIndex, loans?.length || 0)} of{" "}
-              {loans?.length || 0} items
+              Showing {startIndex + 1}-{Math.min(endIndex, sortedLoans?.length || 0)} of{" "}
+              {sortedLoans?.length || 0} items
             </div>
             <div className="flex space-x-2">
               <button
@@ -528,4 +541,4 @@ const LoanHistoryPage = () => {
   );
 };
 
-export default LoanHistoryPage;
+export default LoanHistory;

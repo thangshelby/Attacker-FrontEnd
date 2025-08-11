@@ -26,31 +26,7 @@ import {
   defaultUniversityProfile,
 } from "@/constants/universityProfile";
 import { useEffect } from "react";
-
-const FormField = ({
-  label,
-  icon: Icon,
-  error,
-  children,
-  required = false,
-}) => (
-  <div className="space-y-2">
-    <label className="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300">
-      {Icon && <Icon className="mr-2 h-4 w-4 text-indigo-500" />}
-      {label}
-      {required && <span className="ml-1 text-red-500">*</span>}
-    </label>
-    <div className="relative">
-      {children}
-      {error && (
-        <div className="mt-1 flex items-center text-sm text-red-600">
-          <AlertCircle className="mr-1 h-4 w-4" />
-          {error.message}
-        </div>
-      )}
-    </div>
-  </div>
-);
+import FormField from "@/components/shared/FormField";
 
 const universitySchema = z.object({
   student_id: z.string().min(1, "Mã số sinh viên là bắt buộc"),
@@ -312,6 +288,7 @@ const UniversityProfile = () => {
                     icon={Building2}
                     error={errors.university}
                     required
+                    theme="university"
                   >
                     <div className="relative">
                       <select
@@ -342,6 +319,7 @@ const UniversityProfile = () => {
                   icon={Users}
                   error={errors.student_id}
                   required
+                  theme="university"
                 >
                   <input
                     type="text"
@@ -351,7 +329,12 @@ const UniversityProfile = () => {
                   />
                 </FormField>
 
-                <FormField label="Mã lớp" icon={Users} error={errors.class_id}>
+                <FormField
+                  label="Mã lớp"
+                  icon={Users}
+                  error={errors.class_id}
+                  theme="university"
+                >
                   <input
                     type="text"
                     {...register("class_id")}
@@ -368,6 +351,7 @@ const UniversityProfile = () => {
                   icon={BookOpen}
                   error={errors.faculty_name}
                   required
+                  theme="university"
                 >
                   <div className="relative">
                     <select
@@ -390,6 +374,7 @@ const UniversityProfile = () => {
                   icon={Calendar}
                   error={errors.year_of_study}
                   required
+                  theme="university"
                 >
                   <input
                     type="number"
@@ -409,6 +394,7 @@ const UniversityProfile = () => {
                     icon={GraduationCap}
                     error={errors.major_name}
                     required
+                    theme="university"
                   >
                     <input
                       type="text"

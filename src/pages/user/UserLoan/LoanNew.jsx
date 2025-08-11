@@ -16,9 +16,9 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
-import Step1 from "@/components/newloan/Step1";
-import Step2 from "@/components/newloan/Step2";
-import Step3 from "@/components/newloan/Step3";
+import Step1 from "@/components/user/newloan/Step1";
+import Step2 from "@/components/user/newloan/Step2";
+import Step3 from "@/components/user/newloan/Step3";
 import { useLoan } from "@/hooks/useLoan";
 const validateAmount = (amount) => {
   return amount > 0 && amount <= 100000000;
