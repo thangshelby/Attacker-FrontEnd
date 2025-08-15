@@ -4,29 +4,20 @@ import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-function DropdownMenu({
-  ...props
-}) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
+const DropdownMenu = DropdownMenuPrimitive.Root;
+
+const DropdownMenuPortal = DropdownMenuPrimitive.Portal;
+
+const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+
+interface DropdownMenuContentProps extends React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> {
+  sideOffset?: number;
 }
 
-function DropdownMenuPortal({
-  ...props
-}) {
-  return (<DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />);
-}
-
-function DropdownMenuTrigger({
-  ...props
-}) {
-  return (<DropdownMenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...props} />);
-}
-
-function DropdownMenuContent({
-  className,
-  sideOffset = 4,
-  ...props
-}) {
+const DropdownMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  DropdownMenuContentProps
+>(({ className, sideOffset = 4, ...props }, ref) => {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content

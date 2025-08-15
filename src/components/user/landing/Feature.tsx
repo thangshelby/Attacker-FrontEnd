@@ -1,6 +1,13 @@
 import Section from "./Section";
 import { featureContents } from "./constants";
 
+interface FeatureContent {
+  id: string;
+  title: string;
+  text: string;
+  iconUrl: string;
+}
+
 const Features = () => {
   return (
     <Section id="features">
@@ -15,7 +22,7 @@ const Features = () => {
         </div>
 
         <div className="flex flex-wrap justify-center">
-          {featureContents.map((feature) => (
+          {featureContents.map((feature: FeatureContent) => (
             <div
               key={feature.id}
               className="flex w-full flex-col items-center rounded-xl bg-slate-50 p-6 shadow sm:w-[300px]"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   History,
   Clock,
@@ -13,47 +13,58 @@ import {
   X,
   AlertCircle,
   MessageSquare,
-  User,
   Brain,
   DollarSign,
   Shield,
   Gavel,
 } from "lucide-react";
 import { useLoans, useUpdateLoan } from "@/hooks/useLoan";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useAppStore } from "@/store/appStore";
+import { Loan } from "@/types";
+
+interface ModalProps {
+  modal: string;
+  reason: string;
+  setreason: (reason: string) => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}
+
+interface ConversationModalProps {
+  loan: Loan | null;
+  onClose: () => void;
+}
 
 const OverviewLoans = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [actionLoading, setActionLoading] = useState(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const itemsPerPage = 5;
-  const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState<string | false>(false);
   const [reason, setreason] = useState("");
   const { loans, isLoadingLoans } = useLoans();
   const { updateLoan, updateLoanPending } = useUpdateLoan();
   const { loan, setLoan } = useAppStore();
   const [showConversationModal, setShowConversationModal] = useState(false);
-  const [selectedLoan, setSelectedLoan] = useState(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  const navigate = useNavigate();
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
 
   // Update current time every second to refresh AI processing status
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTime(new Date());
+      // Force re-render every second to update timers
     }, 1000);
     return () => clearInterval(interval);
   }, []);
 
   // Handle loan approval/rejection
-  const handleLoanAction = (newStatus) => {
+  const handleLoanAction = (newStatus: string) => {
     const data = { status: newStatus, reason: reason };
     try {
+      if (!loan) return;
       setActionLoading(loan._id);
       updateLoan({
         loan_id: loan._id,
@@ -74,14 +85,14 @@ const OverviewLoans = () => {
   };
 
   // Filter loans based on search and status
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
@@ -92,24 +103,20 @@ const OverviewLoans = () => {
   };
 
   // Check if loan is still being processed by AI (created < 1 minute ago)
-  const isAIProcessing = (createdAt) => {
+  const isAIProcessing = (createdAt: string) => {
     const now = new Date();
     const created = new Date(createdAt);
-    const diffInMinutes = (now - created) / (1000 * 60);
+    const diffInMinutes = (now.getTime() - created.getTime()) / (1000 * 60);
     return diffInMinutes < 1;
   };
 
   // Get remaining time for AI processing
-  const getAIProcessingTime = (createdAt) => {
+  const getAIProcessingTime = (createdAt: string) => {
     const now = new Date();
     const created = new Date(createdAt);
-    const diffInSeconds = Math.floor((now - created) / 1000);
+    const diffInSeconds = Math.floor((now.getTime() - created.getTime()) / 1000);
     const remainingSeconds = Math.max(0, 60 - diffInSeconds);
     return remainingSeconds;
-  };
-
-  const handleViewDetail = (loan) => {
-    navigate(`/admin/loans/${loan._id}`);
   };
 
   if (isLoadingLoans || !loans) {
@@ -124,20 +131,20 @@ const OverviewLoans = () => {
   // Calculate stats - will auto-update when loans data changes
   const stats = {
     total: loans?.length || 0,
-    pending: loans?.filter((loan) => loan.status === "pending").length || 0,
-    accepted: loans?.filter((loan) => loan.status === "accepted").length || 0,
-    rejected: loans?.filter((loan) => loan.status === "rejected").length || 0,
+    pending: loans?.filter((loan: Loan) => loan.status === "pending").length || 0,
+    accepted: loans?.filter((loan: Loan) => loan.status === "accepted").length || 0,
+    rejected: loans?.filter((loan: Loan) => loan.status === "rejected").length || 0,
   };
 
   const filteredLoans =
-    loans?.filter((loan) => {
+    loans?.filter((loan: Loan) => {
       if (!loan) return false; // Safety check
       const matchesSearch =
         searchTerm === "" ||
         (loan.student_id &&
           loan.student_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (loan.studentInfo?.name &&
-          loan.studentInfo.name
+        (loan.name &&
+          loan.name
             .toLowerCase()
             .includes(searchTerm.toLowerCase())) ||
         (loan.citizen_id &&
@@ -330,7 +337,7 @@ const OverviewLoans = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-600 dark:bg-gray-800">
-                {currentItems.map((loan) => {
+                {currentItems.map((loan: Loan) => {
                   if (!loan || !loan._id) {
                     console.warn("⚠️ Invalid loan object:", loan);
                     return null;
@@ -542,7 +549,7 @@ const OverviewLoans = () => {
 
 export default OverviewLoans;
 
-const Modal = ({ modal, reason, setreason, onConfirm, onCancel, loading }) => {
+const Modal = ({ modal, reason, setreason, onConfirm, onCancel, loading }: ModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="w-full max-w-[1000px] rounded-2xl border border-slate-700/50 bg-slate-800 p-6 shadow-2xl">
@@ -623,7 +630,7 @@ const Modal = ({ modal, reason, setreason, onConfirm, onCancel, loading }) => {
   );
 };
 
-const ConversationModal = ({ loan, onClose }) => {
+const ConversationModal = ({ loan, onClose }: ConversationModalProps) => {
   // Hardcoded conversation data with 5 agents
   const conversationData = {
     summary: `PASS cả 3 special features (F2,F5,F7) - CHẤP NHẬN theo quy định (passed_count = 6/7). + Agent support: Academic agent(s) đồng ý.`,
@@ -699,7 +706,7 @@ const ConversationModal = ({ loan, onClose }) => {
                 {new Intl.NumberFormat("vi-VN", {
                   style: "currency",
                   currency: "VND",
-                }).format(loan?.loan_amount_requested)}
+                }).format(loan?.loan_amount_requested || 0)}
               </p>
             </div>
           </div>

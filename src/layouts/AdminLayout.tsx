@@ -1,27 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  BarChart3,
   Users,
   FileText,
   CreditCard,
-  AlertTriangle,
   Settings,
-  TrendingUp,
-  Shield,
   Bell,
-  Search,
   Menu,
   X,
   Home,
-  DollarSign,
-  UserCheck,
-  Calendar,
   PieChart,
-  AlertCircle,
-  MessageSquare,
-  Download,
-  Clock,
-  Filter,
 } from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
 const AdminLayout = () => {
@@ -68,10 +55,10 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     // Clear any stored auth tokens
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     // Navigate to login page
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
