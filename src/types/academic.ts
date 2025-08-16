@@ -1,18 +1,23 @@
 // Academic Profile Types
-export interface AcademicProfile {
-  id: string;
+export interface Academic {
   student_id: string;
-  university: string;
-  major: string;
   gpa: number;
-  academic_year: number;
-  graduation_year: number;
-  transcript_url?: string;
-  student_card_url?: string;
-  is_verified: boolean;
-  created_at: string;
-  updated_at: string;
+  current_gpa: number;
+  total_credits_earned: number;
+  failed_course_count: number;
+  achievement_award_count: number;
+  has_scholarship?: boolean; // default = false
+  scholarship_count?: number;
+  club?: string;
+  extracurricular_activity_count?: number;
+  has_leadership_role?: boolean;
+  study_year: string;
+  term: number;
+  transcripts: any[]; // hoặc định nghĩa interface riêng nếu transcript có cấu trúc cụ thể
+  created_at?: Date;
+  updated_at?: Date;
 }
+
 
 // Academic Document Types
 export interface AcademicDocument {

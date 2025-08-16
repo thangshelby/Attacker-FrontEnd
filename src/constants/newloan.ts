@@ -5,28 +5,28 @@ export const defaultFormData: Partial<Loan> = {
   loan_amount_requested: 0,
   loan_tenor: 0,
   guarantor: "",
-  loan_purpose: "",
+  loan_purpose: 0,
   custom_purpose: "",
   family_income: "",
-  payment_method: "",
-  payment_frequency:0,
+  payment_method: "0",
+  payment_frequency: "0",
   monthly_installment: 0,
   total_interest: 0,
   total_payment: 0,
 };
-
 export const loanPeriod = [
-  { value: "", label: "Chọn thời hạn" },
-  { value: "3", label: "3 tháng" },
-  { value: "6", label: "6 tháng" },
-  { value: "12", label: "12 tháng" },
-  { value: "24", label: "24 tháng" },
-  { value: "36", label: "36 tháng" },
-  { value: "48", label: "48 tháng" },
-  { value: "60", label: "60 tháng" },
+  { value: 0, label: "Chọn thời hạn" }, // hoặc null nếu bạn muốn rõ ràng hơn
+  { value: 3, label: "3 tháng" },
+  { value: 6, label: "6 tháng" },
+  { value: 12, label: "12 tháng" },
+  { value: 24, label: "24 tháng" },
+  { value: 36, label: "36 tháng" },
+  { value: 48, label: "48 tháng" },
+  { value: 60, label: "60 tháng" },
 ];
 
 export const studentGurantor = [
+  { value: "", label: "Chọn người bảo lãnh" },
   { value: "parent", label: "Bố-Mẹ" },
   { value: "brother-sister", label: "Anh trai-Chị gái" },
   { value: "uncle", label: "Chú/Bác" },
@@ -120,25 +120,29 @@ export const paymentFrequencies = [
 export const calculatePaymentDetails = (
   amount: number,
   tenor: number,
-  paymentMethodId: number,
-  frequency: number | undefined,
+  paymentMethodId: string,
+  frequency: string | undefined,
 ) => {
   if (!amount || !tenor || !paymentMethodId)
     return { monthly: 0, totalInterest: 0, totalPayment: 0 };
 
-  const method = paymentMethods.find((pm) => pm.id === paymentMethodId);
+  const method = paymentMethods.find((pm) => pm.id === Number(paymentMethodId));
   if (!method) return { monthly: 0, totalInterest: 0, totalPayment: 0 };
 
   const principal = amount;
   const months = tenor;
   const annualRate = method.interestRate;
-  const frequencyMonths = frequency ? frequency : method.id === 2 ? 3 : 1;
+  const frequencyMonths = frequency
+    ? Number(frequency)
+    : method.id === 2
+      ? 3
+      : 1;
 
   let periodicPayment = 0;
   let totalInterest = 0;
   let totalPayment = 0;
 
-  switch (paymentMethodId) {
+  switch (Number(paymentMethodId)) {
     case 1:
       totalInterest = principal * annualRate * (months / 12);
       totalPayment = principal + totalInterest;

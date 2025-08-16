@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../hooks/useAuth";
+import { AuthError } from "@/types";
 import { useAuthStore } from "../../store/authStore";
 
 const loginSchema = z.object({
@@ -32,14 +33,14 @@ const LoginPage = () => {
     },
   });
 
-  const handleFocus = () => {
+  const handleFocus = (field: keyof AuthError) => {
     if (error) {
-      clearError();
+      clearError(field);
     }
   };
 
-  const onSubmit = (data) => {
-    if (error) clearError();
+  const onSubmit = (data:any) => {
+    if (error){}
     login.mutate(data);
   };
 
@@ -61,7 +62,9 @@ const LoginPage = () => {
             type="email"
             autoComplete="email"
             {...register("email")}
-            onFocus={handleFocus}
+            onFocus={()=>{
+              handleFocus("email")
+            }}
             placeholder="Email của bạn"
             className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-gray-800 transition-all duration-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none"
           />
@@ -82,7 +85,7 @@ const LoginPage = () => {
             autoComplete="password"
             placeholder="Mật khẩu"
             {...register("password")}
-            onFocus={handleFocus}
+            onFocus={() => handleFocus("password")}
             className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-gray-800 transition-all duration-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none"
           />
           {errors.password && (

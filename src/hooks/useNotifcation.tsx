@@ -53,7 +53,7 @@ export function useNotification() {
         type: "success",
         message: "Created notification successfully.",
       });
-      queryClient.invalidateQueries(["notifications"]);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: () => {
       setToast({ type: "error", message: "Failed to create notification." });
@@ -62,9 +62,10 @@ export function useNotification() {
 
   // 4. Update notification
   const updateNotification = useMutation({
-    mutationFn: ({ id, data }) => notification.updateNotification(id, data),
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      notification.updateNotification(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["notifications"]);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: () => {
       setToast({ type: "error", message: "Failed to update notification." });
@@ -74,7 +75,7 @@ export function useNotification() {
   const markAllAsRead = useMutation({
     mutationFn: () => notification.markAllAsRead(citizen_id),
     onSuccess: () => {
-      queryClient.invalidateQueries(["notifications"]);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: () => {
       setToast({ type: "error", message: "Failed to update notification." });
@@ -82,9 +83,9 @@ export function useNotification() {
   });
   // 5. Delete notification
   const remove = useMutation({
-    mutationFn: (id) => notification.deleteNotification(id),
+    mutationFn: (id: string) => notification.deleteNotification(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(["notifications"]);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: () => {
       setToast({ type: "error", message: "Failed to delete notification." });
