@@ -2,22 +2,22 @@ export interface Loan {
   _id: string
   student_id: string;
   citizen_id: string;
+  name: string;
   loan_amount_requested: number;
   loan_tenor: number; // số tháng
-  loan_purpose: string;
+  loan_purpose: number;
   custom_purpose: string;
   guarantor: string;
-  family_income: string; // có thể đổi thành number nếu muốn tính toán
+  family_income: string, // có thể đổi thành number nếu muốn tính toán
   payment_method: string;
-  payment_frequency: number;
-  monthly_installment: number;
+  payment_frequency: string;
+  monthly_installment: number;  
   total_interest: number;
   total_payment: number;
   status: string;
   reason: string;
   created_at: string; // hoặc Date nếu bạn parse sang object Date
   updated_at: string; // hoặc Date
-  name: string;
 }
 
 export type LoanStatus =

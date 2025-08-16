@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { useNotification } from "@/hooks/useNotifcation";
 import { Bell, X, CheckCircle } from "lucide-react";
 import { getIcon } from "@/utils/getIcon";
@@ -6,6 +6,7 @@ import { getUploadElapsedTime } from "@/utils";
 import { getSocket } from "@/services/socket";
 import { queryClient } from "@/apis/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { Notification } from "@/types";
 
 const HeaderNotification = forwardRef((_, notificationRef) => {
   // const {handleNewNotification, emitNewNotification} = useNotifcationRealTime();
@@ -17,10 +18,10 @@ const HeaderNotification = forwardRef((_, notificationRef) => {
   const [showNotifications, setShowNotifications] = useState(false);
   useEffect(() => {
     if (!notificationRef) return;
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target)
+        notificationRef?.current &&
+        !notificationRef?.current.contains(event.target)
       ) {
         setShowNotifications(false);
       }
@@ -32,37 +33,43 @@ const HeaderNotification = forwardRef((_, notificationRef) => {
 
   useEffect(() => {
     if (notifications) {
-      setUnreadCount(notifications.filter((n) => !n.is_read).length);
+      setUnreadCount(
+        notifications.filter((n: Notification) => !n.is_read).length,
+      );
     }
   }, [notifications]);
   useEffect(() => {
     const socket = getSocket();
 
-    const handleNoti = (data) => {
+    const handleNoti = (data: Notification) => {
       console.log("📢 Notification:", data);
       queryClient.setQueryData(
         ["notifications", user?.citizen_id],
-        (oldData) => {
+        (oldData: Notification[]) => {
           const newNotifications = [...(oldData || []), data];
           return newNotifications;
         },
       );
       setUnreadCount((prev) => prev + 1);
-      queryClient.invalidateQueries(["notifications", user?.citizen_id]);
+      queryClient.invalidateQueries({
+        queryKey: ["notifications", user?.citizen_id],
+      });
     };
 
-    socket?.on("notification", (newNoti) => {
+    socket?.on("notification", (newNoti: Notification) => {
       console.log("📢 Notification:", newNoti);
       queryClient.setQueryData(
         ["notifications", user?.citizen_id],
-        (oldData) => {
-          const newNotifications = [...(oldData || []), newNoti.data];
+        (oldData: Notification[]) => {
+          const newNotifications = [...(oldData || []), newNoti];
           return newNotifications;
         },
       );
       setUnreadCount((prev) => prev + 1);
       console.log("Updated unread count:", unreadCount);
-      queryClient.invalidateQueries(["notifications", user?.citizen_id]);
+      queryClient.invalidateQueries({
+        queryKey: ["notifications", user?.citizen_id],
+      });
     });
 
     return () => {
@@ -70,7 +77,7 @@ const HeaderNotification = forwardRef((_, notificationRef) => {
     };
   }, []);
 
-  const handleMarkAsRead = (id) => {
+  const handleMarkAsRead = (id: string) => {
     updateNotification.mutate({
       id,
       data: {
@@ -83,7 +90,9 @@ const HeaderNotification = forwardRef((_, notificationRef) => {
     markAllAsRead.mutate();
   };
 
-  const toggleNotifications = (e) => {
+  const toggleNotifications = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
     e.stopPropagation();
     setShowNotifications(!showNotifications);
   };
@@ -91,9 +100,9 @@ const HeaderNotification = forwardRef((_, notificationRef) => {
   return (
     <div>
       <button
-        onClick={toggleNotifications}
+        onClick={(e) => toggleNotifications(e)}
         className={`relative cursor-pointer rounded-lg p-2 text-gray-600 transition-all hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 ${
-          unreadCount.length ? "animate-bounce" : ""
+          unreadCount ? "animate-bounce" : ""
         }`}
       >
         <Bell
@@ -132,8 +141,14 @@ const NotificationDropdown = ({
   onMarkAsRead,
   onMarkAllAsRead,
   onClose,
+}: {
+  notifications: Notification[];
+  unreadCount: number;
+  onMarkAsRead: (id: string) => void;
+  onMarkAllAsRead: () => void;
+  onClose: () => void;
 }) => {
-  const getTypeStyles = (type) => {
+  const getTypeStyles = (type: string) => {
     switch (type) {
       case "success":
         return "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400";

@@ -75,7 +75,6 @@ const OverviewLoans = () => {
       setOpenModal(false);
       setreason("");
       toast.success("Cập nhật khoản vay thành công");
-
     } catch (error) {
       console.error("Error updating loan status:", error);
       // Optionally show error notification
@@ -114,7 +113,9 @@ const OverviewLoans = () => {
   const getAIProcessingTime = (createdAt: string) => {
     const now = new Date();
     const created = new Date(createdAt);
-    const diffInSeconds = Math.floor((now.getTime() - created.getTime()) / 1000);
+    const diffInSeconds = Math.floor(
+      (now.getTime() - created.getTime()) / 1000,
+    );
     const remainingSeconds = Math.max(0, 60 - diffInSeconds);
     return remainingSeconds;
   };
@@ -131,9 +132,12 @@ const OverviewLoans = () => {
   // Calculate stats - will auto-update when loans data changes
   const stats = {
     total: loans?.length || 0,
-    pending: loans?.filter((loan: Loan) => loan.status === "pending").length || 0,
-    accepted: loans?.filter((loan: Loan) => loan.status === "accepted").length || 0,
-    rejected: loans?.filter((loan: Loan) => loan.status === "rejected").length || 0,
+    pending:
+      loans?.filter((loan: Loan) => loan.status === "pending").length || 0,
+    accepted:
+      loans?.filter((loan: Loan) => loan.status === "accepted").length || 0,
+    rejected:
+      loans?.filter((loan: Loan) => loan.status === "rejected").length || 0,
   };
 
   const filteredLoans =
@@ -144,9 +148,7 @@ const OverviewLoans = () => {
         (loan.student_id &&
           loan.student_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (loan.name &&
-          loan.name
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())) ||
+          loan.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (loan.citizen_id &&
           loan.citizen_id.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesStatus = !statusFilter || loan.status === statusFilter;
@@ -549,7 +551,14 @@ const OverviewLoans = () => {
 
 export default OverviewLoans;
 
-const Modal = ({ modal, reason, setreason, onConfirm, onCancel, loading }: ModalProps) => {
+const Modal = ({
+  modal,
+  reason,
+  setreason,
+  onConfirm,
+  onCancel,
+  loading,
+}: ModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="w-full max-w-[1000px] rounded-2xl border border-slate-700/50 bg-slate-800 p-6 shadow-2xl">

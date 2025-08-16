@@ -1,12 +1,14 @@
 // Notification Types
 export interface Notification {
-  id: string;
-  user_id: string;
-  title: string;
-  message: string;
+  _id: string;
+  citizen_id:string,
+  header: string;
+  content: string;
+  icon:string,
   type: 'info' | 'success' | 'warning' | 'error';
   is_read: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 // Chatbot Types
