@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ButtonProps as BaseButtonProps } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -8,6 +9,8 @@ export interface ButtonProps extends BaseButtonProps {
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  to?: string; // Navigation path
+  href?: string; // External link
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -21,6 +24,8 @@ const Button: React.FC<ButtonProps> = ({
   rightIcon,
   onClick,
   type = 'button',
+  to,
+  href,
   ...props
 }) => {
   const baseClasses = 'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
@@ -46,14 +51,8 @@ const Button: React.FC<ButtonProps> = ({
     className
   );
 
-  return (
-    <button
-      type={type}
-      className={classes}
-      disabled={disabled || loading}
-      onClick={onClick}
-      {...props}
-    >
+  const content = (
+    <>
       {loading && (
         <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -63,6 +62,47 @@ const Button: React.FC<ButtonProps> = ({
       {!loading && leftIcon}
       {children}
       {!loading && rightIcon}
+    </>
+  );
+
+  // External link
+  if (href) {
+    return (
+      <a
+        href={href}
+        className={classes}
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  // Internal navigation
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={classes}
+        {...props}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  // Regular button
+  return (
+    <button
+      type={type}
+      className={classes}
+      disabled={disabled || loading}
+      onClick={onClick}
+      {...props}
+    >
+      {content}
     </button>
   );
 };

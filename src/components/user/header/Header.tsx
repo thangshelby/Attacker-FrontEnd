@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Bell, MoreVertical, X, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNotification } from "@/hooks/useNotifcation";
+import { useNotification } from "@/hooks/useNotification";
 import { getIcon } from "@/utils/getIcon";
 import HeaderNotification from "./HeaderNotification";
 const ThemeToggle = () => {

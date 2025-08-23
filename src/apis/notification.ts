@@ -1,4 +1,5 @@
 import api from "./api";
+import { Notification } from "@/types/notification";
 
 export const notification = {
   getAllNotifications: () =>

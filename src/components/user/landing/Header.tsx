@@ -27,8 +27,8 @@ const Header = () => {
   };
   return (
     <div
-      className={`fixed top-0 left-0 z-50 w-full lg:bg-transparent lg:backdrop-blur-sm ${
-        openNavigation ? "bg-transparent" : "bg-transparent backdrop-blur-sm"
+      className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
+        openNavigation ? "bg-white/95 backdrop-blur-lg shadow-lg" : "bg-white/80 backdrop-blur-md shadow-sm"
       }`}
     >
       <div className="flex items-center px-5 max-lg:py-4 lg:px-7.5 xl:px-10">
@@ -46,15 +46,18 @@ const Header = () => {
                 key={item.id}
                 href={item.url}
                 onClick={handleClick}
-                className={`font-code text-primary hover:text-color-1 relative block text-2xl uppercase transition-colors ${
+                className={`relative block font-medium transition-all duration-300 hover:scale-105 ${
                   item.onlyMobile ? "lg:hidden" : ""
-                } px-6 py-6 md:py-8 lg:-mr-0.25 lg:text-xs lg:font-semibold ${
+                } px-6 py-6 md:py-8 lg:px-4 xl:px-6 text-xl lg:text-base ${
                   item.url === pathname.hash
-                    ? "lg:text-n-1 z-2"
-                    : "lg:text-n-1/50"
-                } lg:hover:text-n-1 lg:leading-5 xl:px-12`}
+                    ? "text-purple-600 font-semibold"
+                    : "text-gray-700 hover:text-purple-600"
+                }`}
               >
-                {item.title}
+                <span className="relative z-10">{item.title}</span>
+                {item.url === pathname.hash && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full"></div>
+                )}
               </a>
             ))}
             <div className="mt-8 lg:hidden">
@@ -69,11 +72,19 @@ const Header = () => {
         <div
           className={`${
             openNavigation ? "hidden" : "flex"
-          } hidden items-center lg:flex`}
+          } hidden items-center gap-3 lg:flex`}
         >
           <Button
+            variant="outline"
+            className="border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white transition-all duration-300"
+            to="/auth/register"
+            size="sm"
+          >
+            Đăng ký
+          </Button>
+          <Button
             variant="primary"
-            className="bg-blue-500 text-white"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             to="/auth/login"
             size="sm"
           >

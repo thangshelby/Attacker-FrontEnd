@@ -1,5 +1,5 @@
 import { useState, useEffect, forwardRef } from "react";
-import { useNotification } from "@/hooks/useNotifcation";
+import { useNotification } from "@/hooks/useNotification";
 import { Bell, X, CheckCircle } from "lucide-react";
 import { getIcon } from "@/utils/getIcon";
 import { getUploadElapsedTime } from "@/utils";
