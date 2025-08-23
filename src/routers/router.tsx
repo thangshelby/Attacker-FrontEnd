@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import { Suspense } from "react";
 import ProtectedRoute from "../utils/ProtectedRoute";
 
@@ -46,6 +46,9 @@ const Router = () => {
       }
     >
       <Routes>
+        {/* DEFAULT ROUTE - Redirect to landing page */}
+        <Route path="/" element={<Navigate to="/landing" replace />} />
+        
         {/* PUBLIC ROUTES */}
         <Route path="/landing" element={<LandingPage />} />
 
@@ -72,7 +75,7 @@ const Router = () => {
 
           {/* USER ROUTE */}
 
-          <Route path="/" element={<RootLayout />}>
+          <Route path="/home" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile/general-info" element={<UserProfile />} />

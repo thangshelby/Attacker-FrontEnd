@@ -21,25 +21,25 @@ const Features = () => {
           </h2>
         </div>
 
-        <div className="flex flex-wrap justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {featureContents.map((feature: FeatureContent) => (
             <div
               key={feature.id}
-              className="flex w-full flex-col items-center rounded-xl bg-slate-50 p-6 shadow sm:w-[300px]"
+              className="group flex flex-col items-center bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-white/30 hover:bg-white/90 hover:shadow-2xl hover:scale-105 transition-all duration-300"
             >
-              <img
-                src={feature.iconUrl}
-                alt={feature.title}
-                className="mb-4 h-12 w-12 object-contain"
-              />
-              <h3 className="mb-2 text-center text-lg font-bold text-gray-900">
+              <div className="mb-6 p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <img
+                  src={feature.iconUrl}
+                  alt={feature.title}
+                  className="h-10 w-10 object-contain filter brightness-0 invert"
+                />
+              </div>
+              <h3 className="mb-4 text-center text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors duration-300">
                 {feature.title}
               </h3>
-              <div className="mt-2 text-left">
-                <p className="text-md text-center text-gray-600">
-                  {feature.text}
-                </p>
-              </div>
+              <p className="text-center text-gray-600 leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
+                {feature.text}
+              </p>
             </div>
           ))}
         </div>

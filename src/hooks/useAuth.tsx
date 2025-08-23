@@ -30,7 +30,7 @@ export function useAuth() {
         type: "success",
         message: "Welcome back !",
       });
-      navigate("/");
+      navigate("/home");
       return data.data.user;
     },
     retry: false,
@@ -61,7 +61,7 @@ export function useAuth() {
         return;
       }
       if (data.data.user.role === "User") {
-        navigate("/");
+        navigate("/home");
         setToast({
           type: "success",
           message: "Welcome back!",
@@ -108,7 +108,7 @@ export function useAuth() {
         });
         return;
       }
-      navigate("/");
+      navigate("/home");
       setToast({
         type: "success",
         message: "Email verified! Welcome back!",

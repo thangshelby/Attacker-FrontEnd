@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/authStore";
 import { Outlet } from "react-router-dom";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
-import { useNotification } from "@/hooks/useNotifcation";
+import { useNotification } from "@/hooks/useNotification";
 const ProtectedRoute = () => {
   const { user } = useAuthStore();
 
