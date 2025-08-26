@@ -4,8 +4,8 @@ import { useAuthStore } from "../../store/authStore";
 
 export default function VerifyEmailPage() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
-  const inputRefs = useRef([]);
-  const { verifyEmail } = useAuth();
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const { verifyEmail, resendCode } = useAuth();
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function VerifyEmailPage() {
     }
   }, []);
 
-  const handleInputChange = (index, value) => {
+  const handleInputChange = (index: number, value: string) => {
     // Accept any character, not just numbers
     if (value.length > 1) return; // Only allow single character
 
@@ -28,7 +28,10 @@ export default function VerifyEmailPage() {
     }
   };
 
-  const handleKeyDown = (index, e) => {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     // Move to previous input on backspace
     if (e.key === "Backspace" && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -45,12 +48,12 @@ export default function VerifyEmailPage() {
     }
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const paste = e.clipboardData.getData("text").split("");
 
     const newCode = ["", "", "", "", "", ""];
-    paste.forEach((digit, i) => {
+    paste.forEach((digit: string, i: number) => {
       if (i < 6) {
         newCode[i] = digit;
       }
@@ -71,41 +74,45 @@ export default function VerifyEmailPage() {
       alert("Please enter a code");
       return;
     }
-    
-    // Always use a default valid code for verification
-    verifyEmail.mutate({ otp_token: "123456", email: user?.email });
 
-    alert("Code accepted: " + fullCode);
+    // Always use a default valid code for verification
+    verifyEmail.mutate({ otp_token: fullCode, email: user?.email });
+
+    // alert("Code accepted: " + fullCode);
   };
 
   const handleResendCode = () => {
     setCode(["", "", "", "", "", ""]);
     inputRefs.current[0]?.focus();
 
-    alert("Resend code functionality would be implemented here");
+    resendCode.mutate(user?.email!);
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-5">
-      <div className="w-full rounded-xl p-10 text-center sm:p-15">
+      <div className="max-w-7xl rounded-xl p-10 text-center sm:p-15">
         <div className="mb-6 text-3xl text-gray-800">✱</div>
 
         <h1 className="mb-2 text-2xl font-semibold text-gray-800">
-          Confirm your email
+          Xác thực tài khoản của bạn
         </h1>
 
         <p className="mb-10 text-sm leading-relaxed text-gray-600">
-          We sent a code to{" "}
-          <span className="text-sky-500 underline cursor-pointer">{user?.email}</span>
+          Chúng tôi đã gửi mã xác minh tới{" "}
+          <span className="cursor-pointer text-sky-500 underline">
+            {user?.email}
+          </span>
         </p>
 
         <div className="mb-10 flex justify-center gap-4">
           {code.map((digit, index) => (
             <input
               key={index}
-              ref={(el) => (inputRefs.current[index] = el)}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
               type="text"
-              maxLength="1"
+              maxLength={1}
               value={digit}
               onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
@@ -123,19 +130,28 @@ export default function VerifyEmailPage() {
         {/* Create Account Button */}
         <button
           onClick={handleVerifyEmail}
-          className="w-full cursor-pointer rounded-lg bg-gray-800 px-6 py-4 text-base font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none active:translate-y-0"
+          style={{
+            cursor:
+              verifyEmail.isPending || code.join("").length < 6
+                ? "not-allowed"
+                : "pointer",
+          }}
+          disabled={
+            verifyEmail.isPending || !code.join("") || code.join("").length < 6
+          }
+          className={`w-full cursor-pointer rounded-lg bg-gray-800 px-6 py-4 text-base font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-gray-900 focus:ring-2 focus:ring-gray-400 focus:outline-none active:translate-y-0 ${verifyEmail.isPending || code.join("").length < 6 ? "cursor-not-allowed opacity-50" : ""} `}
         >
-          Create an account
+          {verifyEmail.isPending ? "Đang xác thực..." : "Xác thực"}
         </button>
 
         {/* Resend Link */}
         <div className="mt-10 border-t border-gray-200 pt-5">
-          <span className="text-sm text-gray-600">Didn't get a code? </span>
+          <span className="text-sm text-gray-600">Chưa nhận được mã ? </span>
           <button
             onClick={handleResendCode}
-            className="rounded text-sm font-medium text-blue-600 underline hover:text-blue-800 focus:ring-2 focus:ring-blue-100 focus:outline-none"
+            className="cursor-pointer rounded text-sm font-medium text-blue-600 underline hover:text-blue-800 focus:ring-2 focus:ring-blue-100 focus:outline-none"
           >
-            Re-enter email
+            Gửi lại mã
           </button>
         </div>
       </div>

@@ -48,10 +48,10 @@ const universitySchema = z.object({
 const UniversityProfile = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentProcessingSide, setCurrentProcessingSide] = useState(null);
+  const [currentProcessingSide, setCurrentProcessingSide] = useState<string | null>(null);
   const { user } = useAuth();
   const { student, updateStudent } = useStudent(user?.citizen_id);
-  const studentt = {};
+
   const {
     register,
     watch,
@@ -63,14 +63,14 @@ const UniversityProfile = () => {
     mode: "onChange",
     resolver: zodResolver(universitySchema),
     defaultValues: {
-      student_id: studentt?.student_id || "",
-      university: studentt?.university || "",
-      faculty_name: studentt?.faculty_name || "",
-      major_name: studentt?.major_name || "",
-      year_of_study: studentt?.year_of_study || 1,
-      class_id: studentt?.class_id || "",
-      has_parttime_job: studentt?.has_parttime_job || false,
-      has_supporter: studentt?.has_supporter || false,
+      student_id: student?.student_id || "",
+      university: student?.university || "",
+      faculty_name: student?.faculty_name || "",
+      major_name: student?.major_name || "",
+      year_of_study: student?.year_of_study || 1,
+      class_id: student?.class_id || "",
+      has_parttime_job: student?.has_parttime_job || false,
+      has_supporter: student?.has_supporter || false,
       student_card_front: student?.student_card_front || null,
       student_card_back: student?.student_card_back || null,
     },
@@ -91,6 +91,10 @@ const UniversityProfile = () => {
         ...student,
         student_card_front: watchedValues.student_card_front,
         student_card_back: watchedValues.student_card_back,
+        has_parttime_job:
+          student?.has_parttime_job === null ? false : student?.has_parttime_job,
+        has_supporter:
+          student?.has_supporter === null ? false : student?.has_supporter,
       });
     }
   }, [
@@ -99,7 +103,9 @@ const UniversityProfile = () => {
     student,
   ]);
 
-  const handleImageSelect = (side) => async (imageUrl) => {
+  const handleImageSelect = (
+    side: "student_card_front" | "student_card_back"
+  ) => async (imageUrl: string | null) => {
     setValue(side, imageUrl);
     setIsProcessing(false);
     setCurrentProcessingSide(null);
@@ -113,7 +119,7 @@ const UniversityProfile = () => {
     setShowConfirmModal(false);
     updateStudent.mutate(watchedValues);
   };
-  const handleProcessStudentCard = (val, side) => {
+  const handleProcessStudentCard = (val:boolean, side:string) => {
     setIsProcessing(val);
     setCurrentProcessingSide(side);
   };
@@ -288,7 +294,7 @@ const UniversityProfile = () => {
                   <FormField
                     label="Trường đại học"
                     icon={Building2}
-                    error={errors.university}
+                    error={errors.university ? { message: errors.university.message ?? "" } : undefined}
                     required
                     theme="university"
                   >
@@ -319,7 +325,7 @@ const UniversityProfile = () => {
                 <FormField
                   label="Mã số sinh viên"
                   icon={Users}
-                  error={errors.student_id}
+                  error={errors.student_id ? { message: errors.student_id.message ?? "" } : undefined}
                   required
                   theme="university"
                 >
@@ -334,7 +340,7 @@ const UniversityProfile = () => {
                 <FormField
                   label="Mã lớp"
                   icon={Users}
-                  error={errors.class_id}
+                  error={errors.class_id ? { message: errors.class_id.message ?? "" } : undefined}
                   theme="university"
                 >
                   <input
@@ -351,7 +357,7 @@ const UniversityProfile = () => {
                 <FormField
                   label="Khoa"
                   icon={BookOpen}
-                  error={errors.faculty_name}
+                  error={errors.faculty_name ? { message: errors.faculty_name.message ?? "" } : undefined}
                   required
                   theme="university"
                 >
@@ -374,7 +380,7 @@ const UniversityProfile = () => {
                 <FormField
                   label="Năm học"
                   icon={Calendar}
-                  error={errors.year_of_study}
+                  error={errors.year_of_study ? { message: errors.year_of_study.message ?? "" } : undefined}
                   required
                   theme="university"
                 >
@@ -394,7 +400,7 @@ const UniversityProfile = () => {
                   <FormField
                     label="Chuyên ngành"
                     icon={GraduationCap}
-                    error={errors.major_name}
+                    error={errors.major_name ? { message: errors.major_name.message ?? "" } : undefined}
                     required
                     theme="university"
                   >

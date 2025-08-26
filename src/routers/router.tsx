@@ -75,7 +75,7 @@ const Router = () => {
 
           {/* USER ROUTE */}
 
-          <Route path="/home" element={<RootLayout />}>
+          <Route path="/" element={<RootLayout />}>
             <Route index element={<Home />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile/general-info" element={<UserProfile />} />

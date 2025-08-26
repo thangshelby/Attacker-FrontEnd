@@ -26,11 +26,13 @@ export function useAuth() {
         navigate("/admin");
         return data.data.user;
       }
+
       setToast({
         type: "success",
-        message: "Welcome back !",
+        message: "Chào mừng bạn đã quay lại!",
       });
-      navigate("/home");
+
+      navigate("/");
       return data.data.user;
     },
     retry: false,
@@ -47,8 +49,8 @@ export function useAuth() {
       if (data.data.user.kyc_status === "Pending") {
         navigate("/auth/verify-email");
         setToast({
-          type: "info",
-          message: "Please verify your email to continue.",
+          type: "warn",
+          message: "Vui lòng xác thực email để tiếp tục.",
         });
         return;
       }
@@ -56,20 +58,27 @@ export function useAuth() {
         navigate("/admin");
         setToast({
           type: "success",
-          message: "Welcome back, Admin!",
+          message: "Chào mừng quản trị viên đã quay lại!",
         });
         return;
       }
       if (data.data.user.role === "User") {
-        navigate("/home");
+        navigate("/");
         setToast({
           type: "success",
-          message: "Welcome back!",
+          message: "Đăng nhập thành công! Chào mừng bạn quay lại.",
         });
       }
     },
-    onError: (error) => {
-      setError(error.response.data.message);
+    onError: (error: any) => {
+      console.log(error);
+      setError(
+        error?.response?.data?.message || error.message || "Đã xảy ra lỗi.",
+      );
+      setToast({
+        type: "error",
+        message: "Đăng nhập thất bại!",
+      });
     },
   });
 
@@ -83,15 +92,18 @@ export function useAuth() {
       navigate("/auth/verify-email");
       setToast({
         type: "success",
-        message: "Registration successful! Please verify your email.",
+        message: "Đăng ký thành công! Vui lòng xác thực email của bạn.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setToast({
         type: "error",
-        message: "Thất bại!",
+        message: "Đăng ký thất bại!",
       });
-      setError(error.response.data.message);
+      console.log(error);
+      setError(
+        error?.response?.data?.message || error.message || "Đã xảy ra lỗi.",
+      );
     },
   });
 
@@ -104,18 +116,43 @@ export function useAuth() {
         navigate("/admin");
         setToast({
           type: "success",
-          message: "Email verified! Welcome back, Admin!",
+          message: "Xác thực email thành công! Chào mừng quản trị viên.",
         });
         return;
       }
-      navigate("/home");
+      navigate("/");
       setToast({
         type: "success",
-        message: "Email verified! Welcome back!",
+        message: "Xác thực email thành công! Chào mừng bạn quay lại.",
       });
     },
-    onError: (error) => {
-      setError(error.response.data.message);
+    onError: (error: any) => {
+      setError(
+        error?.response?.data?.message || error.message || "Đã xảy ra lỗi.",
+      );
+      setToast({
+        type: "error",
+        message: "Xác thực email thất bại!",
+      });
+    },
+  });
+
+  const resendCode = useMutation({
+    mutationFn: (email: string) => auth.resendOtp(email),
+    onSuccess: () => {
+      setToast({
+        type: "success",
+        message: "Mã xác thực đã được gửi lại!",
+      });
+    },
+    onError: (error: any) => {
+      setError(
+        error?.response?.data?.message || error.message || "An error occurred",
+      );
+      setToast({
+        type: "error",
+        message: "Gửi lại mã xác thực thất bại!",
+      });
     },
   });
 
@@ -125,11 +162,9 @@ export function useAuth() {
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
-      // Redirect to login page after logout
       window.location.href = "http://localhost:5173/auth/login";
     } catch (error) {
       console.error("Logout failed:", error);
-      // Even if logout API fails, clear local state and redirect
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
@@ -144,6 +179,7 @@ export function useAuth() {
     login,
     signUp,
     verifyEmail,
+    resendCode,
     logout,
   };
 }

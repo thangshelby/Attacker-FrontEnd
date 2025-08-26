@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   FileText,
@@ -114,7 +114,7 @@ const sampleLoanData = {
   },
 };
 import { useLoans } from "@/hooks/useLoan";
-import { useUser } from "@/hooks/useUser";
+import { useUserByCitizenId } from "@/hooks/useUser";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
 import { useLoan } from "@/hooks/useLoan";
@@ -129,8 +129,8 @@ const AdminLoanDetail = () => {
 
   const location = useLocation();
   const selectedLoanId = location.pathname.split("/").pop();
-  const { loan } = useLoan(selectedLoanId);
-  const { selectedUser } = useUser(loan?.citizen_id);
+  const { loan } = useLoan(selectedLoanId ?? "");
+  const { user: selectedUser } = useUserByCitizenId(loan?.citizen_id);
 
   const { student } = useStudent(loan?.citizen_id);
   const { academicData } = useAcademic();

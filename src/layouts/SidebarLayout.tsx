@@ -3,15 +3,12 @@ import { useState, createContext, useContext } from "react";
 import { logo } from "../assets";
 import { ChevronFirst, ChevronLast } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
 import { useAppStore } from "@/store/appStore";
 const SidebarContext = createContext<{ expanded: boolean }>({ expanded: true });
-import { User } from "@/types";
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
-  const { user:User } = useAuth();
   const [expanded, setExpanded] = useState(true);
-  const {setExpanded:setExpandedApp} = useAppStore();
+  const { setExpanded: setExpandedApp } = useAppStore();
 
   return (
     <aside
@@ -40,11 +37,11 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
 
           {/* Nút toggle */}
           <button
-            onClick={() =>{
+            onClick={() => {
               setExpanded(!expanded);
               setExpandedApp(!expanded);
             }}
-            className="cursor-pointer flex-shrink-0 rounded-lg bg-gray-50 p-1.5 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="flex-shrink-0 cursor-pointer rounded-lg bg-gray-50 p-1.5 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             {expanded ? <ChevronFirst size={20} /> : <ChevronLast size={20} />}
           </button>
@@ -59,7 +56,17 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
 }
 import { useAuthStore } from "@/store/authStore";
 
-export function SidebarItem({ icon, text, alert, to }) {
+export function SidebarItem({
+  icon,
+  text,
+  alert,
+  to,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  alert?: boolean;
+  to: string;
+}) {
   const { expanded } = useContext(SidebarContext);
   const { user } = useAuthStore();
   const { setModal } = useAppStore();
@@ -67,7 +74,7 @@ export function SidebarItem({ icon, text, alert, to }) {
     <NavLink
       onClick={(e) => {
         if (to == "/DIDs") {
-          if (!user.verified) {
+          if (!user?.verified) {
             setModal({
               type: "warn",
               title: "Không đủ thông tin",
@@ -98,7 +105,7 @@ export function SidebarItem({ icon, text, alert, to }) {
       {expanded && (
         <span className="ml-3 overflow-hidden text-ellipsis whitespace-nowrap">
           {text}
-        </span> 
+        </span>
       )}
 
       {alert && (
@@ -121,13 +128,21 @@ export function SidebarItem({ icon, text, alert, to }) {
 import { useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 
-export function SidebarDropdownItem({ icon, text, children }) {
+export function SidebarDropdownItem({
+  icon,
+  text,
+  children,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  children: any
+}) {
   const { expanded } = useContext(SidebarContext);
   const { pathname } = useLocation();
 
   // Kiểm tra xem có item con nào đang active không
   const childPaths = React.Children.map(children, (child) => child.props.to);
-  const isActive = childPaths.some((path) => pathname.startsWith(path));
+  const isActive = childPaths.some((path:string) => pathname.startsWith(path));
 
   // Dropdown sẽ mở mặc định nếu có item con đang active
   const [isOpen, setIsOpen] = useState(isActive);
@@ -142,7 +157,7 @@ export function SidebarDropdownItem({ icon, text, children }) {
             ? "bg-indigo-50 text-indigo-800 dark:bg-gray-800 dark:text-indigo-200"
             : "text-gray-600 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-800"
         }`}
-        onClick={() => setIsOpen((o) => !o)}
+        onClick={() => setIsOpen((o:boolean) => !o)}
       >
         <div className="flex h-5 min-h-[20px] w-5 min-w-[20px] flex-shrink-0 items-center justify-center">
           <div className="flex h-5 w-5 items-center justify-center [&>svg]:h-5 [&>svg]:w-5">

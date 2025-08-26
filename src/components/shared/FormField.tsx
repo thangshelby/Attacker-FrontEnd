@@ -3,7 +3,7 @@ import { AlertCircle } from "lucide-react";
 interface FormFieldProps {
   label: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  error?: { message: string };
+  error?: { message: string }| undefined;
   children: React.ReactNode;
   required?: boolean;
   theme?: "user" | "university" | "loan"; // user, university, or loan

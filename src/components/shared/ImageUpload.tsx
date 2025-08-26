@@ -1,28 +1,24 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { CheckCircle, Camera, Upload, X } from "lucide-react";
-
-// Mock upload function for demo
-const uploadImage = async (file) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const url = URL.createObjectURL(file);
-      resolve({ url });
-    }, Math.random() * 2000 + 500); // Random delay between 0.5s and 2.5s
-  });
-};
+import { uploadImage } from "@/utils";
 
 // Image Upload Component
 const ImageUpload = ({
   label = "Upload Image",
-  onImageSelect = () => {},
+  onImageSelect,
   selectedImage,
   setIsProcessing = () => {},
-  side = "left",
+  side,
+}: {
+  label: string;
+  onImageSelect: (url: string | null) => void;
+  selectedImage: string | null | undefined;
+  setIsProcessing: (processing: boolean, side: string) => void;
+  side: string;
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isScanSuccess, setIsScanSuccess] = useState(false);
-
 
   const handleScan = () => {
     if (selectedImage) {
@@ -41,18 +37,18 @@ const ImageUpload = ({
     }
   };
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
 
-  const handleDragLeave = useCallback((e) => {
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   }, []);
 
   const handleDrop = useCallback(
-    async (e) => {
+    async (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
 
@@ -72,8 +68,8 @@ const ImageUpload = ({
   );
 
   const handleFileSelect = useCallback(
-    async (e) => {
-      const file = e.target.files[0];
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
       if (file && file.type.startsWith("image/")) {
         if (file.size > 10 * 1024 * 1024) {
           alert("Kích thước file không được vượt quá 10MB");
@@ -94,7 +90,7 @@ const ImageUpload = ({
     setIsDragging(false);
     onImageSelect(null);
     setIsScanning(false);
-  }, [onImageSelect]);
+  }, [onImageSelect, setIsProcessing, side]);
 
   return (
     <div className="space-y-3">
@@ -204,7 +200,7 @@ const ImageUpload = ({
                 Hủy bỏ
               </button>
 
-              {(
+              {
                 <button
                   onClick={handleScan}
                   disabled={!selectedImage || isScanSuccess}
@@ -216,14 +212,14 @@ const ImageUpload = ({
                     Scan thông tin
                   </p>
                 </button>
-              )}
+              }
             </div>
           </div>
         </div>
       )}
 
       {/* Custom CSS for scan animation */}
-      <style jsx>{`
+      <style>{`
         @keyframes scanLine {
           0% {
             top: 0;

@@ -29,16 +29,16 @@ const registerSchema = z
     message: "Mật khẩu không khớp",
     path: ["confirmPassword"], // Gán lỗi cho trường confirmPassword
   })
-  .refine((val) => /^[\w.-]+@[\w.-]+\.edu$/.test(val.email), {
-    message: "Email phải thuộc tên miền .edu",
-    path: ["email"],
-  });
+  // .refine((val) => /^[\w.-]+@[\w.-]+\.edu$/.test(val.email), {
+  //   message: "Email phải thuộc tên miền .edu",
+  //   path: ["email"],
+  // });
 
 const RegisterPage = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
 
-  const { error, clearError, setUser } = useAuthStore();
+  const { error, clearError} = useAuthStore();
 
   const {
     register,
@@ -46,7 +46,7 @@ const RegisterPage = () => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
+    defaultValues: {  
       name: "",
       email: "",
       password: "",
@@ -76,14 +76,12 @@ const RegisterPage = () => {
     }
   };
 
+
+
   return (
     // Layout chính - chiếm toàn bộ màn hình và có nền gradient
     <div className="flex flex-col justify-center p-8 md:p-6">
-      {signUp.isPending && (
-        <div className="bg-opacity-50 absolute z-10 flex h-full w-full items-center justify-center bg-black/60">
-          Loading...
-        </div>
-      )}
+  
       {/* Logo và Tiêu đề */}
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold text-gray-800">Tạo tài khoản</h1>
@@ -114,7 +112,7 @@ const RegisterPage = () => {
                 autoComplete="name"
                 {...register("name")}
                 placeholder="Họ và tên của bạn"
-                onFocus={handleFocus}
+                // onFocus={handleFocus}
                 className="w-full rounded-lg border border-gray-300 py-3 pr-4 pl-10 text-gray-800 transition-all duration-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 focus:outline-none"
               />
             </div>
