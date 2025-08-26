@@ -3,8 +3,7 @@ import {
   SidebarItem,
   SidebarDropdownItem,
 } from "../../layouts/SidebarLayout";
-import { useEffect } from "react";
-import {
+  import {
   Home,
   LayoutDashboard,
   UserCircle,
@@ -15,25 +14,12 @@ import {
   CreditCard,
   LifeBuoy,
   Settings,
-  ShieldCheck,
   LogOut,
 } from "lucide-react";
-import { useState } from "react";
-import { useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const Sidebar = () => {
-  const [open, setOpen] = useState(false);
-  const location = useLocation();
   const { logout } = useAuth();
-
-  useEffect(() => {
-    if (location.pathname !== "/VCs" && location.pathname !== "/DIDs") {
-      setOpen(false);
-    } else {
-      setOpen(true);
-    }
-  }, [location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -68,11 +54,11 @@ const Sidebar = () => {
             to="/profile/academic-info"
           />
         </SidebarDropdownItem>
-        <SidebarItem
+        {/* <SidebarItem
           icon={<ShieldCheck />}
           text="Định danh phi tập trung"
           to="/DIDs"
-        />
+        /> */}
 
         {/* <SidebarItem icon={<Wallet />} text="Khoản vay của tôi" to="/loans" /> */}
         <SidebarItem icon={<History />} text="Lịch sử vay" to="/history" />
@@ -90,11 +76,11 @@ const Sidebar = () => {
             text="Trợ giúp"
             to="/help"
           />
-          
+
           {/* Custom logout button */}
           <div
             onClick={handleLogout}
-            className="group relative flex cursor-pointer items-center rounded-md py-2 px-3 font-medium transition-colors text-gray-600 hover:bg-red-50 dark:text-gray-300 dark:hover:bg-red-900/20"
+            className="group relative flex cursor-pointer items-center rounded-md px-3 py-2 font-medium text-gray-600 transition-colors hover:bg-red-50 dark:text-gray-300 dark:hover:bg-red-900/20"
           >
             <div className="flex h-5 min-h-[20px] w-5 min-w-[20px] flex-shrink-0 items-center justify-center">
               <LogOut size={20} className="text-red-500" />

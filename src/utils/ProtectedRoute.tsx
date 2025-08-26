@@ -8,12 +8,12 @@ const ProtectedRoute = () => {
   const { user } = useAuthStore();
 
   if (!user) {
-    return <Navigate to="/auth/login" replace />;
+    return <Navigate to="/landing" replace />;
   }
 
   if (user.role != "Admin") {
-    useStudent();
-    useAcademic();
+    // useStudent();
+    // useAcademic();
   }
   useNotification();
 

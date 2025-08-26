@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   User,
   Mail,
@@ -16,7 +16,7 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUser } from "@/hooks/useUser";
+import { useUpdateUser } from "@/hooks/useUser";
 import ImageUpload from "@/components/shared/ImageUpload";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,9 +37,11 @@ const formSchema = z.object({
 const UserProfile = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentProcessingSide, setCurrentProcessingSide] = useState(null);
+  const [currentProcessingSide, setCurrentProcessingSide] = useState<
+    string | null
+  >(null);
   const { user } = useAuth();
-  const { updateUser } = useUser();
+  const { updateUser,updateUserLoading } = useUpdateUser();
 
   // Show loading state if user data is not available
   if (!user) {
@@ -79,31 +81,33 @@ const UserProfile = () => {
   });
   const watchedValues = watch();
 
-  useEffect(() => {
-    if (
-      watchedValues.citizen_card_front &&
-      watchedValues.citizen_card_back &&
-      user
-    ) {
-      reset({
-        ...user,
-        birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
-        citizen_card_front: watchedValues.citizen_card_front,
-        citizen_card_back: watchedValues.citizen_card_back,
-      });
-    }
-  }, [
-    watchedValues.citizen_card_back,
-    watchedValues.citizen_card_front,
-    user,
-    reset,
-  ]);
+  // useEffect(() => {
+  //   if (
+  //     watchedValues.citizen_card_front &&
+  //     watchedValues.citizen_card_back &&
+  //     user
+  //   ) {
+  //     reset({
+  //       ...user,
+  //       birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
+  //       citizen_card_front: watchedValues.citizen_card_front,
+  //       citizen_card_back: watchedValues.citizen_card_back,
+  //     });
+  //   }
+  // }, [
+  //   watchedValues.citizen_card_back,
+  //   watchedValues.citizen_card_front,
+  //   user,
+  //   reset,
+  // ]);
 
-  const handleImageSelect = (side) => async (imageUrl) => {
-    setValue(side, imageUrl);
-    setIsProcessing(false);
-    setCurrentProcessingSide(null);
-  };
+  const handleImageSelect =
+    (side: "citizen_card_front" | "citizen_card_back") =>
+    async (imageUrl: string | null) => {
+      setValue(side, imageUrl);
+      setIsProcessing(false);
+      setCurrentProcessingSide(null);
+    };
 
   const onSubmit = () => {
     setShowConfirmModal(true);
@@ -113,7 +117,8 @@ const UserProfile = () => {
     setShowConfirmModal(false);
 
     try {
-      await updateUser?.mutateAsync({
+      console.log(watchedValues)
+      await updateUser({
         _id: user?._id,
         ...watchedValues,
       });
@@ -121,7 +126,7 @@ const UserProfile = () => {
       console.error("Error updating profile:", error);
     }
   };
-  const handleProcessCitizenCard = (val, side) => {
+  const handleProcessCitizenCard = (val: boolean, side: string) => {
     setIsProcessing(val);
     setCurrentProcessingSide(side);
   };
@@ -297,7 +302,11 @@ const UserProfile = () => {
                 <FormField
                   label="Họ và tên"
                   icon={User}
-                  error={errors.name}
+                  error={
+                    errors.name?.message
+                      ? { message: errors.name.message }
+                      : undefined
+                  }
                   required
                 >
                   <input
@@ -311,7 +320,11 @@ const UserProfile = () => {
                 <FormField
                   label="Căn cước công dân"
                   icon={CreditCard}
-                  error={errors.citizen_id}
+                  error={
+                    errors.citizen_id?.message
+                      ? { message: errors.citizen_id.message }
+                      : undefined
+                  }
                 >
                   <input
                     type="text"
@@ -324,7 +337,11 @@ const UserProfile = () => {
                 <FormField
                   label="Email"
                   icon={Mail}
-                  error={errors.email}
+                  error={
+                    errors.email?.message
+                      ? { message: errors.email.message }
+                      : undefined
+                  }
                   required
                 >
                   <input
@@ -338,7 +355,11 @@ const UserProfile = () => {
                 <FormField
                   label="Số điện thoại"
                   icon={Phone}
-                  error={errors.phone}
+                  error={
+                    errors.phone?.message
+                      ? { message: errors.phone.message }
+                      : undefined
+                  }
                 >
                   <input
                     type="tel"
@@ -351,7 +372,11 @@ const UserProfile = () => {
                 <FormField
                   label="Ngày sinh"
                   icon={Calendar}
-                  error={errors.birth}
+                  error={
+                    errors.birth?.message
+                      ? { message: errors.birth.message }
+                      : undefined
+                  }
                 >
                   <input
                     type="date"
@@ -360,7 +385,15 @@ const UserProfile = () => {
                   />
                 </FormField>
 
-                <FormField label="Giới tính" icon={User} error={errors.gender}>
+                <FormField
+                  label="Giới tính"
+                  icon={User}
+                  error={
+                    errors.gender?.message
+                      ? { message: errors.gender.message }
+                      : undefined
+                  }
+                >
                   <select
                     {...register("gender")}
                     className="w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -376,7 +409,11 @@ const UserProfile = () => {
                   <FormField
                     label="Địa chỉ"
                     icon={MapPin}
-                    error={errors.address}
+                    error={
+                      errors.address?.message
+                        ? { message: errors.address.message }
+                        : undefined
+                    }
                   >
                     <textarea
                       {...register("address")}
@@ -401,13 +438,13 @@ const UserProfile = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={updateUser?.isPending}
+                  disabled={updateUserLoading}
                   onClick={() => {
                     onSubmit();
                   }}
                   className="relative cursor-pointer rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {updateUser?.isPending ? (
+                  {updateUserLoading ? (
                     <div className="flex items-center">
                       <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                       Đang cập nhật...

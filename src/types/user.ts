@@ -7,6 +7,7 @@ export interface User {
   name?: string;
   phone?: string;
   avatar?: string;
+  verified: boolean;
   created_at?: string;
   updated_at?: string;
 }

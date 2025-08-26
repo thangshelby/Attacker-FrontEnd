@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import  { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, Loader2 } from "lucide-react";
 import { useChatbot } from "@/hooks/useChatbot";
 
