@@ -27,20 +27,20 @@ const Benefit = () => {
             // Đây là thẻ div ngoài cùng của CARD, chịu trách nhiệm cho nền, bóng, bo góc.
             <div
               key={item.id}
-              className="rounded-xl bg-white p-8 text-center shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+              className="group rounded-3xl bg-white/80 backdrop-blur-sm p-8 text-center shadow-lg border border-white/30 transition-all duration-300 hover:bg-white hover:-translate-y-2 hover:shadow-2xl hover:scale-105"
             >
-              {/* Thẻ div này không cần thiết nữa vì padding đã được áp dụng ở trên, 
-                  nhưng tôi vẫn giữ lại cấu trúc flex để căn chỉnh nội dung. */}
               <div className="flex flex-col items-center">
-                <img
-                  src={item.iconUrl}
-                  alt={item.title}
-                  className="mb-5 h-16 w-16" // Bỏ object-contain nếu icon là SVG chuẩn
-                />
-                <h3 className="mb-3 text-xl font-bold text-gray-900">
+                <div className="mb-6 p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <img
+                    src={item.iconUrl}
+                    alt={item.title}
+                    className="h-12 w-12 filter brightness-0 invert"
+                  />
+                </div>
+                <h3 className="mb-4 text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors duration-300">
                   {item.title}
                 </h3>
-                <p className="leading-relaxed text-gray-600">{item.text}</p>
+                <p className="leading-relaxed text-gray-600 group-hover:text-gray-800 transition-colors duration-300">{item.text}</p>
               </div>
             </div>
           ))}

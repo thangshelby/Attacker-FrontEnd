@@ -135,11 +135,22 @@ const LoginPage = () => {
 
       {/* Nút Đăng nhập mạng xã hội */}
       <div className="flex flex-col gap-4">
-        <button className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 text-gray-700 transition-colors duration-300 hover:bg-gray-50">
+        <button 
+          onClick={() => {
+            // TODO: Implement Google OAuth hoặc Email OTP
+            alert("Tính năng đang phát triển. Vui lòng sử dụng đăng nhập email/password!");
+          }}
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 text-gray-700 transition-colors duration-300 hover:bg-gray-50"
+        >
           <FcGoogle size={22} />
           <span>Đăng nhập với Google</span>
         </button>
-        <button className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-transparent bg-blue-600 py-3 text-white transition-colors duration-300 hover:bg-blue-700">
+        <button 
+          onClick={() => {
+            alert("Tính năng đang phát triển. Vui lòng sử dụng đăng nhập email/password!");
+          }}
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border border-transparent bg-blue-600 py-3 text-white transition-colors duration-300 hover:bg-blue-700"
+        >
           <FaFacebook size={22} />
           <span>Đăng nhập với Facebook</span>
         </button>
