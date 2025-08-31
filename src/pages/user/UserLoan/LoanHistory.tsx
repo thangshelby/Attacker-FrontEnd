@@ -39,9 +39,9 @@ const LoanHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const { user } = useAuth();
-  const { student } = useStudent(user?.citizen_id || "k224141694");
+  const { student } = useStudent(user?.citizen_id || "");
   const { loans, isLoadingLoans, loansError } = useStudentLoans(
-    student?.student_id || "k224141694",
+    student?.student_id || "",
   );
   const navigate = useNavigate();
 

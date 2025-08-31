@@ -9,7 +9,7 @@ const CTA = () => {
           - Thêm: flex, items-center, justify-center để căn giữa nội dung.
           - Thêm: min-h-[450px] để đảm bảo box đủ cao.
         */}
-        <div className="relative flex min-h-[350px] items-center justify-center overflow-hidden rounded-2xl bg-gray-800 p-8 text-center shadow-xl md:min-h-[450px]">
+        <div className="relative flex min-h-[350px] items-center justify-center overflow-hidden rounded-3xl bg-gray-800 p-8 text-center shadow-2xl border border-white/20 md:min-h-[450px]">
           {/* 1. Ảnh nền */}
           <img
             src={ctaImg}
@@ -29,16 +29,16 @@ const CTA = () => {
               Đừng để những khó khăn tài chính tạm thời cản bước bạn trên con
               đường học vấn. Hãy để chúng tôi đồng hành cùng bạn.
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <div className="mt-8 flex flex-wrap justify-center gap-6">
               <a
-                href="#login"
-                className="transform rounded-lg bg-blue-600 px-7 py-3 font-semibold text-white shadow-md transition-transform hover:scale-105 hover:bg-blue-700"
+                href="/auth/login"
+                className="transform rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-blue-700 hover:to-purple-700 hover:shadow-2xl"
               >
                 Đăng nhập
               </a>
               <a
-                href="#signup"
-                className="transform rounded-lg border border-white/50 bg-white/10 px-7 py-3 font-semibold text-white shadow-md transition-transform hover:scale-105 hover:bg-white/20"
+                href="/auth/register"
+                className="transform rounded-xl border-2 border-white/70 bg-white/20 backdrop-blur-sm px-8 py-4 text-lg font-bold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-white/30 hover:shadow-2xl"
               >
                 Đăng ký ngay
               </a>

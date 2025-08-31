@@ -9,6 +9,7 @@ import FAQ from "../../../components/user/landing/FAQ";
 import Testimonials from "../../../components/user/landing/Testimonial";
 import CTA from "../../../components/user/landing/CTA";
 import Footer from "../../../components/user/landing/Footer";
+import LandingChatbot from "../../../components/user/landing/LandingChatbot";
 const LandingPage = () => {
   return (
     <div>
@@ -24,6 +25,9 @@ const LandingPage = () => {
         <CTA />
         <Footer />
       </div>
+      
+      {/* Floating Chatbot for landing page visitors */}
+      <LandingChatbot />
     </div>
   );
 };

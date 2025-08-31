@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Mail,
@@ -18,9 +18,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdateUser } from "@/hooks/useUser";
 import ImageUpload from "@/components/shared/ImageUpload";
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import FormField from "@/components/shared/FormField";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const formSchema = z.object({
   name: z.string(),
@@ -68,45 +68,138 @@ const UserProfile = () => {
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      name: user.name || "",
-      citizen_id: user.citizen_id || "",
-      email: user.email || "",
-      phone: user.phone || "",
-      birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
-      gender: user.gender || "male",
-      address: user.address || "",
-      citizen_card_front: user.citizen_card_front || null,
-      citizen_card_back: user.citizen_card_back || null,
+      name: "",
+      citizen_id: "",
+      email: "",
+      phone: "",
+      birth: "",
+      gender: "male",
+      address: "",
+      citizen_card_front: null,
+      citizen_card_back: null,
     },
   });
   const watchedValues = watch();
 
-  // useEffect(() => {
-  //   if (
-  //     watchedValues.citizen_card_front &&
-  //     watchedValues.citizen_card_back &&
-  //     user
-  //   ) {
-  //     reset({
-  //       ...user,
-  //       birth: new Date(user.birth || new Date()).toISOString().split("T")[0],
-  //       citizen_card_front: watchedValues.citizen_card_front,
-  //       citizen_card_back: watchedValues.citizen_card_back,
-  //     });
-  //   }
-  // }, [
-  //   watchedValues.citizen_card_back,
-  //   watchedValues.citizen_card_front,
-  //   user,
-  //   reset,
-  // ]);
+  // Reset form để tránh hardcode data - chạy ngay khi component mount
+  useEffect(() => {
+    console.log("Reset form về trống");
+    reset({
+      name: "",
+      citizen_id: "",
+      email: "",
+      phone: "",
+      birth: "",
+      gender: "male",
+      address: "",
+      citizen_card_front: null,
+      citizen_card_back: null,
+    });
+  }, []); // Chỉ chạy 1 lần khi mount
 
-  const handleImageSelect =
+  // Function extract OCR data từ file trực tiếp
+  const extractOCRData = async (file: File) => {
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      console.log("GEMINI_API_KEY:", apiKey ? "Có" : "KHÔNG CÓ");
+      
+      if (!apiKey) {
+        console.error("Thiếu GEMINI_API_KEY! Tạo file .env với VITE_GEMINI_API_KEY=your_key");
+        return null;
+      }
+      
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      // Convert file to base64 - giới hạn kích thước để tránh stack overflow
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        console.error("File quá lớn, vui lòng chọn file nhỏ hơn 5MB");
+        return null;
+      }
+      
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      // Convert từng chunk để tránh stack overflow
+      let base64Image = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        base64Image += String.fromCharCode(uint8Array[i]);
+      }
+      base64Image = btoa(base64Image);
+
+      const imagePart = {
+        inlineData: {
+          data: base64Image,
+          mimeType: file.type
+        }
+      };
+
+      const result = await model.generateContent([
+        "Extract Vietnamese citizen ID information from this image. Return only JSON format with these fields: name, citizen_id, birth_date, gender, address. Example: {\"name\": \"Nguyen Van A\", \"citizen_id\": \"123456789012\", \"birth_date\": \"1990-01-01\", \"gender\": \"Nam\", \"address\": \"123 Duong ABC, Quan XYZ, TP Ho Chi Minh\"}",
+        imagePart
+      ]);
+
+      const response = await result.response;
+      const text = response.text();
+
+      // Remove markdown code blocks nếu có
+      let jsonText = text;
+      if (text.includes('```json')) {
+        jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      }
+
+      const ocrData = JSON.parse(jsonText);
+      console.log('OCR Result:', ocrData);
+      return ocrData;
+    } catch (error) {
+      console.error('OCR Error:', error);
+      return null;
+    }
+  };
+
+    const handleImageSelect =
     (side: "citizen_card_front" | "citizen_card_back") =>
-    async (imageUrl: string | null) => {
+    async (imageUrl: string | null, file?: File) => {
       setValue(side, imageUrl);
       setIsProcessing(false);
       setCurrentProcessingSide(null);
+      
+      // Extract OCR data nếu là mặt trước CCCD và có file
+      if (file && side === "citizen_card_front") {
+        try {
+          console.log("Đang extract OCR data từ file:", file.name);
+          console.log("GEMINI_API_KEY có sẵn:", !!import.meta.env.VITE_GEMINI_API_KEY);
+          
+          const ocrData = await extractOCRData(file);
+          
+          if (ocrData) {
+            console.log("OCR thành công:", ocrData);
+            // Tự động điền form với OCR data
+            setValue("name", ocrData.name || "");
+            setValue("citizen_id", ocrData.citizen_id || "");
+            setValue("birth", ocrData.birth_date || "");
+            setValue("gender", ocrData.gender === "Nam" ? "male" : "female");
+            setValue("address", ocrData.address || "");
+
+            console.log("OCR Data auto-filled:", ocrData);
+            
+            // Upload lên Cloudinary sau khi OCR thành công (optional)
+            try {
+              const { uploadImage } = await import("@/utils");
+              const imageUploaded = await uploadImage(file);
+              console.log("Upload lên Cloudinary thành công:", imageUploaded.url);
+              // Có thể lưu URL này vào database nếu cần
+            } catch (uploadError) {
+              console.log("Không upload lên Cloudinary:", uploadError);
+            }
+          } else {
+            console.log("OCR trả về null - có thể do lỗi API key hoặc network");
+          }
+        } catch (error) {
+          console.error("Lỗi khi extract OCR:", error);
+          alert("Lỗi khi xử lý OCR. Vui lòng thử lại với ảnh khác hoặc kiểm tra kết nối mạng.");
+        }
+      }
     };
 
   const onSubmit = () => {

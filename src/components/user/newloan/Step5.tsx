@@ -100,7 +100,7 @@ const Step5 = ({ formData, studentInfo }) => {
             </div>
             <div class="info-row">
               <span>Mã sinh viên:</span>
-              <span class="highlight">${"k224141694"}</span>
+              <span class="highlight">${studentInfo.studentId || "N/A"}</span>
             </div>
             <div class="info-row">
               <span>Ngành học:</span>
