@@ -25,9 +25,7 @@ import { useEffect } from "react";
 const AcademicProfile = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [transcripts, setTranscripts] = useState([]);
   const [isProcessSuccess, setIsProcessSuccess] = useState(false);
-  const [errors, setErrors] = useState({});
   const { user } = useAuth();
   const { student } = useStudent(user?.citizen_id);
   const { academicData } = useAcademic(student?.student_id);
@@ -113,8 +111,7 @@ const AcademicProfile = () => {
                 <AlertCircle className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="mb-6 text-lg leading-relaxed font-semibold text-gray-800 dark:text-gray-200">
-                Bạn có chắc muốn cập nhật thông tin học tập từ{" "}
-                {transcripts.length} bảng điểm?
+                Bạn có chắc muốn cập nhật thông tin học tập?
               </h3>
               <div className="flex justify-center gap-4">
                 <button
@@ -195,22 +192,13 @@ const AcademicProfile = () => {
             </div>
 
             <DocumentUploadDemo
-              transcripts={transcripts}
-              onTranscriptsChange={setTranscripts}
-              errors={errors.transcripts}
+              onFinalSubmit={(academicData) => {
+                console.log('Academic data from DocumentUploadDemo:', academicData);
+                // Có thể xử lý thêm ở đây nếu cần
+              }}
             />
 
-            {/* Action Button */}
-            <div className="mt-6 cursor-pointer text-center">
-              <button
-                onClick={handleSubmit}
-                // disabled={transcripts.length === 0}
-                className="inline-flex cursor-pointer items-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-indigo-600 hover:to-purple-700 focus:ring-2 focus:ring-indigo-500/50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Cập nhật thông tin học tập
-              </button>
-            </div>
+
           </div>
         </div>
 
@@ -316,132 +304,7 @@ const AcademicProfile = () => {
               </div>
             </div>
 
-            {/* Detailed Information */}
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-              {/* Academic Details */}
-              <div className="rounded-2xl border border-gray-700 bg-gray-800/50 p-6 backdrop-blur-lg">
-                <h3 className="mb-6 flex items-center text-xl font-bold text-white">
-                  <BookOpen className="mr-2 h-5 w-5 text-blue-400" />
-                  Chi Tiết Học Tập
-                </h3>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-gray-700 py-3">
-                    <span className="text-gray-300">Môn học trượt</span>
-                    <span
-                      className={`font-medium ${
-                        (academicData?.failed_course_count || 0) > 0
-                          ? "text-red-400"
-                          : "text-green-400"
-                      }`}
-                    >
-                      {academicData?.failed_course_count || 0} môn
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b border-gray-700 py-3">
-                    <span className="text-gray-300">Có học bổng</span>
-                    <div className="flex items-center">
-                      {academicData?.has_scholarship ? (
-                        <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
-                      ) : (
-                        <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                      )}
-                      <span
-                        className={`font-medium ${
-                          academicData?.has_scholarship
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {academicData?.has_scholarship ? "Có" : "Không"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {academicData?.has_scholarship && (
-                    <div className="flex items-center justify-between border-b border-gray-700 py-3">
-                      <span className="text-gray-300">Số học bổng</span>
-                      <span className="font-medium text-yellow-400">
-                        {academicData?.scholarship_count || 0} học bổng
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between py-3">
-                    <span className="text-gray-300">Vai trò lãnh đạo</span>
-                    <div className="flex items-center">
-                      {academicData?.has_leadership_role ? (
-                        <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
-                      ) : (
-                        <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                      )}
-                      <span
-                        className={`font-medium ${
-                          academicData?.has_leadership_role
-                            ? "text-green-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {academicData?.has_leadership_role ? "Có" : "Không"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Achievements & Activities */}
-              <div className="rounded-2xl border border-gray-700 bg-gray-800/50 p-6 backdrop-blur-lg">
-                <h3 className="mb-6 flex items-center text-xl font-bold text-white">
-                  <Star className="mr-2 h-5 w-5 text-yellow-400" />
-                  Thành Tích & Hoạt Động
-                </h3>
-
-                <div className="space-y-6">
-                  {/* Achievement Summary */}
-                  <div className="rounded-lg bg-gray-700/30 p-4">
-                    <h4 className="mb-3 font-medium text-white">
-                      Tổng Quan Thành Tích
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-purple-400">
-                          {academicData?.achievement_award_count || 0}
-                        </div>
-                        <div className="text-gray-400">Giải thưởng</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-blue-400">
-                          {academicData?.scholarship_count || 0}
-                        </div>
-                        <div className="text-gray-400">Học bổng</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Activity Summary */}
-                  <div className="rounded-lg bg-gray-700/30 p-4">
-                    <h4 className="mb-3 font-medium text-white">
-                      Hoạt Động Ngoại Khóa
-                    </h4>
-                    <div className="text-center">
-                      <div className="mb-2 text-3xl font-bold text-green-400">
-                        {academicData?.extracurricular_activity_count || 2}
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        Hoạt động đã tham gia
-                      </div>
-                      {academicData?.has_leadership_role && (
-                        <div className="mt-2 inline-flex items-center rounded-full border border-purple-600/30 bg-purple-600/20 px-3 py-1 text-xs text-purple-400">
-                          <Users className="mr-1 h-3 w-3" />
-                          Có vai trò lãnh đạo
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             {/* Last Updated */}
             <div className="mt-8 text-center">

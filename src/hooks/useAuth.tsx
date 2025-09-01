@@ -36,7 +36,7 @@ export function useAuth() {
       return data.data.user;
     },
     retry: false,
-    enabled: true,
+    enabled: false, // ⚠️ DISABLE auto-execute
   });
 
   const login = useMutation({
@@ -172,6 +172,20 @@ export function useAuth() {
     }
   };
 
+  // ✅ Manual method để check authentication
+  const checkAuth = async () => {
+    try {
+      const { data } = await auth.getCurrentUser();
+      setUser(data.data.user);
+      return data.data.user;
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      localStorage.removeItem("token");
+      setUser(null);
+      return null;
+    }
+  };
+
   return {
     user: currentUser,
     isLoading,
@@ -181,5 +195,6 @@ export function useAuth() {
     verifyEmail,
     resendCode,
     logout,
+    checkAuth, // ✅ Export manual check method
   };
 }

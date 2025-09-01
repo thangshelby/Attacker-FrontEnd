@@ -15,6 +15,7 @@ import {
   Loader2,
   Info,
 } from "lucide-react";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import ImageUpload from "@/components/shared/ImageUpload";
 import { useStudent } from "@/hooks/useStudent";
@@ -49,7 +50,16 @@ const UniversityProfile = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentProcessingSide, setCurrentProcessingSide] = useState<string | null>(null);
+  const [isOCRScanning, setIsOCRScanning] = useState(false);
   const { user } = useAuth();
+  
+  // ✅ CSS animation cho hiệu ứng scan
+  const scanAnimation = `
+    @keyframes scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+  `;
   const { student, updateStudent } = useStudent(user?.citizen_id);
 
   const {
@@ -103,12 +113,139 @@ const UniversityProfile = () => {
     student,
   ]);
 
+  // ✅ OCR extraction cho thẻ sinh viên sử dụng thư viện Gemini
+  const extractStudentCardOCR = async (file: File) => {
+    try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        console.error('GEMINI_API_KEY not found');
+        return null;
+      }
+
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      const universityList = universities.map(uni => uni.name).join('\n');
+      
+      const prompt = `Hãy phân tích thẻ sinh viên này và trích xuất MÃ SỐ SINH VIÊN và TÊN TRƯỜNG từ mặt trước thẻ.
+
+      Mã số sinh viên thường:
+      - Nằm ở mặt trước thẻ sinh viên
+      - Có format: K21110xxx, 21110xxx, 20110xxx, 22110xxx, v.v.
+      - Thường có label "MSSV:", "Mã số:", "Student ID:", hoặc nằm gần tên sinh viên
+      - Là dãy số hoặc chữ-số dài 8-10 ký tự
+
+      Tên trường thường:
+      - Nằm ở đầu thẻ hoặc logo trường
+      - Có thể viết tắt hoặc đầy đủ
+      - So sánh và chọn trường phù hợp nhất từ danh sách sau:
+
+      DANH SÁCH TRƯỜNG:
+      ${universityList}
+
+      Trả về JSON:
+      {
+        "student_id": "mã số sinh viên tìm được",
+        "university_name": "tên trường chính xác từ danh sách trên (copy y nguyên)"
+      }
+      
+      Chỉ trả về JSON, không giải thích gì thêm.`;
+
+      // Convert file to generative part
+      const imageParts = await fileToGenerativePart(file);
+      
+      const result = await model.generateContent([prompt, imageParts]);
+      const response = await result.response;
+      const text = response.text();
+      
+      if (!text) {
+        console.error('No OCR text returned');
+        return null;
+      }
+
+      // Remove markdown code blocks nếu có
+      let jsonText = text;
+      if (text.includes('```json')) {
+        jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      }
+
+      const ocrData = JSON.parse(jsonText);
+      console.log('Student Card OCR Result:', ocrData);
+      return ocrData;
+    } catch (error) {
+      console.error('Student Card OCR Error:', error);
+      return null;
+    }
+  };
+
+  // Helper function to convert file to generative part
+  const fileToGenerativePart = async (file: File) => {
+    const base64EncodedDataPromise = new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result?.toString().split(',')[1]);
+      reader.readAsDataURL(file);
+    });
+    
+    return {
+      inlineData: {
+        data: await base64EncodedDataPromise,
+        mimeType: file.type
+      },
+    };
+  };
+
   const handleImageSelect = (
     side: "student_card_front" | "student_card_back"
-  ) => async (imageUrl: string | null) => {
+  ) => async (imageUrl: string | null, file?: File) => {
     setValue(side, imageUrl);
     setIsProcessing(false);
     setCurrentProcessingSide(null);
+    
+    // ✅ Extract OCR data nếu là mặt trước thẻ sinh viên và có file
+            if (file && side === "student_card_front") {
+          try {
+            console.log("Đang extract OCR data từ thẻ sinh viên:", file.name);
+            console.log("GEMINI_API_KEY có sẵn:", !!import.meta.env.VITE_GEMINI_API_KEY);
+            
+            // ✅ Bật hiệu ứng scanning
+            setIsOCRScanning(true);
+            
+            const ocrData = await extractStudentCardOCR(file);
+        
+        if (ocrData) {
+          console.log("OCR thành công:", ocrData);
+          
+          // ✅ Tự động điền mã số sinh viên
+          if (ocrData.student_id) {
+            setValue("student_id", ocrData.student_id);
+            console.log("Student ID auto-filled:", ocrData.student_id);
+          }
+          
+          // ✅ Tự động điền trường đại học
+          if (ocrData.university_name) {
+            // Tìm university ID từ tên trường
+            const foundUniversity = universities.find(uni => 
+              uni.name === ocrData.university_name
+            );
+            
+            if (foundUniversity) {
+              setValue("university", foundUniversity.id);
+              console.log("University auto-filled:", foundUniversity.name, "->", foundUniversity.id);
+            } else {
+              console.log("Không tìm thấy trường phù hợp trong danh sách:", ocrData.university_name);
+            }
+          }
+        } else {
+          console.log("OCR trả về null");
+        }
+      } catch (error) {
+        console.error("Lỗi khi extract OCR thẻ sinh viên:", error);
+        alert("Lỗi khi xử lý OCR thẻ sinh viên. Vui lòng thử lại với ảnh khác.");
+      } finally {
+        // ✅ Tắt hiệu ứng scanning
+        setIsOCRScanning(false);
+      }
+    }
   };
 
   const onSubmit = async () => {
@@ -125,7 +262,11 @@ const UniversityProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
+    <>
+      {/* ✅ CSS Animation */}
+      <style>{scanAnimation}</style>
+      
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
       {isProcessing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="mx-4 rounded-2xl bg-white p-8 shadow-2xl dark:bg-gray-800">
@@ -220,13 +361,27 @@ const UniversityProfile = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <ImageUpload
-                label="Thẻ sinh viên - Mặt trước"
-                onImageSelect={handleImageSelect("student_card_front")}
-                selectedImage={watchedValues.student_card_front}
-                setIsProcessing={handleProcessStudentCard}
-                side="student_card_front"
-              />
+              <div className="relative">
+                <ImageUpload
+                  label="Thẻ sinh viên - Mặt trước"
+                  onImageSelect={handleImageSelect("student_card_front")}
+                  selectedImage={watchedValues.student_card_front}
+                  setIsProcessing={handleProcessStudentCard}
+                  side="student_card_front"
+                />
+                {/* ✅ Hiệu ứng scan cho mặt trước */}
+                {isOCRScanning && watchedValues.student_card_front && (
+                  <div className="absolute inset-0 pointer-events-none">
+                    <div className="h-full w-full rounded-xl" 
+                         style={{
+                           background: 'linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.4) 50%, transparent 100%)',
+                           animation: 'scan 2s ease-in-out infinite'
+                         }}
+                    />
+                  </div>
+                )}
+              </div>
+              
               <ImageUpload
                 label="Thẻ sinh viên - Mặt sau"
                 onImageSelect={handleImageSelect("student_card_back")}
@@ -496,6 +651,7 @@ const UniversityProfile = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 
