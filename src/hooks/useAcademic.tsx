@@ -14,12 +14,22 @@ export function useAcademic(student_id: string) {
   } = useQuery({
     queryKey: ["academicRecord", student_id],
     queryFn: async () => {
-      const { data } = await academic.getAcademicRecord(student_id);
-      return data.data.academic;
+      try {
+        const { data } = await academic.getAcademicRecord(student_id);
+        return data.data.academic;
+      } catch (error) {
+        // Nếu là 404 (record chưa tồn tại), trả về null thay vì throw error
+        if (error.response?.status === 404) {
+          console.log('Academic record not found, returning null');
+          return null;
+        }
+        // Các lỗi khác thì vẫn throw
+        throw error;
+      }
     },
-    retry: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    retry: false, // Không retry cho 404
+    refetchOnWindowFocus: false, // Tắt auto-refetch
+    refetchOnReconnect: false,
     enabled: !!student_id, // Only run if student ID is available
   });
 
