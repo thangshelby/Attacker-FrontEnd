@@ -19,6 +19,7 @@ import {
   Gavel,
 } from "lucide-react";
 import { useLoans, useUpdateLoan } from "@/hooks/useLoan";
+import { loan as loanApi } from "@/apis/loan";
 import { toast } from "react-toastify";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useAppStore } from "@/store/appStore";
@@ -640,62 +641,203 @@ const Modal = ({
 };
 
 const ConversationModal = ({ loan, onClose }: ConversationModalProps) => {
-  // Hardcoded conversation data with 5 agents
-  const conversationData = {
-    summary: `PASS cả 3 special features (F2,F5,F7) - CHẤP NHẬN theo quy định (passed_count = 6/7). + Agent support: Academic agent(s) đồng ý.`,
-    agents: [
-      {
-        name: "Academic Agent",
-        icon: Brain,
-        color: "text-blue-400",
-        bgColor: "bg-blue-900/20",
-        borderColor: "border-blue-700",
-        decision: "approve",
-        reason:
-          "Quyết định: Approve. Sinh viên có GPA chuẩn hóa 3.4/4.0 (khoảng 8.43/10) tại một trường đại học Tier 1, cho thấy thành tích học tập khá tốt trong môi trường đào tạo chất lượng cao. Dù mới năm 3, sinh viên vẫn còn một năm để cải thiện và nâng cao kết quả học tập, đặc biệt trong ngành Công Nghệ Tài Chính thuộc nhóm STEM, vốn yêu cầu kỹ năng phân tích, toán học và công nghệ. Việc duy trì thành tích ổn định chứng tỏ khả năng thích nghi và học hỏi tốt. Ngoài học tập, sinh viên tham gia Science Club, thể hiện niềm đam mê nghiên cứu và chủ động trong hoạt động ngoại khóa; đồng thời có việc làm thêm, cho thấy trách nhiệm tài chính và khả năng quản lý thời gian. Về bối cảnh gia đình, thu nhập 2,34 triệu VND/tháng ở mức thấp, nhưng sinh viên không có nợ và được mẹ bảo lãnh, thể hiện sự hỗ trợ và cam kết tài chính từ gia đình. Sau tốt nghiệp, khu vực Bắc nơi sinh viên sinh sống có nhiều cơ hội việc làm trong ngành công nghệ tài chính, kết hợp với kinh nghiệm ngoại khóa và làm thêm, mở ra tiềm năng phát triển rõ ràng. Tổng thể, đây là ứng viên xứng đáng nhận sự chấp thuận.",
-      },
-      {
-        name: "Finance Agent",
-        icon: DollarSign,
-        color: "text-green-400",
-        bgColor: "bg-green-900/20",
-        borderColor: "border-green-700",
-        decision: "approve",
-        reason:
-          "Quyết định: Approve. Sinh viên đề nghị vay 3.000.000 VND cho mục đích học tập, phù hợp tiêu chí ưu tiên và được bảo lãnh bởi mẹ, gia đình không có nợ hiện tại và thu nhập ổn định 2,34 triệu VND/tháng. Mặc dù tỷ lệ nợ trên thu nhập ở mức cao (DTI 128%), rủi ro được giảm thiểu nhờ cam kết hỗ trợ tài chính từ gia đình và triển vọng nghề nghiệp của ngành Công Nghệ Tài Chính, với mức lương trung bình sau tốt nghiệp 8–12 triệu VND/tháng, đủ đảm bảo khả năng trả nợ. Sinh viên hiện có việc làm thêm, thể hiện sự chủ động và trách nhiệm, do đó khoản vay được chấp thuận.",
-      },
-      {
-        name: "Critical Agent for Academic",
-        icon: Shield,
-        color: "text-orange-400",
-        bgColor: "bg-orange-900/20",
-        borderColor: "border-orange-700",
-        decision: "reject",
-        reason:
-          "Lập luận dựa trên thành tích học tập, hoạt động ngoại khóa và sự hỗ trợ tài chính từ gia đình tuy hợp lý nhưng chưa đủ cơ sở để đánh giá rủi ro tín dụng một cách toàn diện. Hồ sơ thiếu dữ liệu về lịch sử tín dụng của sinh viên hoặc người bảo lãnh, bao gồm khả năng quản lý nợ, các khoản nợ cũ hay cam kết tài chính hiện tại. Việc lấy thành tích học tập và hoạt động ngoại khóa làm cơ sở dự đoán khả năng trả nợ là chưa thuyết phục, vì các yếu tố này không phản ánh rõ năng lực tài chính thực tế hoặc khả năng duy trì thu nhập ổn định trong tương lai. Thêm vào đó, thu nhập gia đình ở mức thấp tiềm ẩn rủi ro dài hạn nếu sinh viên gặp biến cố tài chính hoặc mất việc làm, đặc biệt trong bối cảnh thị trường lao động biến động. Các giả định về khả năng phát triển sau tốt nghiệp vẫn mang tính chủ quan và chưa có bằng chứng cụ thể về khả năng nâng cao thu nhập. Khuyến nghị: Reject.",
-      },
-      {
-        name: "Critical Agent for Finance",
-        icon: Shield,
-        color: "text-orange-400",
-        bgColor: "bg-orange-900/20",
-        borderColor: "border-orange-700",
-        decision: "approve",
-        reason:
-          "Quyết định: Approve. Mặc dù tỷ lệ thu nhập so với khoản vay (78%) và nợ/thu nhập (128%) cho thấy áp lực tài chính tương đối cao, song các yếu tố bổ sung giúp giảm thiểu rủi ro cần được xem xét. Sinh viên hiện có việc làm thêm, cho thấy khả năng tạo nguồn thu nhập bổ sung ngoài mức thu nhập 2,34 triệu VND/tháng, đồng thời nhận được sự hỗ trợ tài chính từ gia đình. Người bảo lãnh (mẹ) tuy không có tài sản đảm bảo cụ thể, nhưng nếu có thu nhập ổn định và khả năng đáp ứng nghĩa vụ tài chính, rủi ro vỡ nợ sẽ được hạn chế. Ngành học Công Nghệ Tài Chính có triển vọng nghề nghiệp tốt, mức lương trung bình sau tốt nghiệp từ 8–12 triệu VND/tháng, đủ để đảm bảo khả năng trả nợ trong dài hạn. Bên cạnh đó, nếu sinh viên có việc làm ổn định sau tốt nghiệp, khả năng hoàn trả sẽ được củng cố đáng kể. Với mục đích vay phù hợp, triển vọng thu nhập trong tương lai và sự bảo lãnh từ gia đình, khoản vay được đánh giá là khả thi và được chấp thuận.",
-      },
-      {
-        name: "Decision Agent",
-        icon: Gavel,
-        color: "text-purple-400",
-        bgColor: "bg-purple-900/20",
-        borderColor: "border-purple-700",
-        decision: "approve",
-        reason:
-          "PASS cả 3 special features - CHẤP NHẬN theo quy định (passed_count = 6/7). + Agent support: Academic agent(s) đồng ý. Kết luận: Chấp thuận khoản vay.",
-      },
-    ],
+  const [isLoadingConversation, setIsLoadingConversation] = useState(true);
+  const [conversationData, setConversationData] = useState<any>(null);
+
+  // Fetch MAS conversation data
+  const fetchConversation = async (loanId: string) => {
+    setIsLoadingConversation(true);
+    try {
+      console.log("Fetching conversation for loan ID:", loanId);
+      const response = await loanApi.getMassConversation(loanId);
+      console.log("Full response:", response);
+      console.log("Response data:", response.data);
+      
+      // Try different possible data structures
+      let conversationData = null;
+      
+      const rawData = response.data.data;
+      console.log("Raw data object:", rawData);
+      
+      // Check if result_stringify is in the conversation object
+      const conversationObj = rawData.conversation;
+      console.log("Conversation object:", conversationObj);
+      console.log("result_stringify exists:", conversationObj?.result_stringify);
+      
+      if (conversationObj && conversationObj.result_stringify && typeof conversationObj.result_stringify === 'string') {
+        // Parse the result_stringify which contains the actual conversation data
+        try {
+          conversationData = JSON.parse(conversationObj.result_stringify);
+          console.log("SUCCESS! Parsed result_stringify:", conversationData);
+          console.log("Responses object:", conversationData.responses);
+          console.log("Academic repredict:", conversationData.responses?.academic_repredict);
+          console.log("Finance repredict:", conversationData.responses?.finance_repredict);
+          console.log("Critical academic:", conversationData.responses?.critical_academic);
+          console.log("Critical finance:", conversationData.responses?.critical_finance);
+          console.log("Final result:", conversationData.final_result);
+        } catch (parseError) {
+          console.error("Error parsing result_stringify:", parseError);
+          conversationData = conversationObj;
+        }
+      } else {
+        console.log("result_stringify not found or not a string");
+        conversationData = rawData;
+      }
+      
+      console.log("Final conversation data:", conversationData);
+      setConversationData(conversationData);
+    } catch (error) {
+      console.error("Error fetching conversation:", error);
+      setConversationData(null);
+    } finally {
+      setIsLoadingConversation(false);
+    }
   };
+
+  useEffect(() => {
+    if (loan?._id) {
+      fetchConversation(loan._id);
+    }
+  }, [loan?._id]);
+
+  // Show loading state while fetching conversation
+  if (isLoadingConversation) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="flex h-[90vh] w-full max-w-6xl flex-col rounded-2xl border border-slate-700/50 bg-slate-800 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-700 p-6">
+            <div className="flex items-center space-x-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">
+                  Cuộc tranh luận của Multi-Agent System
+                </h3>
+                <p className="text-sm text-slate-400">
+                  Mã sinh viên: {loan?.student_id} | Số tiền:{" "}
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(loan?.loan_amount_requested || 0)}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="mx-auto h-16 w-16 animate-spin rounded-full border-t-2 border-indigo-500"></div>
+              <p className="mt-4 text-white">Đang tải cuộc tranh luận...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no conversation data
+  if (!conversationData) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="flex h-[90vh] w-full max-w-6xl flex-col rounded-2xl border border-slate-700/50 bg-slate-800 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-700 p-6">
+            <div className="flex items-center space-x-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                <MessageSquare className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">
+                  Cuộc tranh luận của Multi-Agent System
+                </h3>
+                <p className="text-sm text-slate-400">
+                  Mã sinh viên: {loan?.student_id} | Số tiền:{" "}
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(loan?.loan_amount_requested || 0)}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <AlertCircle className="mx-auto h-16 w-16 text-red-400" />
+              <p className="mt-4 text-white">Không tìm thấy dữ liệu cuộc tranh luận</p>
+              <p className="mt-2 text-slate-400">Có thể khoản vay chưa được xử lý bởi MAS</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Extract data from real conversation structure
+  const finalResult = conversationData.final_result || {};
+  const responses = conversationData.responses || {};
+  const ruleBased = conversationData.rule_based || {};
+
+  // Map agent responses to display format - using processed LLM responses, not raw
+  const agents = [
+    {
+      name: "Academic Agent",
+      icon: Brain,
+      color: "text-blue-400",
+      bgColor: "bg-blue-900/20",
+      borderColor: "border-blue-700",
+      decision: responses.academic_repredict?.decision || "unknown",
+      reason: responses.academic_repredict?.raw_response || responses.academic_repredict?.reason || "Không có dữ liệu",
+    },
+    {
+      name: "Finance Agent", 
+      icon: DollarSign,
+      color: "text-green-400",
+      bgColor: "bg-green-900/20",
+      borderColor: "border-green-700",
+      decision: responses.finance_repredict?.decision || "unknown",
+      reason: responses.finance_repredict?.raw_response || responses.finance_repredict?.reason || "Không có dữ liệu",
+    },
+    {
+      name: "Critical Agent (Academic)",
+      icon: Shield,
+      color: "text-orange-400",
+      bgColor: "bg-orange-900/20",
+      borderColor: "border-orange-700",
+      decision: responses.critical_academic?.recommended_decision || "unknown",
+      reason: responses.critical_academic?.raw_response || responses.critical_academic?.critical_response || "Không có dữ liệu",
+    },
+    {
+      name: "Critical Agent (Finance)",
+      icon: Shield,
+      color: "text-orange-400",
+      bgColor: "bg-orange-900/20",
+      borderColor: "border-orange-700",
+      decision: responses.critical_finance?.recommended_decision || "unknown",
+      reason: responses.critical_academic?.raw_response || responses.critical_academic?.critical_response || "Không có dữ liệu",
+    },
+    {
+      name: "Decision Agent",
+      icon: Gavel,
+      color: "text-purple-400",
+      bgColor: "bg-purple-900/20",
+      borderColor: "border-purple-700",
+      decision: finalResult.decision || "unknown",
+      reason: finalResult.raw_response || finalResult.reason || "Không có dữ liệu",
+    },
+  ];
+
+  const summary = `Quyết định: ${finalResult.decision || "unknown"}. ${finalResult.reason || ""} ${ruleBased.rule_based_reason ? `Rule-based: ${ruleBased.rule_based_reason}` : ""}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -731,19 +873,43 @@ const ConversationModal = ({ loan, onClose }: ConversationModalProps) => {
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-6">
             {/* Summary Section */}
-            <div className="rounded-lg border border-green-700 bg-green-900/20 p-4">
-              <h4 className="mb-2 flex items-center text-lg font-semibold text-green-400">
-                <CheckCircle className="mr-2 h-5 w-5" />
+            <div className={`rounded-lg border p-4 ${
+              finalResult.decision === "approve" 
+                ? "border-green-700 bg-green-900/20" 
+                : finalResult.decision === "reject"
+                ? "border-red-700 bg-red-900/20"
+                : "border-yellow-700 bg-yellow-900/20"
+            }`}>
+              <h4 className={`mb-2 flex items-center text-lg font-semibold ${
+                finalResult.decision === "approve" 
+                  ? "text-green-400" 
+                  : finalResult.decision === "reject"
+                  ? "text-red-400"
+                  : "text-yellow-400"
+              }`}>
+                {finalResult.decision === "approve" ? (
+                  <CheckCircle className="mr-2 h-5 w-5" />
+                ) : finalResult.decision === "reject" ? (
+                  <XCircle className="mr-2 h-5 w-5" />
+                ) : (
+                  <AlertCircle className="mr-2 h-5 w-5" />
+                )}
                 Kết quả cuối cùng
               </h4>
-              <p className="text-sm text-green-300">
-                {conversationData.summary}
+              <p className={`text-sm ${
+                finalResult.decision === "approve" 
+                  ? "text-green-300" 
+                  : finalResult.decision === "reject"
+                  ? "text-red-300"
+                  : "text-yellow-300"
+              }`}>
+                {summary}
               </p>
             </div>
 
             {/* Agent Conversations */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              {conversationData.agents.map((agent, index) => {
+              {agents.map((agent, index) => {
                 const IconComponent = agent.icon;
                 return (
                   <div
