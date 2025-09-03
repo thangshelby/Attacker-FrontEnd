@@ -29,6 +29,7 @@ import {
 import { useEffect } from "react";
 import FormField from "@/components/shared/FormField";
 import { useAuth } from "@/hooks/useAuth";
+import { academic } from "@/apis/academic";
 
 const universitySchema = z.object({
   student_id: z.string().min(1, "Mã số sinh viên là bắt buộc"),
@@ -154,7 +155,7 @@ const UniversityProfile = () => {
       // Convert file to generative part
       const imageParts = await fileToGenerativePart(file);
       
-      const result = await model.generateContent([prompt, imageParts]);
+      const result = await model.generateContent([prompt, imageParts as any]);
       const response = await result.response;
       const text = response.text();
       
@@ -254,7 +255,38 @@ const UniversityProfile = () => {
 
   const handleConfirmUpdate = async () => {
     setShowConfirmModal(false);
-    updateStudent.mutate(watchedValues);
+    try {
+      // Update Student first
+      await updateStudent.mutateAsync(watchedValues as any);
+
+      // Then upsert Academic with normalized study_year (1..6) and a default term if missing
+      const studentId = watchedValues.student_id as string;
+      const normalizedStudyYear = Math.min(
+        6,
+        Math.max(1, Number(watchedValues.year_of_study) || 3)
+      );
+      const term = 1;
+
+      const payload: any = {
+        student_id: studentId,
+        study_year: normalizedStudyYear,
+        term,
+      };
+
+      try {
+        const { data } = await academic.getAcademicRecord(studentId);
+        if (data?.data?.academic) {
+          await academic.update(studentId, payload);
+        } else {
+          await academic.create(payload);
+        }
+      } catch (err: any) {
+        // If not found or error, try create
+        await academic.create(payload);
+      }
+    } catch (e) {
+      console.error("Update UniversityProfile error:", e);
+    }
   };
   const handleProcessStudentCard = (val:boolean, side:string) => {
     setIsProcessing(val);
