@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import { Suspense } from "react";
-import ProtectedRoute from "../utils/ProtectedRoute";
+import ProtectedRoute from "@/utils/ProtectedRoute.tsx";
 
 //AUTH PAGES
 import LoginPage from "../pages/auth/LoginPage";

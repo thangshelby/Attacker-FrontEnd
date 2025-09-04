@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
 import Step1 from "@/components/user/newloan/Step1";
-import Step2 from "@/components/user/newloan/Step2";
+// import Step2 from "@/components/user/newloan/Step2";
 import Step3 from "@/components/user/newloan/Step3";
 import Step4 from "@/components/user/newloan/Step4";
 import Step5 from "@/components/user/newloan/Step5";
@@ -114,7 +114,7 @@ const NewLoans = () => {
     setStudentInfo({
       fullName: user?.name || "Nguyễn Văn An",
       studentId: student?.student_id || "SV001",
-      major: student?.major || "Khoa học Máy tính",
+      major: student?.major_name || "Khoa học Máy tính",
       academicYear: "2021-2025",
       gpa: academic?.gpa || "3.75",
       completedCredits: academic?.total_credits_earned,
@@ -133,7 +133,7 @@ const NewLoans = () => {
     if (currentStep === 1) {
       trigger().then((isValid) => {
         if (isValid) {
-          setCurrentStep(2);
+          setCurrentStep(3);
         } else {
           console.error("Form validation failed", errors);
         }
@@ -251,7 +251,7 @@ const NewLoans = () => {
           )}
 
           {/* Step 2: Academic Verification */}
-          {currentStep === 2 && <Step2 studentInfo={studentInfo} />}
+          {/* {currentStep === 2 && <Step2 studentInfo={studentInfo} />} */}
 
           {/* Step 3: Final Review */}
           {currentStep === 3 && (

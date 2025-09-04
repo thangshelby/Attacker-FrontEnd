@@ -15,12 +15,13 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUpdateUser } from "@/hooks/useUser";
+
+import { zodResolver } from '@hookform/resolvers/zod';
 import ImageUpload from "@/components/shared/ImageUpload";
 import { useAuth } from "@/hooks/useAuth";
 import FormField from "@/components/shared/FormField";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { useUpdateUser } from "@/hooks/useUser";
 
 const formSchema = z.object({
   name: z.string(),
