@@ -113,12 +113,13 @@ const sampleLoanData = {
     both_conditions_met: true,
   },
 };
-import { useLoans } from "@/hooks/useLoan";
+import { useLoans, useMASConversation } from "@/hooks/useLoan";
 import { useUserByCitizenId } from "@/hooks/useUser";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
 import { useLoan } from "@/hooks/useLoan";
 import OverviewSection from "@/components/admin/loandetail/Overview";
+import { Loan } from "@/types/loan";
 
 const AdminLoanDetail = () => {
   const [selectedLoan] = useState(sampleLoanData);
@@ -129,14 +130,12 @@ const AdminLoanDetail = () => {
 
   const location = useLocation();
   const selectedLoanId = location.pathname.split("/").pop();
-  const { loan } = useLoan(selectedLoanId ?? "");
-  const { user: selectedUser } = useUserByCitizenId(loan?.citizen_id);
-
-  const { student } = useStudent(loan?.citizen_id);
-  const { academicData } = useAcademic();
+  const { selectedLoan: loan } = useLoan(selectedLoanId ?? "07520400104");
+  // const { user: selectedUser } = useUserByCitizenId(loan?.citizen_id||"07520400104");
+  // const { student } = useStudent(loan?.citizen_id||"07520400104");
+  // const { academicData } = useAcademic(loan.citizen_id || "07520400104");
   const navigate = useNavigate();
-  const { getMASConversation } = useLoans(loan?.loan_id);
-  const masConversation = getMASConversation.data;
+  const { masConversation } = useMASConversation(loan?.loan_id);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowNotification(true), 1000);
@@ -178,7 +177,7 @@ const AdminLoanDetail = () => {
   // if (getMASConversation.isLoading || !masConversation) {
   //   return <div>Loading...</div>;
   // }
-  return (
+  return (  
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
       {/* Notification Toast */}
       {showNotification && (
@@ -247,7 +246,6 @@ const AdminLoanDetail = () => {
     </div>
   );
 };
-
 //  Optimized Header Component - Tối giản hóa khi có thông tin chi tiết bên dưới
 const Header = ({
   selectedLoan,
@@ -258,6 +256,15 @@ const Header = ({
   isFullscreen,
   onToggleFullscreen,
   handleBackToList,
+}:{
+  selectedLoan:Loan,
+  formatCurrency:(value:number)=>string,
+  formatDate:(value:string)=>string,
+  onCopyLoanId:()=>void,
+  onExport:()=>void,
+  isFullscreen:boolean,
+  onToggleFullscreen:()=>void,
+  handleBackToList:()=>void
 }) => (
   <div className="mb-6">
     {/* Top Navigation Bar */}

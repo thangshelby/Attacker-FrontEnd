@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { loan } from "@/apis/loan";
 import { queryClient } from "../apis/react-query";
-import { Loan,UpdateLoanParams } from "@/types";
+import { Loan, UpdateLoanParams } from "@/types";
 // Define interface for update loan parameters
 
 export function useLoans() {
@@ -17,28 +17,45 @@ export function useLoans() {
     },
   });
 
-  // const getMASConversation = useQuery({
-  //   queryKey: ["masConversation", loan_id],
-  //   queryFn: async () => {
-  //     const { data } = await loan.getMassConversation(loan_id);
-  //     return data.data.conversation;
-  //   },
-  //   enabled: !!loan_id,
-  // });
-
-  // Fetch loan by ID
-  // const getLoanById = useQuery({
-  //   queryKey: ["loan", { id: loanId }],
-  //   queryFn: (loan_id) => loan.getLoanById(loan_id),
-  //   enabled: true,
-  // });
-
   return {
     loans,
     isLoadingLoans,
     loansError,
     // getMASConversation,
   };
+}
+export function useMASConversation(loan_id: string | undefined) {
+  const {
+    data: masConversation,
+    isLoading: isLoadingMASConversation,
+    error: masConversationError,
+  } = useQuery({
+    queryKey: ["masConversation", loan_id],
+    queryFn: async () => {
+      const { data } = await loan.getMassConversation(loan_id!);
+      return data.data.conversation;
+    },
+    enabled: !!loan_id,
+  });
+  return {
+    masConversation,
+    isLoadingMASConversation,
+    masConversationError,
+  };
+}
+
+export function useAnalyzeLoan() {
+  const { mutate: analyzeLoan, isPending: analyzeLoanPending } = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await loan.analyze(data);
+      return response.data;
+    },
+
+    onError: (error) => {
+      console.error("Error analyzing loan:", error);
+    },
+  });
+  return { analyzeLoan, analyzeLoanPending };
 }
 
 export function useLoan(loan_id: string) {
@@ -53,7 +70,6 @@ export function useLoan(loan_id: string) {
       return data.data.loan;
     },
     enabled: !!loan_id,
-
   });
   return {
     selectedLoan,
@@ -98,7 +114,9 @@ export function useUpdateLoan() {
 
       // Also invalidate specific loan if we have the ID
       if (variables.loan_id) {
-        queryClient.invalidateQueries({ queryKey: ["loan", variables.loan_id] });
+        queryClient.invalidateQueries({
+          queryKey: ["loan", variables.loan_id],
+        });
       }
 
       // // If we have student_id, also invalidate student-specific loans

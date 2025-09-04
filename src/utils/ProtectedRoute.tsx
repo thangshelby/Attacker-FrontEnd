@@ -12,8 +12,8 @@ const ProtectedRoute = () => {
   }
 
   if (user.role != "Admin") {
-    // useStudent();
-    // useAcademic();
+    useStudent(user.citizen_id);
+    useAcademic(user.citizen_id);
   }
   useNotification();
 

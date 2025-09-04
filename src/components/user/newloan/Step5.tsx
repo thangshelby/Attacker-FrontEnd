@@ -15,6 +15,7 @@ import {
   Printer,
 } from "lucide-react";
 
+
 const Step5 = ({ formData, studentInfo }) => {
   const navigate = useNavigate();
   const [isPrinting, setIsPrinting] = useState(false);
@@ -299,14 +300,14 @@ const Step5 = ({ formData, studentInfo }) => {
           </h4>
           <div className="flex flex-col gap-3 sm:flex-row">
             <button
-              onClick={() => (window.location.href = "/history")}
+              onClick={() => (navigate("/history"))}
               className="flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
             >
               <History className="mr-2 h-4 w-4" />
               Xem lịch sử vay
             </button>
             <button
-              onClick={() => (window.location.href = "/dashboard")}
+              onClick={() => (navigate("/"))}
               className="flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500/20 dark:border-gray-500 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500"
             >
               <Award className="mr-2 h-4 w-4" />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   History,
   Clock,
@@ -17,6 +17,7 @@ import {
   DollarSign,
   Shield,
   Gavel,
+  ChartArea,
 } from "lucide-react";
 import { useLoans, useUpdateLoan } from "@/hooks/useLoan";
 import { loan as loanApi } from "@/apis/loan";
@@ -24,6 +25,7 @@ import { toast } from "react-toastify";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useAppStore } from "@/store/appStore";
 import { Loan } from "@/types";
+import { useMASConversation , useAnalyzeLoan} from "@/hooks/useLoan";
 
 interface ModalProps {
   modal: string;
@@ -52,14 +54,9 @@ const OverviewLoans = () => {
   const { loan, setLoan } = useAppStore();
   const [showConversationModal, setShowConversationModal] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const { masConversation } = useMASConversation(selectedLoan?._id);
+  const { analyzeLoan } = useAnalyzeLoan();
 
-  // Update current time every second to refresh AI processing status
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Force re-render every second to update timers
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Handle loan approval/rejection
   const handleLoanAction = (newStatus: string) => {
@@ -82,6 +79,20 @@ const OverviewLoans = () => {
     } finally {
       setActionLoading(null);
     }
+  };
+
+  const handleAnalyzeLoan = async () => {
+    if (!loan) return;
+    setActionLoading(loan._id);
+    // updateLoan({
+    //   loan_id: loan._id,
+    //   data: { is_analyze: true },
+    // });
+    // if (!loan) return;
+    await analyzeLoan({
+      student_id: loan.student_id,
+      loan_id: loan._id
+    });
   };
 
   // Filter loans based on search and status
@@ -121,6 +132,7 @@ const OverviewLoans = () => {
     return remainingSeconds;
   };
 
+  
   if (isLoadingLoans || !loans) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -382,6 +394,7 @@ const OverviewLoans = () => {
                         <div className="flex items-center space-x-2">
                           {/* View Conversation Button */}
                           <button
+                            disabled={loan.is_analyze}
                             onClick={() => {
                               setSelectedLoan(loan);
                               setShowConversationModal(true);
@@ -407,6 +420,23 @@ const OverviewLoans = () => {
                                 </div>
                               ) : (
                                 <>
+                                  {/* Analyze Button */}
+                                  <button
+                                    onClick={() => {
+                                      setLoan(loan);
+                                      handleAnalyzeLoan();
+                                    }}
+                                    disabled={actionLoading === loan._id}
+                                    className="inline-flex items-center rounded-lg bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700 transition-colors hover:bg-yellow-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-yellow-900/30 dark:text-yellow-300 dark:hover:bg-yellow-900/50"
+                                    title="Duyệt khoản vay"
+                                  >
+                                    {actionLoading === loan._id ? (
+                                      <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                                    ) : (
+                                      <ChartArea className="h-3 w-3" />
+                                    )}
+                                  </button>
+
                                   {/* Approve Button */}
                                   <button
                                     onClick={() => {

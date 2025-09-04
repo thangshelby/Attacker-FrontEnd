@@ -18,6 +18,7 @@ export interface Loan {
   reason: string;
   created_at: string; // hoặc Date nếu bạn parse sang object Date
   updated_at: string; // hoặc Date
+  is_analyze: boolean;
 }
 
 export type LoanStatus =

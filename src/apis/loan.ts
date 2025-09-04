@@ -32,6 +32,11 @@ export const loan = {
       withCredentials: true,
     });
   },
+  analyze:(data:any)=>{
+    return api.post("/loans/analyze",data,{
+      withCredentials: true,
+    })
+  },
   getLoans: () => {
     return api.get("/loan", {
       withCredentials: true,
