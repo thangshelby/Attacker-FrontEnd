@@ -29,7 +29,6 @@ const Sidebar = () => {
     <div className="flex">
       <SidebarLayout>
         {/* Thay active và onClick bằng prop 'to' */}
-        <SidebarItem icon={<Home />} text="Trang chủ" alert to="/" />
         <SidebarItem
           icon={<LayoutDashboard />}
           text="Tổng quan"
