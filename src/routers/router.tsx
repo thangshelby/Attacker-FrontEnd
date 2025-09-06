@@ -63,7 +63,8 @@ const Router = () => {
 
           {/* ADMIN ROUTES */}
           <Route path="admin" element={<AdminLayout />}>
-            <Route index path="dashboard" element={<AdminDashboard />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="loans" element={<OverviewLoans />} />
             <Route path="loans/:loan_id" element={<AdminLoanDetail />} />
 
