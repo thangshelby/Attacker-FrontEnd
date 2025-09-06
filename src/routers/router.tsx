@@ -77,7 +77,7 @@ const Router = () => {
           {/* USER ROUTE */}
 
           <Route path="/" element={<RootLayout />}>
-            <Route index element={<Home />} />
+            <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile/general-info" element={<UserProfile />} />
             <Route
