@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   History,
   Clock,
@@ -25,7 +25,7 @@ import { toast } from "react-toastify";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useAppStore } from "@/store/appStore";
 import { Loan } from "@/types";
-import { useMASConversation , useAnalyzeLoan} from "@/hooks/useLoan";
+import { useAnalyzeLoan} from "@/hooks/useLoan";
 
 interface ModalProps {
   modal: string;
@@ -54,7 +54,6 @@ const OverviewLoans = () => {
   const { loan, setLoan } = useAppStore();
   const [showConversationModal, setShowConversationModal] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
-  const { masConversation } = useMASConversation(selectedLoan?._id);
   const { analyzeLoan } = useAnalyzeLoan();
 
 

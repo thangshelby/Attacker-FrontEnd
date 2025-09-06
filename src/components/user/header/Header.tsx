@@ -48,10 +48,10 @@ const Header = () => {
           />
           <div className="min-w-0 leading-4">
             <h4 className="truncate font-bold text-gray-800 dark:text-gray-100">
-              {user.name}
+              {user?.name || "Người dùng"}
             </h4>
             <span className="block truncate text-xs font-medium text-gray-600 dark:text-gray-400">
-              {user.email}
+              {user?.email || ""}
             </span>
           </div>
           <MoreVertical

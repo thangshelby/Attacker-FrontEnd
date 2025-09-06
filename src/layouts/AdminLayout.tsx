@@ -1,20 +1,19 @@
 import { useState } from "react";
 import {
-  Users,
   FileText,
   CreditCard,
-  Settings,
   Bell,
   Menu,
   X,
   Home,
-  PieChart,
 } from "lucide-react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const menuItems = [
     {
       id: "dashboard",
@@ -30,35 +29,10 @@ const AdminLayout = () => {
       color: "text-purple-500",
       to: "loans",
     },
-    {
-      id: "analytics",
-      label: "Báo Cáo & Phân Tích",
-      icon: PieChart,
-      color: "text-cyan-500",
-      to: "debate",
-    },
-    {
-      id: "students",
-      label: "Quản Lý Sinh Viên",
-      icon: Users,
-      color: "text-green-500",
-      to: "debate-2",
-    },
-    {
-      id: "settings",
-      label: "Cài Đặt",
-      icon: Settings,
-      color: "text-gray-500",
-      to: "settings",
-    },
   ];
 
-  const handleLogout = () => {
-    // Clear any stored auth tokens
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    // Navigate to login page
-    navigate("/login");
+  const handleLogout = async () => {
+    await logout();
   };
 
   return (
