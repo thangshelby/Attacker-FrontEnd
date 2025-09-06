@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { auth } from "../apis/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
@@ -173,18 +174,27 @@ export function useAuth() {
   };
 
   // ✅ Manual method để check authentication
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
+      console.log("checkAuth: Making API call...");
       const { data } = await auth.getCurrentUser();
+      console.log("checkAuth: API response:", data);
+      console.log("checkAuth: Setting user:", data.data.user);
+      
+      // Update both store and React Query cache
       setUser(data.data.user);
+      queryClient.setQueryData(["currentUser"], data.data.user);
+      
+      console.log("checkAuth: User set in store and query cache");
       return data.data.user;
     } catch (error) {
       console.error("Auth check failed:", error);
       localStorage.removeItem("token");
       setUser(null);
+      queryClient.setQueryData(["currentUser"], null);
       return null;
     }
-  };
+  }, [setUser]);
 
   return {
     user: currentUser,
