@@ -58,6 +58,27 @@ export function useAnalyzeLoan() {
   return { analyzeLoan, analyzeLoanPending };
 }
 
+export function useCanCreateLoan(user_id: string) {
+  const {
+    data: canCreateLoan,
+    isLoading: isLoadingCanCreateLoan,
+    error: canCreateLoanError,
+  } = useQuery({
+    queryKey: ["canCreateLoan", user_id],
+    queryFn: async () => {
+      const { data } = await loan.checkCanCreateLoan(user_id);
+
+      return data
+    },
+    enabled: !!user_id,
+  });
+  return {
+    canCreateLoan,
+    isLoadingCanCreateLoan,
+    canCreateLoanError,
+  };
+}
+
 export function useLoan(loan_id: string) {
   const {
     data: selectedLoan,

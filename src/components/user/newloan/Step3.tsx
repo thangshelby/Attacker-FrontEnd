@@ -13,7 +13,10 @@ import {
   loanPurposes,
   paymentMethods,
   paymentFrequencies,
+  studentGurantor,
+  incomeRanges 
 } from "@/constants/newloan";
+
 const Step3 = ({ formData, studentInfo }) => {
   const [verificationId, setVerificationId] = useState(null);
 
@@ -44,7 +47,7 @@ const Step3 = ({ formData, studentInfo }) => {
       <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
         <h2 className="flex items-center text-lg font-semibold text-white">
           <FileText className="mr-2 h-5 w-5" />
-          Bước 3: Xem lại thông tin và gửi yêu cầu
+          Bước 2: Xem lại thông tin và gửi yêu cầu
         </h2>
       </div>
 
@@ -88,7 +91,7 @@ const Step3 = ({ formData, studentInfo }) => {
                     Người bảo lãnh:
                   </span>
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
-                    {formData.guarantor}
+                    {studentGurantor.find((sg) => sg.value === formData.guarantor)?.label}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -96,7 +99,7 @@ const Step3 = ({ formData, studentInfo }) => {
                     Thu nhập gia đình:
                   </span>
                   <span className="font-semibold text-gray-800 dark:text-gray-200">
-                    {formatCurrency(formData.family_income)}
+                    {incomeRanges.find((ir) => ir.value === formData.family_income)?.label}
                   </span>
                 </div>
                 <div className="border-t pt-3">

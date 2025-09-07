@@ -59,7 +59,8 @@ const ImageUpload = ({
         }
         setIsProcessing(true, side);
         // Tạo URL để hiển thị ảnh preview
-        const imageUrl = URL.createObjectURL(file);
+        const imageUrl = await uploadImage(file);
+        console.log(imageUrl)
         onImageSelect(imageUrl, file);
       }
     },

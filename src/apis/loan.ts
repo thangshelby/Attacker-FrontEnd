@@ -22,6 +22,11 @@ export const loan = {
       withCredentials: true,
     });
   },
+  checkCanCreateLoan:(user_id:string) => {
+    return api.get(`/loans/can_create_loan/${user_id}`, {
+      withCredentials: true,
+    });
+  },
   create: (data: Partial<Loan>) => {
     return api.post("/loans/contract", data, {
       withCredentials: true,

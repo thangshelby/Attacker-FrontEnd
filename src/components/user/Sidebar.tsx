@@ -4,7 +4,6 @@ import {
   SidebarDropdownItem,
 } from "../../layouts/SidebarLayout";
   import {
-  Home,
   LayoutDashboard,
   UserCircle,
   BadgeInfo,

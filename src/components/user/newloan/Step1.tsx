@@ -395,70 +395,143 @@ const Step1 = ({
         {formData.loan_amount_requested &&
           formData.loan_tenor &&
           formData.payment_method &&
-          formData.payment_frequency && (
+          (formData.payment_method === "1" || formData.payment_frequency) && (
             <div className="rounded-xl border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/30">
               <h3 className="mb-4 flex items-center text-lg font-semibold text-green-800 dark:text-green-200">
                 <Calculator className="mr-2 h-5 w-5" />
                 Thông tin trả nợ (ước tính)
               </h3>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Số tiền vay
-                      </p>
-                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                        {formatCurrency(formData.loan_amount_requested)}
-                      </p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-green-500" />
-                  </div>
-                </div>
+              {(() => {
+                const details = calculatePaymentDetails(
+                  formData.loan_amount_requested,
+                  formData.loan_tenor,
+                  formData.payment_method,
+                  formData.payment_frequency,
+                );
+                const selectedMethod = paymentMethods.find(
+                  (pm) => pm.id === parseInt(formData.payment_method),
+                );
 
-                <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Thời hạn
-                      </p>
-                      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                        {formData.loan_tenor} tháng
+                return (
+                  <div className="space-y-4">
+                    {/* Payment Method Info */}
+                    <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
+                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Phương thức thanh toán
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedMethod?.name} - Lãi suất: {((selectedMethod?.interestRate || 0) * 100).toFixed(1)}%/năm
                       </p>
                     </div>
-                    <Clock className="h-8 w-8 text-blue-500" />
-                  </div>
-                </div>
 
-                <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Tổng lãi
-                      </p>
-                      <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                        {formatCurrency(formData?.total_interest || 0)}
-                      </p>
-                    </div>
-                    <TrendingUp className="h-8 w-8 text-orange-500" />
-                  </div>
-                </div>
+                    {/* Calculation Grid */}
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              Số tiền vay
+                            </p>
+                            <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                              {formatCurrency(formData.loan_amount_requested)}
+                            </p>
+                          </div>
+                          <DollarSign className="h-8 w-8 text-green-500" />
+                        </div>
+                      </div>
 
-                <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Tổng tiền trả
-                      </p>
-                      <p className="text-lg font-bold text-red-600 dark:text-red-400">
-                        {formatCurrency(formData?.total_payment || 0)}
+                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              Thời hạn
+                            </p>
+                            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                              {formData.loan_tenor} tháng
+                            </p>
+                          </div>
+                          <Clock className="h-8 w-8 text-blue-500" />
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              Tổng lãi
+                            </p>
+                            <p className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                              {formatCurrency(details.totalInterest)}
+                            </p>
+                          </div>
+                          <TrendingUp className="h-8 w-8 text-orange-500" />
+                        </div>
+                      </div>
+
+                      <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                              Tổng tiền trả
+                            </p>
+                            <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                              {formatCurrency(details.totalPayment)}
+                            </p>
+                          </div>
+                          <Calculator className="h-8 w-8 text-red-500" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Periodic Payment Info - Only show for methods 2 and 3 */}
+                    {formData.payment_method !== "1" && details.monthly > 0 && (
+                      <div className="rounded-lg bg-blue-50 p-4 dark:bg-blue-900/20">
+                        <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+                          Thanh toán định kỳ
+                        </h4>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-blue-600 dark:text-blue-400">
+                              {formData.payment_method === "2" 
+                                ? `Lãi trả mỗi ${formData.payment_frequency} tháng` 
+                                : `Trả đều mỗi ${formData.payment_frequency} tháng`}
+                            </p>
+                            <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
+                              {formatCurrency(details.monthly)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-blue-600 dark:text-blue-400">
+                              Số kỳ thanh toán: {Math.ceil(formData.loan_tenor / Number(formData.payment_frequency))}
+                            </p>
+                            {formData.payment_method === "2" && (
+                              <p className="text-xs text-blue-600 dark:text-blue-400">
+                                + Trả gốc {formatCurrency(formData.loan_amount_requested)} cuối kỳ
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Payment Method Explanation */}
+                    <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                        Cách thức thanh toán
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {formData.payment_method === "1" && 
+                          "Bạn sẽ trả toàn bộ số tiền gốc và lãi vào ngày đáo hạn. Không có thanh toán định kỳ."}
+                        {formData.payment_method === "2" && 
+                          `Bạn sẽ trả lãi ${formatCurrency(details.monthly)} mỗi ${formData.payment_frequency} tháng, và trả toàn bộ gốc ${formatCurrency(formData.loan_amount_requested)} vào cuối kỳ hạn.`}
+                        {formData.payment_method === "3" && 
+                          `Bạn sẽ trả đều ${formatCurrency(details.monthly)} (bao gồm cả gốc và lãi) mỗi ${formData.payment_frequency} tháng cho đến hết thời hạn vay.`}
                       </p>
                     </div>
-                    <Calculator className="h-8 w-8 text-red-500" />
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           )}
       </div>
