@@ -16,7 +16,7 @@ import {
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUpload from "@/components/shared/ImageUpload";
 import { useAuth } from "@/hooks/useAuth";
 import FormField from "@/components/shared/FormField";
@@ -41,22 +41,11 @@ const UserProfile = () => {
   const [currentProcessingSide, setCurrentProcessingSide] = useState<
     string | null
   >(null);
-  const { user } = useAuth();
-  const { updateUser,updateUserLoading } = useUpdateUser();
+  const { user, isLoading } = useAuth();
+  const { updateUser, updateUserLoading } = useUpdateUser();
 
   // Show loading state if user data is not available
-  if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Đang tải thông tin người dùng...
-          </p>
-        </div>
-      </div>
-    );
-  }
+
   // Use user from useAuth instead of empty object
   const {
     register,
@@ -86,15 +75,15 @@ const UserProfile = () => {
   useEffect(() => {
     console.log("Reset form về trống");
     reset({
-      name: "",
-      citizen_id: "",
-      email: "",
-      phone: "",
-      birth: "",
-      gender: "male",
-      address: "",
-      citizen_card_front: null,
-      citizen_card_back: null,
+      name: user?.name || "",
+      citizen_id: user?.citizen_id ||  "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      birth: user?.birth || "",
+      gender: user?.gender || "male",
+      address: user?.address || "",
+      citizen_card_front: user?.citizen_card_front || null,
+      citizen_card_back: user?.citizen_card_back || null,
     });
   }, []); // Chỉ chạy 1 lần khi mount
 
@@ -103,26 +92,29 @@ const UserProfile = () => {
     try {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       console.log("GEMINI_API_KEY:", apiKey ? "Có" : "KHÔNG CÓ");
-      
+
       if (!apiKey) {
-        console.error("Thiếu GEMINI_API_KEY! Tạo file .env với VITE_GEMINI_API_KEY=your_key");
+        console.error(
+          "Thiếu GEMINI_API_KEY! Tạo file .env với VITE_GEMINI_API_KEY=your_key",
+        );
         return null;
       }
-      
+
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       // Convert file to base64 - giới hạn kích thước để tránh stack overflow
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
         console.error("File quá lớn, vui lòng chọn file nhỏ hơn 5MB");
         return null;
       }
-      
+
       const arrayBuffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
-      
+
       // Convert từng chunk để tránh stack overflow
-      let base64Image = '';
+      let base64Image = "";
       for (let i = 0; i < uint8Array.length; i++) {
         base64Image += String.fromCharCode(uint8Array[i]);
       }
@@ -131,13 +123,13 @@ const UserProfile = () => {
       const imagePart = {
         inlineData: {
           data: base64Image,
-          mimeType: file.type
-        }
+          mimeType: file.type,
+        },
       };
 
       const result = await model.generateContent([
-        "Extract Vietnamese citizen ID information from this image. Return only JSON format with these fields: name, citizen_id, birth_date, gender, address. Example: {\"name\": \"Nguyen Van A\", \"citizen_id\": \"123456789012\", \"birth_date\": \"1990-01-01\", \"gender\": \"Nam\", \"address\": \"123 Duong ABC, Quan XYZ, TP Ho Chi Minh\"}",
-        imagePart
+        'Extract Vietnamese citizen ID information from this image. Return only JSON format with these fields: name, citizen_id, birth_date, gender, address. Example: {"name": "Nguyen Van A", "citizen_id": "123456789012", "birth_date": "1990-01-01", "gender": "Nam", "address": "123 Duong ABC, Quan XYZ, TP Ho Chi Minh"}',
+        imagePart,
       ]);
 
       const response = await result.response;
@@ -145,34 +137,40 @@ const UserProfile = () => {
 
       // Remove markdown code blocks nếu có
       let jsonText = text;
-      if (text.includes('```json')) {
-        jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      if (text.includes("```json")) {
+        jsonText = text
+          .replace(/```json\n?/g, "")
+          .replace(/```\n?/g, "")
+          .trim();
       }
 
       const ocrData = JSON.parse(jsonText);
-      console.log('OCR Result:', ocrData);
+      console.log("OCR Result:", ocrData);
       return ocrData;
     } catch (error) {
-      console.error('OCR Error:', error);
+      console.error("OCR Error:", error);
       return null;
     }
   };
 
-    const handleImageSelect =
+  const handleImageSelect =
     (side: "citizen_card_front" | "citizen_card_back") =>
     async (imageUrl: string | null, file?: File) => {
       setValue(side, imageUrl);
       setIsProcessing(false);
       setCurrentProcessingSide(null);
-      
+
       // Extract OCR data nếu là mặt trước CCCD và có file
       if (file && side === "citizen_card_front") {
         try {
           console.log("Đang extract OCR data từ file:", file.name);
-          console.log("GEMINI_API_KEY có sẵn:", !!import.meta.env.VITE_GEMINI_API_KEY);
-          
+          console.log(
+            "GEMINI_API_KEY có sẵn:",
+            !!import.meta.env.VITE_GEMINI_API_KEY,
+          );
+
           const ocrData = await extractOCRData(file);
-          
+
           if (ocrData) {
             console.log("OCR thành công:", ocrData);
             // Tự động điền form với OCR data
@@ -183,12 +181,15 @@ const UserProfile = () => {
             setValue("address", ocrData.address || "");
 
             console.log("OCR Data auto-filled:", ocrData);
-            
+
             // Upload lên Cloudinary sau khi OCR thành công (optional)
             try {
               const { uploadImage } = await import("@/utils");
               const imageUploaded = await uploadImage(file);
-              console.log("Upload lên Cloudinary thành công:", imageUploaded.url);
+              console.log(
+                "Upload lên Cloudinary thành công:",
+                imageUploaded.url,
+              );
               // Có thể lưu URL này vào database nếu cần
             } catch (uploadError) {
               console.log("Không upload lên Cloudinary:", uploadError);
@@ -198,7 +199,9 @@ const UserProfile = () => {
           }
         } catch (error) {
           console.error("Lỗi khi extract OCR:", error);
-          alert("Lỗi khi xử lý OCR. Vui lòng thử lại với ảnh khác hoặc kiểm tra kết nối mạng.");
+          alert(
+            "Lỗi khi xử lý OCR. Vui lòng thử lại với ảnh khác hoặc kiểm tra kết nối mạng.",
+          );
         }
       }
     };
@@ -211,7 +214,7 @@ const UserProfile = () => {
     setShowConfirmModal(false);
 
     try {
-      console.log(watchedValues)
+      console.log(watchedValues);
       await updateUser({
         _id: user?._id,
         ...watchedValues,
@@ -225,6 +228,18 @@ const UserProfile = () => {
     setCurrentProcessingSide(side);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+        <div className="text-center">
+          <div className="mx-auto h-16 w-16 animate-spin rounded-full border-t-2 border-blue-500"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Đang tải thông tin người dùng...
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
       {isProcessing && (

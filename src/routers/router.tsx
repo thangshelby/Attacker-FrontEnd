@@ -47,7 +47,7 @@ const Router = () => {
     >
       <Routes>
         {/* DEFAULT ROUTE - Redirect to landing page */}
-        <Route path="/" element={<Navigate to="/landing" replace />} />
+        {/* <Route path="/" element={<Navigate to="/landing" replace />} /> */}
         
         {/* PUBLIC ROUTES */}
         <Route path="/landing" element={<LandingPage />} />

@@ -1,9 +1,10 @@
-import React from "react";
+import React, { use } from "react";
 import { useState, createContext, useContext } from "react";
 import { logo } from "../assets";
 import { ChevronFirst, ChevronLast } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAppStore } from "@/store/appStore";
+import { useCanCreateLoan } from "@/hooks/useLoan";
 const SidebarContext = createContext<{ expanded: boolean }>({ expanded: true });
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
@@ -54,7 +55,6 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
     </aside>
   );
 }
-import { useAuthStore } from "@/store/authStore";
 
 export function SidebarItem({
   icon,
@@ -68,18 +68,19 @@ export function SidebarItem({
   to: string;
 }) {
   const { expanded } = useContext(SidebarContext);
-  const { user } = useAuthStore();
+  const { user } = useAuth();
+  const { canCreateLoan } =
+    useCanCreateLoan(user?._id);
   const { setModal } = useAppStore();
   return (
     <NavLink
       onClick={(e) => {
-        if (to == "/DIDs") {
-          if (!user?.verified) {
+        if (to == "/newloan") {
+          if (!canCreateLoan.status) {
             setModal({
               type: "warn",
               title: "Không đủ thông tin",
-              message:
-                "Bạn không thể truy cập trang này. Vui lòng cập nhật đầy đủ thông tin người dùng",
+              message: canCreateLoan.message,
             });
             e.preventDefault();
           }
@@ -127,6 +128,7 @@ export function SidebarItem({
 
 import { useLocation } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function SidebarDropdownItem({
   icon,
@@ -135,14 +137,14 @@ export function SidebarDropdownItem({
 }: {
   icon: React.ReactNode;
   text: string;
-  children: any
+  children: any;
 }) {
   const { expanded } = useContext(SidebarContext);
   const { pathname } = useLocation();
 
   // Kiểm tra xem có item con nào đang active không
   const childPaths = React.Children.map(children, (child) => child.props.to);
-  const isActive = childPaths.some((path:string) => pathname.startsWith(path));
+  const isActive = childPaths.some((path: string) => pathname.startsWith(path));
 
   // Dropdown sẽ mở mặc định nếu có item con đang active
   const [isOpen, setIsOpen] = useState(isActive);
@@ -157,7 +159,7 @@ export function SidebarDropdownItem({
             ? "bg-indigo-50 text-indigo-800 dark:bg-gray-800 dark:text-indigo-200"
             : "text-gray-600 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-800"
         }`}
-        onClick={() => setIsOpen((o:boolean) => !o)}
+        onClick={() => setIsOpen((o: boolean) => !o)}
       >
         <div className="flex h-5 min-h-[20px] w-5 min-w-[20px] flex-shrink-0 items-center justify-center">
           <div className="flex h-5 w-5 items-center justify-center [&>svg]:h-5 [&>svg]:w-5">
