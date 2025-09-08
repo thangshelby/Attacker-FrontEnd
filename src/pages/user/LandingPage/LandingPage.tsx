@@ -21,7 +21,6 @@ const LandingPage = () => {
         <Security />
         <Benefit />
         <FAQ />
-        <Testimonials />
         <CTA />
         <Footer />
       </div>

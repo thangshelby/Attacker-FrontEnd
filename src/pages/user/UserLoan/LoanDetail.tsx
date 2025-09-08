@@ -1,5 +1,4 @@
-import React from "react";
-import { useAppStore } from "@/store/appStore";
+
 import {
   ArrowLeft,
   FileText,

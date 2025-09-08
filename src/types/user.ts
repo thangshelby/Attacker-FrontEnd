@@ -1,9 +1,11 @@
 // User and Authentication Types
 export interface User {
-  id: string;
+  _id: string;
   citizen_id: string;
   email: string;
   role: 'User' | 'Admin';
+  /** KYC verification status */
+  kyc_status: 'Pending' | 'Verified';
   name?: string;
   phone?: string;
   avatar?: string;

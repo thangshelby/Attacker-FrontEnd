@@ -1,11 +1,11 @@
 import { Navigate } from "react-router-dom";
-import { useAuthStore } from "../store/authStore";
 import { Outlet } from "react-router-dom";
 import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
 import { useNotification } from "@/hooks/useNotification";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState, useRef } from "react";
+import { useAuthStore } from "@/store/authStore";
 
 const ProtectedRoute = () => {
   const { user } = useAuthStore();
@@ -83,6 +83,14 @@ const ProtectedRoute = () => {
 
   if (!user) {
     return <Navigate to="/landing" replace />;
+  }
+
+  if (user.kyc_status === "Pending") {
+    return <Navigate to="/auth/verify-email" replace />;
+  }
+
+  if (user.role === "Admin") {
+    return <Navigate to="/admin" replace />;
   }
 
   return <Outlet />;

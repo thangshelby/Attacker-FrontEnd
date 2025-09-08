@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNotification } from "@/hooks/useNotification";
 import { getIcon } from "@/utils/getIcon";
 import HeaderNotification from "./HeaderNotification";
+import { useAuthStore } from "@/store/authStore";
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(true);
 
@@ -19,7 +20,7 @@ const ThemeToggle = () => {
 
 const Header = () => {
   const notificationRef = useRef(null);
-  const { user } = useAuth();
+  const { user } = useAuthStore();
 
 
   return (

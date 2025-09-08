@@ -26,11 +26,13 @@ export function useStudent(citizen_id: string) {
   });
 
   const updateStudent = useMutation({
-    mutationFn: (data: any) =>
-      student.updateStudent({
+    mutationFn: (data: Partial<Student>) =>{
+  
+      return  student.updateStudent({
         citizen_id: user?.citizen_id,
         ...data,
-      }),
+      })
+    },
     onSuccess: (data) => {
       setToast({
         type: "success",

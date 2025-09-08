@@ -132,54 +132,78 @@ export const calculatePaymentDetails = (
   const principal = amount;
   const months = tenor;
   const annualRate = method.interestRate;
-  const frequencyMonths = frequency
-    ? Number(frequency)
-    : method.id === 2
-      ? 3
-      : 1;
 
   let periodicPayment = 0;
   let totalInterest = 0;
   let totalPayment = 0;
 
   switch (Number(paymentMethodId)) {
-    case 1:
+    case 1: {
+      // Trả cả gốc và lãi vào ngày đáo hạn (Lãi đơn)
+      // Tổng lãi = Số tiền vay × Lãi suất năm × (Số tháng vay / 12)
       totalInterest = principal * annualRate * (months / 12);
+      // Tổng tiền trả = Số tiền vay + Tổng lãi
       totalPayment = principal + totalInterest;
-      periodicPayment = 0;
+      periodicPayment = 0; // Không có thanh toán định kỳ
       break;
+    }
 
-    case 2:
+    case 2: {
+      // Trả lãi định kỳ, gốc cuối kỳ
       if (!frequency) {
         return { monthly: 0, totalInterest: 0, totalPayment: 0 };
       }
-      const periodicRate = annualRate / (12 / frequencyMonths);
-      const numberOfPayments = Math.floor(months / frequencyMonths);
-      const periodicInterest = principal * periodicRate;
-      totalInterest = periodicInterest * numberOfPayments;
+      const frequencyMonths = Number(frequency);
+      const periodsPerYear = 12 / frequencyMonths;
+      
+      // Lãi kỳ = Số tiền vay × (Lãi suất năm / Số kỳ trong năm)
+      const interestPerPeriod = principal * (annualRate / periodsPerYear);
+      
+      // Số kỳ thanh toán
+      const numberOfPeriods = Math.ceil(months / frequencyMonths);
+      
+      // Tổng lãi = Lãi kỳ × Số kỳ
+      totalInterest = interestPerPeriod * numberOfPeriods;
+      
+      // Tổng tiền trả = Số tiền vay + Tổng lãi
       totalPayment = principal + totalInterest;
-      periodicPayment = periodicInterest;
+      
+      periodicPayment = interestPerPeriod;
       break;
+    }
 
-    case 3:
+    case 3: {
+      // Trả đều gốc và lãi định kỳ (Annuity)
       if (!frequency) {
         return { monthly: 0, totalInterest: 0, totalPayment: 0 };
       }
-      const effectiveRate = annualRate / (12 / frequencyMonths);
-      const totalPeriods = Math.floor(months / frequencyMonths);
+      const frequencyMonths = Number(frequency);
+      const periodsPerYear = 12 / frequencyMonths;
+      
+      // Lãi suất kỳ = r = Lãi suất năm / Số kỳ trong năm
+      const periodicRate = annualRate / periodsPerYear;
+      
+      // Số kỳ = n
+      const numberOfPeriods = Math.ceil(months / frequencyMonths);
 
-      if (effectiveRate === 0) {
-        periodicPayment = principal / totalPeriods;
+      if (periodicRate === 0) {
+        // Trường hợp lãi suất = 0
+        periodicPayment = principal / numberOfPeriods;
       } else {
-        periodicPayment =
-          (principal *
-            effectiveRate *
-            Math.pow(1 + effectiveRate, totalPeriods)) /
-          (Math.pow(1 + effectiveRate, totalPeriods) - 1);
+        // PMT = P × [r(1+r)^n] / [(1+r)^n - 1]
+        const onePlusR = 1 + periodicRate;
+        const onePlusRPowN = Math.pow(onePlusR, numberOfPeriods);
+        
+        periodicPayment = principal * (periodicRate * onePlusRPowN) / (onePlusRPowN - 1);
       }
-      totalPayment = periodicPayment * totalPeriods;
+      
+      // Tổng tiền trả = PMT × Số kỳ
+      totalPayment = periodicPayment * numberOfPeriods;
+      
+      // Tổng lãi = Tổng tiền trả - Số tiền vay
       totalInterest = totalPayment - principal;
       break;
+    }
   }
 
   return {
