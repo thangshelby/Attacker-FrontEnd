@@ -1,7 +1,7 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Outlet } from "react-router-dom";
-import { useStudent } from "@/hooks/useStudent";
-import { useAcademic } from "@/hooks/useAcademic";
+// import { useStudent } from "@/hooks/useStudent"; // ❌ REMOVED: Không cần cho admin
+// import { useAcademic } from "@/hooks/useAcademic"; // ❌ REMOVED: Gây loop vô hạn
 import { useNotification } from "@/hooks/useNotification";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState, useRef } from "react";
@@ -12,12 +12,9 @@ const ProtectedRoute = () => {
   const { checkAuth } = useAuth();
   const [isChecking, setIsChecking] = useState(true);
   const hasCheckedAuth = useRef(false);
+  const location = useLocation();
 
-  // ✅ Always call hooks at the top level
-  const citizenId = user && user.role !== "Admin" ? user.citizen_id : "";
-  const { student } = useStudent(citizenId);
-  const studentId = student?.student_id || "";
-  useAcademic(studentId);
+  // ✅ Always call hooks at the top level  
   useNotification();
 
   useEffect(() => {
@@ -90,7 +87,10 @@ const ProtectedRoute = () => {
   }
 
   if (user.role === "Admin") {
-    return <Navigate to="/admin" replace />;
+    // Chỉ redirect nếu không phải đang ở admin route để tránh loop
+    if (!location.pathname.startsWith("/admin")) {
+      return <Navigate to="/admin" replace />;
+    }
   }
 
   return <Outlet />;

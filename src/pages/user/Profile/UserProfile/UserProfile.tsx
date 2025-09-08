@@ -74,18 +74,27 @@ const UserProfile = () => {
   // Reset form để tránh hardcode data - chạy ngay khi component mount
   useEffect(() => {
     console.log("Reset form về trống");
+    
+    // ✅ Format birth date for input[type="date"]
+    const formatDate = (dateString: string | Date) => {
+      if (!dateString) return "";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "";
+      return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    };
+    
     reset({
       name: user?.name || "",
       citizen_id: user?.citizen_id ||  "",
       email: user?.email || "",
       phone: user?.phone || "",
-      birth: user?.birth || "",
+      birth: formatDate(user?.birth || ""),
       gender: user?.gender || "male",
       address: user?.address || "",
       citizen_card_front: user?.citizen_card_front || null,
       citizen_card_back: user?.citizen_card_back || null,
     });
-  }, []); // Chỉ chạy 1 lần khi mount
+  }, [user]); // ✅ Add user dependency to re-run when user data loads
 
   // Function extract OCR data từ file trực tiếp
   const extractOCRData = async (file: File) => {
@@ -214,13 +223,19 @@ const UserProfile = () => {
     setShowConfirmModal(false);
 
     try {
-      console.log(watchedValues);
-      await updateUser({
+      console.log('🚀 UserProfile - Updating user with data:', watchedValues);
+      console.log('👤 Current user:', user);
+      console.log('🆔 User ID to send:', user?._id);
+      
+      const payload = {
         _id: user?._id,
         ...watchedValues,
-      });
+      };
+      console.log('📦 Final payload:', payload);
+      
+      await updateUser(payload);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("❌ Error updating profile:", error);
     }
   };
   const handleProcessCitizenCard = (val: boolean, side: string) => {
