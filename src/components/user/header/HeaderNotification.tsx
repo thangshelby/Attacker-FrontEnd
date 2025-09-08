@@ -245,8 +245,19 @@ const NotificationDropdown = ({
                     <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
                       {notification?.content}
                     </p>
-                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+
+                    {/* <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
                       {getUploadElapsedTime(notification.created_at)}
+                    </p> */}
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
+                      {getUploadElapsedTime(notification.updated_at)} •{" "}
+                      {new Date(notification.updated_at).toLocaleString("vi-VN", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </div>
                 </div>

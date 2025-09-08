@@ -95,10 +95,16 @@ const LoanHistory = () => {
       </div>
     );
   }
+
+  // Sort loans theo ngày tạo (mới nhất trước)
+  const sortedLoans = [...(loans || [])].sort((a, b) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
   const totalPages = Math.ceil((loans?.length || 0) / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentItems = loans?.slice(startIndex, endIndex);
+  const currentItems = sortedLoans.slice(startIndex, endIndex);
+
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900">
