@@ -6,10 +6,12 @@ export const student = {
       withCredentials: true,
     });
   },
-  updateStudent: (data: any) =>
-    api.put(`/students/update_student`, data, {
+  updateStudent: (data: any) => {
+    console.log('🔌 Student API - Updating student with data:', data);
+    return api.put(`/students/update_student`, data, {
       withCredentials: true,
-    }),
+    });
+  },
 
   // getAllUsers: () => {
   //   return api.get("/api/users/all_users", {

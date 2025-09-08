@@ -7,6 +7,7 @@ export const academic = {
     });
   },
   create: (data: any) => {
+    console.log('🔌 Academic API - Creating record with data:', data);
     return api.post("/academic/create", data, {
       withCredentials: true,
     });

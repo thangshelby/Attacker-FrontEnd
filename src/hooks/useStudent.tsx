@@ -27,13 +27,19 @@ export function useStudent(citizen_id: string) {
 
   const updateStudent = useMutation({
     mutationFn: (data: Partial<Student>) =>{
-  
-      return  student.updateStudent({
+      console.log('🔥 useStudent - updateStudent called with data:', data);
+      console.log('👤 Using citizen_id from user:', user?.citizen_id);
+      
+      const payload = {
         citizen_id: user?.citizen_id,
         ...data,
-      })
+      };
+      console.log('📦 Final payload to API:', payload);
+      
+      return student.updateStudent(payload);
     },
     onSuccess: (data) => {
+      console.log('✅ useStudent - Update success:', data);
       setToast({
         type: "success",
         message: "Student updated successfully",
@@ -42,7 +48,7 @@ export function useStudent(citizen_id: string) {
       setStudent(data.data.student);
     },
     onError: (error) => {
-      console.error("Error updating student:", error);
+      console.error("❌ useStudent - Error updating student:", error);
     },
   });
 

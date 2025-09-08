@@ -21,6 +21,7 @@ import { useStudent } from "@/hooks/useStudent";
 import { useAcademic } from "@/hooks/useAcademic";
 import { getGPAColor, getGPALevel } from "@/utils/index";
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AcademicProfile = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,8 +29,9 @@ const AcademicProfile = () => {
   const [isProcessSuccess, setIsProcessSuccess] = useState(false);
   const { user } = useAuth();
   const { student } = useStudent(user?.citizen_id);
-  const { academicData } = useAcademic(student?.student_id);
+  const { academicData, refetch: refetchAcademicData } = useAcademic(student?.student_id);
   const academicContainerRef = useRef(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (academicContainerRef?.current) {
@@ -192,9 +194,46 @@ const AcademicProfile = () => {
             </div>
 
             <DocumentUploadDemo
-              onFinalSubmit={(academicData) => {
+              studentId={student?.student_id}
+              onFinalSubmit={async (academicData: any) => {
+                console.log('🎯 === onFinalSubmit TRIGGERED ===');
                 console.log('Academic data from DocumentUploadDemo:', academicData);
-                // Có thể xử lý thêm ở đây nếu cần
+                console.log('🔄 Starting cache invalidation and refetch...');
+                
+                // Invalidate và refetch academic data sau khi upload thành công
+                if (student?.student_id) {
+                  try {
+                    // Method 1: Invalidate cache
+                    console.log('🗑️ Invalidating cache...');
+                    await queryClient.invalidateQueries({
+                      queryKey: ["academicRecord", student.student_id]
+                    });
+                    console.log('✅ Invalidated academic record cache for student:', student.student_id);
+                    
+                    // Method 2: Remove cache completely
+                    console.log('🗑️ Removing cache completely...');
+                    await queryClient.removeQueries({
+                      queryKey: ["academicRecord", student.student_id]
+                    });
+                    
+                    // Method 3: Force refetch 
+                    console.log('🔄 Force refetching academic data...');
+                    if (refetchAcademicData) {
+                      const result = await refetchAcademicData();
+                      console.log('✅ Refetch result:', result);
+                    }
+                    
+                    // Method 4: Reset queries để force fresh fetch
+                    console.log('🔄 Resetting queries...');
+                    await queryClient.resetQueries({
+                      queryKey: ["academicRecord", student.student_id]
+                    });
+                    
+                    console.log('� All refresh methods completed!');
+                  } catch (error) {
+                    console.error('❌ Error during cache refresh:', error);
+                  }
+                }
               }}
             />
 
