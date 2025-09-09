@@ -13,7 +13,6 @@ import LandingPage from "../pages/user/LandingPage/LandingPage.tsx";
 import NotFoundPage from "../pages/notfound/NotFoundPage";
 import AuthLayout from "../layouts/AuthLayout.tsx";
 import RootLayout from "../layouts/RootLayout";
-import Home from "../pages/user/Home/Home.tsx";
 import Dashboard from "../pages/user/Dashboard/Dashboard.tsx";
 import UserProfile from "@/pages/user/Profile/UserProfile/UserProfile";
 import UniversityProfile from "../pages/user/Profile/UniversityProfile/UniversityProfile.tsx";
@@ -48,9 +47,10 @@ const Router = () => {
       <Routes>
         {/* DEFAULT ROUTE - Redirect to landing page */}
         {/* <Route path="/" element={<Navigate to="/landing" replace />} /> */}
-        
+
         {/* PUBLIC ROUTES */}
         <Route path="/landing" element={<LandingPage />} />
+        <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
 
         <Route path="/auth" element={<AuthLayout />}>
           <Route path="login" element={<LoginPage />} />
@@ -59,8 +59,6 @@ const Router = () => {
 
         {/* PROTECTED ROUTES */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-
           {/* ADMIN ROUTES */}
           <Route path="admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />

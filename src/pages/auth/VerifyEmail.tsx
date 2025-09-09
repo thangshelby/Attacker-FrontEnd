@@ -5,8 +5,9 @@ import { useAuthStore } from "../../store/authStore";
 export default function VerifyEmailPage() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const { verifyEmail, resendCode } = useAuth();
-  const { user } = useAuthStore();
+  const { verifyEmail, resendCode ,user} = useAuth();
+  console.log(user)
+  // const { user } = useAuthStore();
 
   useEffect(() => {
     if (inputRefs.current[0]) {
