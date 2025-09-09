@@ -260,7 +260,6 @@ const NewLoans = () => {
           {/* Step 4: OTP Verification */}
           {currentStep === 4 && (
             <Step4
-              formData={watch()}
               onNext={() => setCurrentStep(5)}
               onBack={() => {
                 setCurrentStep(3);

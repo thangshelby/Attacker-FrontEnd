@@ -63,19 +63,7 @@ const Sidebar = () => {
         <SidebarItem icon={<CreditCard />} text="Khoản vay mới" to="/newloan" />
         <div className="mt-auto">
           <div className="my-2 border-t border-gray-200 dark:border-gray-700" />
-          <SidebarItem
-            icon={<Settings size={20} />}
-            text="Cài đặt"
-            to="/settings"
-          />
 
-          <SidebarItem
-            icon={<LifeBuoy size={20} />}
-            text="Trợ giúp"
-            to="/help"
-          />
-
-          {/* Custom logout button */}
           <div
             onClick={handleLogout}
             className="group relative flex cursor-pointer items-center rounded-md px-3 py-2 font-medium text-gray-600 transition-colors hover:bg-red-50 dark:text-gray-300 dark:hover:bg-red-900/20"

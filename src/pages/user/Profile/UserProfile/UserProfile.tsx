@@ -82,10 +82,13 @@ const UserProfile = () => {
       if (isNaN(date.getTime())) return "";
       return date.toISOString().split('T')[0]; // YYYY-MM-DD format
     };
+
+    // ✅ Check if citizen_id is temporary (starts with TEMP_)
+    const isTemporaryCitizenId = user?.citizen_id?.startsWith('TEMP_');
     
     reset({
       name: user?.name || "",
-      citizen_id: user?.citizen_id ||  "",
+      citizen_id: isTemporaryCitizenId ? "" : (user?.citizen_id || ""),
       email: user?.email || "",
       phone: user?.phone || "",
       birth: formatDate(user?.birth || ""),

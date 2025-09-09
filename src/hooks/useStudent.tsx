@@ -17,11 +17,29 @@ export function useStudent(citizen_id: string) {
   } = useQuery({
     queryKey: ["student", citizen_id],
     queryFn: async () => {
-      const { data } = await student.getStudent(citizen_id);
-      setStudent(data.data.student);
-      return data.data.student;
+      try {
+        const { data } = await student.getStudent(citizen_id);
+        console.log('📦 Student API response:', data);
+        
+        // Handle both response formats
+        const studentInfo = data.data?.student || data.student;
+        if (studentInfo) {
+          setStudent(studentInfo);
+          return studentInfo;
+        } else {
+          console.log('📭 No student data found for citizen_id:', citizen_id);
+          return null;
+        }
+      } catch (error: any) {
+        console.log('❌ Student API error:', error.response?.status, error.response?.data);
+        if (error.response?.status === 404) {
+          console.log('📭 Student not found, returning null');
+          return null;
+        }
+        throw error;
+      }
     },
-    // retry: true,
+    retry: false, // Don't retry on 404
     enabled: !!citizen_id,
   });
 
@@ -45,7 +63,11 @@ export function useStudent(citizen_id: string) {
         message: "Student updated successfully",
       });
 
-      setStudent(data.data.student);
+      // Handle both response formats
+      const studentInfo = data.data?.student || data.student;
+      if (studentInfo) {
+        setStudent(studentInfo);
+      }
     },
     onError: (error) => {
       console.error("❌ useStudent - Error updating student:", error);

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Mail,
   Shield,
@@ -10,35 +10,79 @@ import {
 import api from "@/apis/api";
 import { useAuth } from "@/hooks/useAuth";
 
-const Step4 = ({ onNext, onBack, formData, onOtpVerified }) => {
+interface Step4Props {
+  onNext: () => void;
+  onBack: () => void;
+  onOtpVerified: () => void;
+}
+
+const Step4 = ({ onNext, onBack, onOtpVerified }: Step4Props) => {
+  console.log('🔄 Step4 component mounted/re-rendered'); // ✅ Debug log
+  
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [otpSent, setOtpSent] = useState(() => {
+    // ✅ Check localStorage to persist OTP sent state
+    const stored = localStorage.getItem('newloan_otp_sent');
+    return stored === 'true';
+  });
   const { user } = useAuth();
-  const inputRefs = useRef([]);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
   const handleSendMail = async () => {
-    await api.get(`/users/send_otp/${user?.email || ""}`);
+    console.log('🔍 handleSendMail called, otpSent:', otpSent); // ✅ Debug log
+    
+    if (otpSent) {
+      console.log('⏭️ OTP already sent, skipping'); // ✅ Debug log
+      return; // ✅ Prevent multiple sends
+    }
+    
+    try {
+      console.log('📧 Sending OTP to:', user?.email); // ✅ Debug log
+      await api.get(`/users/send_otp/${user?.email || ""}`);
+      setOtpSent(true);
+      localStorage.setItem('newloan_otp_sent', 'true'); // ✅ Persist to localStorage
+      console.log('✅ OTP sent successfully to:', user?.email);
+    } catch (error) {
+      console.error('❌ Failed to send OTP:', error);
+      setError("Không thể gửi mã OTP. Vui lòng thử lại.");
+    }
   };
+  
   useEffect(() => {
-    handleSendMail();
-  }, []);
+    if (!otpSent && user?.email) {
+      handleSendMail();
+    }
+  }, [user?.email, otpSent]);
+
+  // ✅ Cleanup localStorage when user leaves without completing
+  useEffect(() => {
+    return () => {
+      // Only clear if not verified (user left without completing)
+      if (!isVerified) {
+        localStorage.removeItem('newloan_otp_sent');
+        console.log('🧹 Cleaned up OTP state on unmount');
+      }
+    };
+  }, [isVerified]);
 
   // Timer countdown
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => {
         setTimer((prev) => prev - 1);
-      }, 5000);
+      }, 1000); // ✅ Fixed: 1 second instead of 5 seconds
       return () => clearInterval(interval);
     } else {
       setCanResend(true);
     }
   }, [timer]);
 
-  const handleOtpChange = (index, value) => {
+  const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return; // Only allow single digit
 
     const newOtp = [...otp];
@@ -52,7 +96,7 @@ const Step4 = ({ onNext, onBack, formData, onOtpVerified }) => {
     }
   };
 
-  const handleKeyDown = (index, e) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     // Handle backspace
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -61,6 +105,7 @@ const Step4 = ({ onNext, onBack, formData, onOtpVerified }) => {
 
   const handleVerifyOtp = async () => {
     const otpCode = otp.join("");
+    console.log('🔐 Verifying OTP:', otpCode); // ✅ Debug log
 
     if (otpCode.length !== 6) {
       setError("Vui lòng nhập đầy đủ 6 số");
@@ -70,35 +115,64 @@ const Step4 = ({ onNext, onBack, formData, onOtpVerified }) => {
     setIsVerifying(true);
     setError("");
 
-    // Simulate API call - accept any 6-digit code
-    setTimeout(() => {
-      setIsVerifying(false);
-      setIsVerified(true);
+    try {
+      // ✅ Call real API to verify OTP for loan
+      const response = await api.post('/users/verify-otp-loan', {
+        email: user?.email,
+        otp_token: otpCode
+      });
 
-      // Trigger loan creation after OTP verification
-      if (onOtpVerified) {
-        onOtpVerified();
+      if (response.data.status) {
+        setIsVerified(true);
+        localStorage.removeItem('newloan_otp_sent'); // ✅ Clear localStorage on success
+        console.log('✅ OTP verification successful');
+
+        // Trigger loan creation after OTP verification
+        if (onOtpVerified) {
+          onOtpVerified();
+        }
+
+        // Auto proceed to next step after 1.5 seconds
+        setTimeout(() => {
+          onNext();
+        }, 1500);
+      } else {
+        console.log('❌ OTP verification failed:', response.data.message); // ✅ Debug log
+        setError(response.data.message || "Mã OTP không chính xác");
       }
-
-      // Auto proceed to next step after 1.5 seconds
-      setTimeout(() => {
-        onNext();
-      }, 1500);
-    }, 2000);
+    } catch (error: any) {
+      console.error('❌ OTP verification error:', error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Mã OTP không chính xác. Vui lòng thử lại.");
+      }
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
-  const handleResendOtp = () => {
-    setTimer(60);
-    setCanResend(false);
-    setOtp(["", "", "", "", "", ""]);
-    setError("");
-    inputRefs.current[0]?.focus();
+  const handleResendOtp = async () => {
+    try {
+      setTimer(60);
+      setCanResend(false);
+      setOtp(["", "", "", "", "", ""]);
+      setError("");
+      setOtpSent(false); // ✅ Reset flag to allow resend
+      inputRefs.current[0]?.focus();
 
-    // Simulate sending new OTP
-    console.log("📧 Đã gửi lại mã OTP");
+      // ✅ Call real API to resend OTP
+      await api.get(`/users/send_otp/${user?.email || ""}`);
+      setOtpSent(true); // ✅ Mark as sent
+      localStorage.setItem('newloan_otp_sent', 'true'); // ✅ Persist to localStorage
+      console.log("📧 Đã gửi lại mã OTP");
+    } catch (error) {
+      console.error('❌ Resend OTP error:', error);
+      setError("Không thể gửi lại mã OTP. Vui lòng thử lại.");
+    }
   };
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -158,10 +232,12 @@ const Step4 = ({ onNext, onBack, formData, onOtpVerified }) => {
             {otp.map((digit, index) => (
               <input
                 key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
+                ref={(el) => {
+                  inputRefs.current[index] = el;
+                }}
                 type="text"
                 inputMode="numeric"
-                maxLength="1"
+                maxLength={1}
                 value={digit}
                 onChange={(e) => handleOtpChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}

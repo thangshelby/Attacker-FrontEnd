@@ -213,7 +213,7 @@ const Step3 = ({ formData, studentInfo }) => {
                     Tín chỉ:
                   </span>
                   <span className="font-semibold text-blue-800 dark:text-blue-200">
-                    {studentInfo.completedCredits}/{studentInfo.totalCredits}
+                    {studentInfo.completedCredits}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -234,24 +234,6 @@ const Step3 = ({ formData, studentInfo }) => {
                     <Award className="mr-1 h-3 w-3" />
                     {studentInfo.academicRank}
                   </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Verification Status */}
-            <div className="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                <div>
-                  <h5 className="font-medium text-green-800 dark:text-green-200">
-                    Đã xác minh
-                  </h5>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    Thông tin học tập đã được xác minh qua Verifiable Credential
-                  </p>
-                  <p className="mt-1 font-mono text-xs text-green-600 dark:text-green-400">
-                    ID: {verificationId}
-                  </p>
                 </div>
               </div>
             </div>

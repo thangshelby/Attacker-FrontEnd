@@ -419,23 +419,6 @@ const OverviewLoans = () => {
                                 </div>
                               ) : (
                                 <>
-                                  {/* Analyze Button */}
-                                  <button
-                                    onClick={() => {
-                                      setLoan(loan);
-                                      handleAnalyzeLoan();
-                                    }}
-                                    disabled={actionLoading === loan._id}
-                                    className="inline-flex items-center rounded-lg bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700 transition-colors hover:bg-yellow-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-yellow-900/30 dark:text-yellow-300 dark:hover:bg-yellow-900/50"
-                                    title="Duyệt khoản vay"
-                                  >
-                                    {actionLoading === loan._id ? (
-                                      <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
-                                    ) : (
-                                      <ChartArea className="h-3 w-3" />
-                                    )}
-                                  </button>
-
                                   {/* Approve Button */}
                                   <button
                                     onClick={() => {

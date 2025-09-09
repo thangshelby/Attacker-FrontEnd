@@ -89,6 +89,25 @@ const UniversityProfile = () => {
 
   const watchedValues = watch();
 
+  // ✅ Reset form when student data is loaded
+  useEffect(() => {
+    if (student) {
+      console.log('🔄 Resetting form with student data:', student);
+      reset({
+        student_id: student.student_id || "",
+        university: student.university || "",
+        faculty_name: student.faculty_name || "",
+        major_name: student.major_name || "",
+        year_of_study: Number(student.year_of_study) || 1,
+        class_id: student.class_id || "",
+        has_parttime_job: student.has_parttime_job || false,
+        has_supporter: student.has_supporter || false,
+        student_card_front: student.student_card_front || null,
+        student_card_back: student.student_card_back || null,
+      });
+    }
+  }, [student, reset]);
+
   // ✅ Only log when there are actual errors, not continuously
   useEffect(() => {
     if (Object.keys(errors).length > 0) {

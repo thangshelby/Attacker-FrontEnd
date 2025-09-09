@@ -1,29 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   BookOpen,
   Trophy,
-  Calendar,
   TrendingUp,
-  Clock,
   Star,
-  Users,
   FileText,
   Award,
-  Target,
   ChevronRight,
-  Plus,
-  Activity,
-  BarChart3,
   GraduationCap,
   Heart,
   Zap,
-  CheckCircle2,
-  AlertCircle,
   ArrowUp,
   ArrowDown,
-  Eye
+  User,
+  School
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { useStudent } from '@/hooks/useStudent';
+import { useAcademic } from '@/hooks/useAcademic';
+import { useNavigate } from 'react-router-dom';
 
 interface StatCardProps {
   title: string;
@@ -33,9 +29,31 @@ interface StatCardProps {
   trend?: 'up' | 'down';
   trendValue?: string;
   color?: string;
+  loading?: boolean;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon: Icon, trend, trendValue, color = "blue" }) => {
+const StatCard: React.FC<StatCardProps> = ({ 
+  title, 
+  value, 
+  subtitle, 
+  icon: Icon, 
+  trend, 
+  trendValue, 
+  color = "blue",
+  loading = false 
+}) => {
+  if (loading) {
+    return (
+      <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-lg dark:bg-gray-800">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="group relative overflow-hidden rounded-xl bg-white p-6 shadow-sm transition-all hover:shadow-lg dark:bg-gray-800">
       <div className="flex items-start justify-between">
@@ -63,7 +81,15 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, icon: Icon,
   );
 };
 
-const QuickActionCard = ({ title, description, icon: Icon, color = "blue", onClick }) => {
+interface QuickActionCardProps {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  color?: string;
+  onClick: () => void;
+}
+
+const QuickActionCard: React.FC<QuickActionCardProps> = ({ title, description, icon: Icon, color = "blue", onClick }) => {
   return (
     <button
       onClick={onClick}
@@ -81,160 +107,80 @@ const QuickActionCard = ({ title, description, icon: Icon, color = "blue", onCli
   );
 };
 
-const RecentActivityItem = ({ title, subtitle, time, type, icon: Icon }) => {
-  const getTypeColor = (type) => {
-    switch (type) {
-      case 'success': return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
-      case 'warning': return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
-      case 'info': return 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30';
-      default: return 'text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-700';
-    }
-  };
+interface InfoItem {
+  label: string;
+  value: string;
+}
 
-  return (
-    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-      <div className={`rounded-full p-2 ${getTypeColor(type)}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 dark:text-white">{title}</p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{time}</p>
-      </div>
-    </div>
-  );
-};
+interface InfoCardProps {
+  title: string;
+  items: InfoItem[];
+  icon: LucideIcon;
+  color?: string;
+}
 
-const ProgressCard = ({ title, current, total, color = "blue" }) => {
-  const percentage = (current / total) * 100;
-  
+const InfoCard: React.FC<InfoCardProps> = ({ title, items, icon: Icon, color = "blue" }) => {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-medium text-gray-900 dark:text-white">{title}</h4>
-        <span className="text-sm text-gray-500 dark:text-gray-400">{current}/{total}</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-        <div 
-          className={`bg-${color}-500 h-2 rounded-full transition-all duration-300`}
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{percentage.toFixed(0)}% hoàn thành</p>
-    </div>
-  );
-};
-
-const UpcomingEventCard = ({ title, date, time, type, location }) => {
-  return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-      <div className="rounded-full bg-purple-100 p-2 dark:bg-purple-900/30">
-        <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-      </div>
-      <div className="flex-1">
-        <h4 className="text-sm font-medium text-gray-900 dark:text-white">{title}</h4>
-        <p className="text-xs text-gray-500 dark:text-gray-400">{type}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-blue-600 dark:text-blue-400">{date}</span>
-          <span className="text-xs text-gray-400">•</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">{time}</span>
+    <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+      <div className="flex items-center gap-3 mb-4">
+        <div className={`rounded-full bg-${color}-100 p-2 dark:bg-${color}-900/30`}>
+          <Icon className={`h-5 w-5 text-${color}-600 dark:text-${color}-400`} />
         </div>
-        {location && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{location}</p>
-        )}
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
+      </div>
+      <div className="space-y-3">
+        {items.map((item: InfoItem, index: number) => (
+          <div key={index} className="flex items-center justify-between">
+            <span className="text-sm text-gray-600 dark:text-gray-400">{item.label}</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">{item.value}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-const StudentHomeDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const { student } = useStudent(user?.citizen_id || '');
+  const { academicData, isLoading: academicLoading } = useAcademic(student?.student_id || '');
 
   const quickActions = [
     {
-      title: "Upload Bảng Điểm",
-      description: "Thêm bảng điểm học kỳ mới",
-      icon: FileText,
+      title: "Hồ sơ cá nhân",
+      description: "Cập nhật thông tin cá nhân",
+      icon: User,
       color: "blue",
-      onClick: () => console.log("Navigate to transcript upload")
+      onClick: () => navigate('/profile/general-info')
     },
     {
-      title: "Thêm Thành Tích",
-      description: "Ghi nhận thành tích cá nhân",
-      icon: Trophy,
-      color: "yellow",
-      onClick: () => console.log("Navigate to achievements")
-    },
-    {
-      title: "Hoạt Động Xã Hội",
-      description: "Cập nhật hoạt động tình nguyện",
-      icon: Heart,
-      color: "red",
-      onClick: () => console.log("Navigate to social activities")
-    },
-    {
-      title: "Đăng Ký Học Bổng",
-      description: "Khám phá cơ hội học bổng",
-      icon: GraduationCap,
+      title: "Hồ sơ sinh viên",
+      description: "Quản lý thông tin học tập",
+      icon: School,
       color: "green",
-      onClick: () => console.log("Navigate to scholarships")
+      onClick: () => navigate('/profile/student-info')
+    },
+    {
+      title: "Hồ sơ học thuật",
+      description: "Cập nhật bảng điểm và thành tích",
+      icon: FileText,
+      color: "yellow",
+      onClick: () => navigate('/profile/academic-info')
     }
   ];
 
-  const recentActivities = [
-    {
-      title: "Cập nhật bảng điểm HK1",
-      subtitle: "Môn Lập trình Web - Điểm A",
-      time: "2 giờ trước",
-      type: "success",
-      icon: BookOpen
-    },
-    {
-      title: "Thành tích mới được thêm",
-      subtitle: "Giải nhì Olympic Tin học",
-      time: "1 ngày trước",
-      type: "success",
-      icon: Trophy
-    },
-    {
-      title: "Nhắc nhở: Hạn nộp hồ sơ",
-      subtitle: "Học bổng khuyến khích học tập",
-      time: "2 ngày trước",
-      type: "warning",
-      icon: AlertCircle
-    },
-    {
-      title: "Hoạt động tình nguyện",
-      subtitle: "Mùa hè xanh 2024 - 40 giờ",
-      time: "3 ngày trước",
-      type: "info",
-      icon: Users
-    }
-  ];
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Chào buổi sáng';
+    if (hour < 18) return 'Chào buổi chiều';
+    return 'Chào buổi tối';
+  };
 
-  const upcomingEvents = [
-    {
-      title: "Thi cuối kỳ môn Cơ sở dữ liệu",
-      date: "15/08/2024",
-      time: "07:30",
-      type: "Thi cử",
-      location: "Phòng A101"
-    },
-    {
-      title: "Hội thảo Khởi nghiệp",
-      date: "18/08/2024",
-      time: "14:00",
-      type: "Sự kiện",
-      location: "Hội trường lớn"
-    },
-    {
-      title: "Hạn nộp đơn học bổng",
-      date: "20/08/2024",
-      time: "23:59",
-      type: "Deadline",
-      location: "Online"
-    }
-  ];
+  const formatGPA = (gpa: number) => {
+    return gpa ? gpa.toFixed(2) : '0.00';
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -243,20 +189,26 @@ const StudentHomeDashboard = () => {
         <div className="mb-8">
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-8 text-white">
             <div className="relative z-10">
-              <h1 className="text-3xl font-bold">Chào mừng trở lại, Thắng! 👋</h1>
+              <h1 className="text-3xl font-bold">
+                {getGreeting()}, {user?.name || 'Sinh viên'}! 👋
+              </h1>
               <p className="mt-2 text-blue-100">
-                Hôm nay là ngày tuyệt vời để cập nhật thành tích của bạn
+                Chào mừng bạn đến với hệ thống Student Credit
               </p>
-              <div className="mt-6 flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-300" />
-                  <span className="text-sm">Hoàn thành 85% mục tiêu học kỳ</span>
+              {academicData && (
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-yellow-300" />
+                    <span className="text-sm">GPA: {formatGPA(academicData.gpa)}/4.0</span>
+                  </div>
+                  {academicData.has_scholarship && (
+                    <div className="flex items-center gap-2">
+                      <Star className="h-5 w-5 text-yellow-300" />
+                      <span className="text-sm">Có học bổng</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-yellow-300" />
-                  <span className="text-sm">GPA: 3.75/4.0</span>
-                </div>
-              </div>
+              )}
             </div>
             <div className="absolute right-0 top-0 h-full w-1/3 opacity-10">
               <GraduationCap className="h-full w-full" />
@@ -268,35 +220,35 @@ const StudentHomeDashboard = () => {
         <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="GPA Hiện Tại"
-            value="3.75"
+            value={academicData ? formatGPA(academicData.gpa) : '0.00'}
             subtitle="Trên thang điểm 4.0"
             icon={TrendingUp}
-            trend="up"
-            trendValue="+0.15 so với HK trước"
             color="green"
+            loading={academicLoading}
           />
           <StatCard
             title="Tín Chỉ Tích Lũy"
-            value="95"
-            subtitle="/ 120 tín chỉ"
+            value={academicData?.total_credits_earned || 0}
+            subtitle="Tín chỉ đã hoàn thành"
             icon={BookOpen}
             color="blue"
+            loading={academicLoading}
           />
           <StatCard
             title="Thành Tích"
-            value="12"
+            value={academicData?.achievement_award_count || 0}
             subtitle="Giải thưởng & chứng nhận"
             icon={Trophy}
-            trend="up"
-            trendValue="+3 tháng này"
             color="yellow"
+            loading={academicLoading}
           />
           <StatCard
             title="Hoạt Động XH"
-            value="156"
-            subtitle="Giờ tình nguyện"
+            value={academicData?.extracurricular_activity_count || 0}
+            subtitle="Hoạt động ngoại khóa"
             icon={Heart}
             color="red"
+            loading={academicLoading}
           />
         </div>
 
@@ -309,10 +261,6 @@ const StudentHomeDashboard = () => {
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Thao Tác Nhanh
                 </h2>
-                <button className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                  Xem tất cả
-                  <ChevronRight className="h-4 w-4" />
-                </button>
               </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {quickActions.map((action, index) => (
@@ -321,122 +269,92 @@ const StudentHomeDashboard = () => {
               </div>
             </div>
 
-            {/* Progress Section */}
-            <div>
-              <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">
-                Tiến Độ Học Tập
-              </h2>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <ProgressCard
-                  title="Tín chỉ học kỳ này"
-                  current={18}
-                  total={22}
-                  color="blue"
-                />
-                <ProgressCard
-                  title="Bài tập đã hoàn thành"
-                  current={24}
-                  total={28}
-                  color="green"
-                />
-                <ProgressCard
-                  title="Thực hành chuyên ngành"
-                  current={8}
-                  total={10}
-                  color="purple"
-                />
-                <ProgressCard
-                  title="Dự án nhóm"
-                  current={3}
-                  total={4}
-                  color="orange"
-                />
-              </div>
-            </div>
-
-            {/* Recent Activities */}
-            <div>
-              <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Hoạt Động Gần Đây
+            {/* Academic Progress */}
+            {academicData && (
+              <div>
+                <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">
+                  Tiến Độ Học Tập
                 </h2>
-                <button className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                  <Eye className="h-4 w-4" />
-                  Xem chi tiết
-                </button>
-              </div>
-              <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-                <div className="space-y-2">
-                  {recentActivities.map((activity, index) => (
-                    <RecentActivityItem key={index} {...activity} />
-                  ))}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">GPA Học kỳ hiện tại</h4>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{formatGPA(academicData.current_gpa)}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(academicData.current_gpa / 4.0) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {((academicData.current_gpa / 4.0) * 100).toFixed(0)}% so với thang điểm tối đa
+                    </p>
+                  </div>
+                  
+                  <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">Môn thi rớt</h4>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{academicData.failed_course_count}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                      <div 
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          academicData.failed_course_count === 0 ? 'bg-green-500' : 
+                          academicData.failed_course_count <= 2 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${Math.min(academicData.failed_course_count * 20, 100)}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {academicData.failed_course_count === 0 ? 'Xuất sắc!' : 
+                       academicData.failed_course_count <= 2 ? 'Cần cải thiện' : 'Cần chú ý'}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column */}
           <div className="space-y-8">
-            {/* Calendar Widget */}
-            <div>
-              <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">
-                Lịch Sắp Tới
-              </h2>
-              <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-                <div className="space-y-4">
-                  {upcomingEvents.map((event, index) => (
-                    <UpcomingEventCard key={index} {...event} />
-                  ))}
-                </div>
-                <button className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700">
-                  Xem lịch đầy đủ
-                </button>
-              </div>
-            </div>
+            {/* User Information */}
+            <InfoCard
+              title="Thông tin cá nhân"
+              icon={User}
+              color="blue"
+              items={[
+                { label: 'Họ tên', value: user?.name || 'Chưa cập nhật' },
+                { label: 'Email', value: user?.email || 'Chưa cập nhật' },
+                { label: 'Số CCCD', value: user?.citizen_id?.startsWith('TEMP_') ? 'Chưa cập nhật' : (user?.citizen_id || 'Chưa cập nhật') },
+                { label: 'Trạng thái KYC', value: user?.kyc_status === 'Verified' ? 'Đã xác thực' : 'Chưa xác thực' }
+              ]}
+            />
 
-            {/* Achievement Highlight */}
-            <div className="rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 p-6 text-white">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-bold">Thành Tích Nổi Bật</h3>
-                  <p className="mt-2 text-sm opacity-90">
-                    Bạn đã đạt được 12 thành tích trong năm học này!
-                  </p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <Trophy className="h-5 w-5" />
-                    <span className="text-sm font-medium">Top 5% khoa</span>
+
+            {/* Academic Highlights */}
+            {academicData && (
+              <div className="rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 p-6 text-white">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold">Thành Tích Nổi Bật</h3>
+                    <p className="mt-2 text-sm opacity-90">
+                      {academicData.achievement_award_count > 0 
+                        ? `Bạn đã đạt được ${academicData.achievement_award_count} thành tích!`
+                        : 'Hãy cố gắng để đạt được nhiều thành tích hơn!'
+                      }
+                    </p>
+                    <div className="mt-4 flex items-center gap-2">
+                      <Trophy className="h-5 w-5" />
+                      <span className="text-sm font-medium">
+                        {academicData.has_leadership_role ? 'Có vai trò lãnh đạo' : 'Sinh viên tích cực'}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <Award className="h-12 w-12 opacity-80" />
-              </div>
-            </div>
-
-            {/* Study Tips */}
-            <div className="rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
-              <h3 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
-                💡 Gợi Ý Hôm Nay
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Cập nhật thông tin học bổng mới nhất
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Tham gia hoạt động ngoại khóa để tăng điểm rèn luyện
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Ôn tập cho kỳ thi cuối kỳ sắp tới
-                  </p>
+                  <Award className="h-12 w-12 opacity-80" />
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -444,4 +362,4 @@ const StudentHomeDashboard = () => {
   );
 };
 
-export default StudentHomeDashboard;
+export default Dashboard;
