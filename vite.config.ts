@@ -15,4 +15,21 @@ export default defineConfig({
     'import.meta.env.VITE_SOCKET_URL': JSON.stringify(process.env.VITE_SOCKET_URL),
     'import.meta.env.VITE_FRONTEND_URL': JSON.stringify(process.env.VITE_FRONTEND_URL),
   },
+  build: {
+    // Optimize build for production
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          utils: ['axios', 'socket.io-client', 'zustand']
+        }
+      }
+    }
+  },
+  preview: {
+    port: process.env.PORT || 4173,
+    host: '0.0.0.0'
+  }
 });
