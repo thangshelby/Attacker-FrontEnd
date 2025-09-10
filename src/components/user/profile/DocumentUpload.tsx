@@ -595,7 +595,8 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   // Function để lấy data mới nhất từ API - CHỈ SAU KHI SUBMIT THÀNH CÔNG
   const fetchLatestAcademicData = async (studentId) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/v1/academic/get_record/${studentId}`, {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+      const response = await fetch(`${baseUrl}/academic/get_record/${studentId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

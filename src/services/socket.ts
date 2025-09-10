@@ -4,7 +4,7 @@ let socket = null;
 
 export const initSocket = (citizen_id) => {
   if (!socket) {
-    socket = io("http://localhost:3000", {
+    socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3000", {
       auth: {
         citizen_id: citizen_id,
       },

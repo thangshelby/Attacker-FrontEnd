@@ -163,13 +163,13 @@ export function useAuth() {
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
-      window.location.href = "http://localhost:5173/auth/login";
+      window.location.href = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/auth/login`;
     } catch (error) {
       console.error("Logout failed:", error);
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
-      window.location.href = "http://localhost:5173/auth/login";
+      window.location.href = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/auth/login`;
     }
   };
 
