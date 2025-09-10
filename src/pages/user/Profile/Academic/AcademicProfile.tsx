@@ -29,7 +29,9 @@ const AcademicProfile = () => {
   const [isProcessSuccess, setIsProcessSuccess] = useState(false);
   const { user } = useAuth();
   const { student } = useStudent(user?.citizen_id);
-  const { academicData, refetch: refetchAcademicData } = useAcademic(student?.student_id);
+  const { academicData, refetch: refetchAcademicData } = useAcademic(
+    student?.student_id,
+  );
   const academicContainerRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -82,7 +84,9 @@ const AcademicProfile = () => {
   //     </div>
   //   );
   // }
-
+  if (!student) {
+    return null;
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       {/* Processing Modal */}
@@ -194,50 +198,54 @@ const AcademicProfile = () => {
             </div>
 
             <DocumentUploadDemo
-              studentId={student?.student_id}
+              studentId={student.student_id}
               onFinalSubmit={async (academicData: any) => {
-                console.log('🎯 === onFinalSubmit TRIGGERED ===');
-                console.log('Academic data from DocumentUploadDemo:', academicData);
-                console.log('🔄 Starting cache invalidation and refetch...');
-                
+                console.log("🎯 === onFinalSubmit TRIGGERED ===");
+                console.log(
+                  "Academic data from DocumentUploadDemo:",
+                  academicData,
+                );
+                console.log("🔄 Starting cache invalidation and refetch...");
+
                 // Invalidate và refetch academic data sau khi upload thành công
                 if (student?.student_id) {
                   try {
                     // Method 1: Invalidate cache
-                    console.log('🗑️ Invalidating cache...');
+                    console.log("🗑️ Invalidating cache...");
                     await queryClient.invalidateQueries({
-                      queryKey: ["academicRecord", student.student_id]
+                      queryKey: ["academicRecord", student.student_id],
                     });
-                    console.log('✅ Invalidated academic record cache for student:', student.student_id);
-                    
+                    console.log(
+                      "✅ Invalidated academic record cache for student:",
+                      student.student_id,
+                    );
+
                     // Method 2: Remove cache completely
-                    console.log('🗑️ Removing cache completely...');
+                    console.log("🗑️ Removing cache completely...");
                     await queryClient.removeQueries({
-                      queryKey: ["academicRecord", student.student_id]
+                      queryKey: ["academicRecord", student.student_id],
                     });
-                    
-                    // Method 3: Force refetch 
-                    console.log('🔄 Force refetching academic data...');
+
+                    // Method 3: Force refetch
+                    console.log("🔄 Force refetching academic data...");
                     if (refetchAcademicData) {
                       const result = await refetchAcademicData();
-                      console.log('✅ Refetch result:', result);
+                      console.log("✅ Refetch result:", result);
                     }
-                    
+
                     // Method 4: Reset queries để force fresh fetch
-                    console.log('🔄 Resetting queries...');
+                    console.log("🔄 Resetting queries...");
                     await queryClient.resetQueries({
-                      queryKey: ["academicRecord", student.student_id]
+                      queryKey: ["academicRecord", student.student_id],
                     });
-                    
-                    console.log('� All refresh methods completed!');
+
+                    console.log("� All refresh methods completed!");
                   } catch (error) {
-                    console.error('❌ Error during cache refresh:', error);
+                    console.error("❌ Error during cache refresh:", error);
                   }
                 }
               }}
             />
-
-
           </div>
         </div>
 
@@ -342,8 +350,6 @@ const AcademicProfile = () => {
                 <p className="text-sm text-gray-400">Số hoạt động tham gia</p>
               </div>
             </div>
-
-
 
             {/* Last Updated */}
             <div className="mt-8 text-center">

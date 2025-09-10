@@ -13,6 +13,7 @@ import {
   CheckCircle,
   Loader2,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 interface SubmissionResult {
   gpa: number;
@@ -76,8 +77,11 @@ const DocumentUpload = ({
 
   const addFiles = useCallback(
     (files) => {
-      console.log(`📤 Trying to add files for documentType: ${documentType}`, files);
-      
+      console.log(
+        `📤 Trying to add files for documentType: ${documentType}`,
+        files,
+      );
+
       const validFiles = Array.from(files).filter((file) => {
         const isValidType =
           file.type.startsWith("image/") || file.type === "application/pdf";
@@ -118,7 +122,7 @@ const DocumentUpload = ({
         setErrors({});
       }
     },
-    [documents, documentType, onDocumentsChange]
+    [documents, documentType, onDocumentsChange],
   );
 
   const removeFile = useCallback(
@@ -126,7 +130,7 @@ const DocumentUpload = ({
       const updatedDocuments = documents.filter((doc) => doc.id !== fileId);
       onDocumentsChange(updatedDocuments);
     },
-    [documents, onDocumentsChange]
+    [documents, onDocumentsChange],
   );
 
   const handleDrag = useCallback((e) => {
@@ -149,7 +153,7 @@ const DocumentUpload = ({
         addFiles(e.dataTransfer.files);
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   const handleChange = useCallback(
@@ -159,7 +163,7 @@ const DocumentUpload = ({
         addFiles(e.target.files);
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   const handleStepComplete = () => {
@@ -173,8 +177,6 @@ const DocumentUpload = ({
       onSkip();
     }
   };
-
-
 
   return (
     <div className="space-y-6">
@@ -201,11 +203,10 @@ const DocumentUpload = ({
           </div>
         </div>
 
-
-        
         {/* Debug info */}
-        <div className="text-xs text-gray-500 mt-2">
-          Debug: isLastStep={String(isLastStep)}, documents.length={documents.length}
+        <div className="mt-2 text-xs text-gray-500">
+          Debug: isLastStep={String(isLastStep)}, documents.length=
+          {documents.length}
         </div>
       </div>
 
@@ -250,7 +251,7 @@ const DocumentUpload = ({
               fileInput.click();
             }
           }}
-          className="mt-4 inline-flex items-center rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="mt-4 inline-flex items-center rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-600 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
         >
           + Thêm {config.label.toLowerCase()}
         </button>
@@ -291,13 +292,15 @@ const DocumentUpload = ({
       )}
 
       {/* Status Info Only - No Buttons */}
-      <div className="flex justify-center items-center pt-2">
+      <div className="flex items-center justify-center pt-2">
         <div className="text-sm text-gray-500">
           {documents.length > 0 && (
             <span>✅ {documents.length} file đã upload</span>
           )}
           {config.required && documents.length === 0 && (
-            <span className="text-orange-500">⚠️ Cần upload ít nhất 1 file</span>
+            <span className="text-orange-500">
+              ⚠️ Cần upload ít nhất 1 file
+            </span>
           )}
           {!config.required && documents.length === 0 && (
             <span className="text-gray-400">📂 Có thể bỏ qua bước này</span>
@@ -311,7 +314,7 @@ const DocumentUpload = ({
 const DocumentItem = ({ document, index, onRemove, config }) => {
   const [showPreview, setShowPreview] = useState(false);
 
-  const isPDF = document.name.toLowerCase().endsWith('.pdf');
+  const isPDF = document.name.toLowerCase().endsWith(".pdf");
 
   return (
     <>
@@ -369,7 +372,7 @@ const DocumentItem = ({ document, index, onRemove, config }) => {
             >
               <X className="h-4 w-4" />
             </button>
-            
+
             {isPDF ? (
               <div className="text-center">
                 <FileText className="mx-auto mb-4 h-16 w-16 text-red-500" />
@@ -394,7 +397,7 @@ const DocumentItem = ({ document, index, onRemove, config }) => {
                 className="max-h-[80vh] max-w-full rounded-lg object-contain"
               />
             )}
-            
+
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {config.label} #{index + 1}
@@ -420,47 +423,57 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   const [skippedSteps, setSkippedSteps] = useState(new Set());
   const [isProcessingOCR, setIsProcessingOCR] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionStep, setSubmissionStep] = useState('');
-  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
+  const [submissionStep, setSubmissionStep] = useState("");
+  const [submissionResult, setSubmissionResult] =
+    useState<SubmissionResult | null>(null);
   const resultRef = React.useRef<HTMLDivElement | null>(null);
 
   // Fix logic mapping step -> document type
   const getDocumentTypeByStep = (step) => {
     const mapping = {
-      1: 'transcript',
-      2: 'personal_achievement', 
-      3: 'social_activity',
-      4: 'scholarship'
+      1: "transcript",
+      2: "personal_achievement",
+      3: "social_activity",
+      4: "scholarship",
     };
     return mapping[step];
   };
 
   const currentDocumentType = getDocumentTypeByStep(currentStep);
 
-  console.log(`📍 Current Step: ${currentStep}, Document Type: ${currentDocumentType}`);
+  console.log(
+    `📍 Current Step: ${currentStep}, Document Type: ${currentDocumentType}`,
+  );
   console.log(`📊 Available DOCUMENT_TYPES:`, Object.keys(DOCUMENT_TYPES));
-  console.log(`📊 Step mapping:`, Object.entries(DOCUMENT_TYPES).map(([key, val]) => `${key}: step ${val.step}`));
-  console.log(`🔧 Fixed mapping: 1→transcript, 2→personal_achievement, 3→social_activity, 4→scholarship`);
+  console.log(
+    `📊 Step mapping:`,
+    Object.entries(DOCUMENT_TYPES).map(
+      ([key, val]) => `${key}: step ${val.step}`,
+    ),
+  );
+  console.log(
+    `🔧 Fixed mapping: 1→transcript, 2→personal_achievement, 3→social_activity, 4→scholarship`,
+  );
 
   const isLastStep = currentStep === 4;
   const isTranscriptStep = currentStep === 1; // Bảng điểm là bắt buộc
 
   const handleStepComplete = (type, documents) => {
     console.log(`🔄 Step complete - Type: ${type}, Files: ${documents.length}`);
-    
+
     // CHỈ reset submissionResult khi user bắt đầu upload file mới ở step 1 (transcript)
     // Tức là user đang bắt đầu quy trình upload mới
-    if (type === 'transcript' && documents.length > 0 && submissionResult) {
-      console.log('🔄 User bắt đầu upload mới, reset submissionResult');
+    if (type === "transcript" && documents.length > 0 && submissionResult) {
+      console.log("🔄 User bắt đầu upload mới, reset submissionResult");
       setSubmissionResult(null);
     }
-    
+
     // Lưu data của step hiện tại
-    setStepData(prev => ({
+    setStepData((prev) => ({
       ...prev,
-      [type]: documents
+      [type]: documents,
     }));
-    
+
     // KHÔNG tự động chuyển step ở đây - để cho useEffect xử lý
     // if (currentStep < 4) {
     //   setCurrentStep(prev => prev + 1);
@@ -471,47 +484,51 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   const processTranscriptOCR = async (file) => {
     try {
       setIsProcessingOCR(true);
-      
+
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
-        console.error('GEMINI_API_KEY not found');
+        console.error("GEMINI_API_KEY not found");
         return { gpa: "0.00", credits: "0" };
       }
-      
+
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
+
       // Convert file to generative part
       const imagePart = await fileToGenerativePart(file);
-      
-      const prompt = "Hãy phân tích bảng điểm này và trả về JSON với format: {\"gpa\": \"X.XX\", \"credits\": \"XX\"}. Chỉ trả về JSON, không có text khác.";
-      
+
+      const prompt =
+        'Hãy phân tích bảng điểm này và trả về JSON với format: {"gpa": "X.XX", "credits": "XX"}. Chỉ trả về JSON, không có text khác.';
+
       // Gọi Gemini để OCR
       const result = await model.generateContent([prompt, imagePart]);
       const response = await result.response;
       const text = response.text();
-      
+
       if (!text) {
-        console.error('No OCR text returned');
+        console.error("No OCR text returned");
         return { gpa: "0.00", credits: "0" };
       }
-      
+
       // Remove markdown code blocks nếu có
       let jsonText = text;
-      if (text.includes('```json')) {
-        jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      if (text.includes("```json")) {
+        jsonText = text
+          .replace(/```json\n?/g, "")
+          .replace(/```\n?/g, "")
+          .trim();
       }
-      
+
       // Parse JSON từ OCR result
       const ocrData = JSON.parse(jsonText);
-      console.log('Transcript OCR Result:', ocrData);
-      
+      console.log("Transcript OCR Result:", ocrData);
+
       return {
         gpa: ocrData.gpa,
-        credits: ocrData.credits
+        credits: ocrData.credits,
       };
     } catch (error) {
-      console.error('OCR Error:', error);
+      console.error("OCR Error:", error);
       return { gpa: "0.00", credits: "0" };
     } finally {
       setIsProcessingOCR(false);
@@ -522,31 +539,34 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   const fileToGenerativePart = async (file) => {
     const base64EncodedDataPromise = new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result?.toString().split(',')[1]);
+      reader.onloadend = () => resolve(reader.result?.toString().split(",")[1]);
       reader.readAsDataURL(file);
     });
-    
+
     return {
       inlineData: {
         data: await base64EncodedDataPromise,
-        mimeType: file.type
+        mimeType: file.type,
       },
     };
   };
 
-
-
   // Load data sẵn có khi component mount - CHỈ KHI CHƯA CÓ SUBMISSION RESULT
   useEffect(() => {
+    if (!studentId) {
+      return;
+    }
     // Chỉ load data khi chưa có submissionResult và chưa có file nào được upload
-    const hasAnyFiles = Object.values(stepData).some(files => files.length > 0);
-    
+    const hasAnyFiles = Object.values(stepData).some(
+      (files) => files.length > 0,
+    );
+
     if (!submissionResult && !hasAnyFiles) {
       const loadExistingData = async () => {
-        const studentId = "23520123"; // Lấy từ user context
+        // Lấy từ user context
         await fetchLatestAcademicData(studentId);
       };
-      
+
       loadExistingData();
     }
   }, []); // Chỉ chạy 1 lần khi mount
@@ -556,7 +576,7 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   //   const currentType = Object.keys(DOCUMENT_TYPES).find(
   //     key => DOCUMENT_TYPES[key].step === currentStep
   //   );
-    
+
   //   if (currentType && stepData[currentType] && stepData[currentType].length > 0) {
   //     // Nếu có file, tự động chuyển step sau 0.5 giây
   //     const timer = setTimeout(() => {
@@ -564,27 +584,29 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   //         setCurrentStep(prev => prev + 1);
   //       }
   //     }, 500); // Giảm từ 1000ms xuống 500ms
-      
+
   //     return () => clearTimeout(timer);
   //   }
   // }, [stepData, currentStep]);
 
   // Reset submissionResult khi stepData thay đổi (user upload/remove file)
   useEffect(() => {
-    const hasAnyFiles = Object.values(stepData).some(files => files.length > 0);
+    const hasAnyFiles = Object.values(stepData).some(
+      (files) => files.length > 0,
+    );
     if (hasAnyFiles && submissionResult) {
-      console.log('🔄 Reset submissionResult vì user đã upload file mới');
+      console.log("🔄 Reset submissionResult vì user đã upload file mới");
       setSubmissionResult(null);
     }
   }, [stepData, submissionResult]);
 
   const handleSkipStep = () => {
     // Đánh dấu step hiện tại là đã bỏ qua
-    setSkippedSteps(prev => new Set([...prev, currentStep]));
-    
+    setSkippedSteps((prev) => new Set([...prev, currentStep]));
+
     // Chuyển sang step tiếp theo
     if (currentStep < 4) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
@@ -595,77 +617,89 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   // Function để lấy data mới nhất từ API - CHỈ SAU KHI SUBMIT THÀNH CÔNG
   const fetchLatestAcademicData = async (studentId) => {
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
-      const response = await fetch(`${baseUrl}/academic/get_record/${studentId}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const baseUrl =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+      const response = await fetch(
+        `${baseUrl}/academic/get_record/${studentId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
       if (response.ok) {
         const result = await response.json();
         const academicData = result.data.academic;
-        
-        console.log('📊 Latest academic data AFTER submit:', academicData);
-        
+
+        console.log("📊 Latest academic data AFTER submit:", academicData);
+
         // CHỈ set result khi được gọi từ handleFinalSubmit (sau khi submit thành công)
         // Không tự động set khi component mount
         setSubmissionResult({
           gpa: academicData.gpa,
           credits: academicData.total_credits_earned,
           hasPersonalAchievement: academicData.has_personal_achievement,
-          hasSocialActivity: academicData.has_social_activity || academicData.has_leadership_role,
+          hasSocialActivity:
+            academicData.has_social_activity ||
+            academicData.has_leadership_role,
           hasScholarship: academicData.has_scholarship,
           transcriptCount: academicData.transcripts?.length || 0,
           achievementCount: academicData.achievement_award_count || 0,
           activityCount: academicData.extracurricular_activity_count || 0,
-          scholarshipCount: academicData.scholarship_count || 0
+          scholarshipCount: academicData.scholarship_count || 0,
         });
       } else if (response.status === 404) {
-        console.log('📝 Chưa có dữ liệu academic cho student này');
+        console.log("📝 Chưa có dữ liệu academic cho student này");
         // Không làm gì, để user upload bình thường
       } else {
-        console.error('Failed to fetch latest academic data:', response.status);
+        console.error("Failed to fetch latest academic data:", response.status);
       }
     } catch (error) {
-      console.error('Error fetching academic data:', error);
+      console.error("Error fetching academic data:", error);
     }
   };
 
   const handleFinalSubmit = async () => {
-      console.log('🚀 handleFinalSubmit called!');
-      console.log('� Student ID from props:', studentId);
-      console.log('�📊 Current stepData:', stepData);
-      console.log('📈 File counts:', {
-        transcript: stepData.transcript.length,
-        personal_achievement: stepData.personal_achievement.length,
-        social_activity: stepData.social_activity.length,
-        scholarship: stepData.scholarship.length
-      });    // Prevent multiple submissions
+    console.log("🚀 handleFinalSubmit called!");
+    console.log("� Student ID from props:", studentId);
+    console.log("�📊 Current stepData:", stepData);
+    console.log("📈 File counts:", {
+      transcript: stepData.transcript.length,
+      personal_achievement: stepData.personal_achievement.length,
+      social_activity: stepData.social_activity.length,
+      scholarship: stepData.scholarship.length,
+    }); // Prevent multiple submissions
     if (isSubmitting) {
-      console.log('⚠️ Already submitting, ignore click');
+      console.log("⚠️ Already submitting, ignore click");
       return;
     }
-    
+
     setIsSubmitting(true);
-    setSubmissionStep('Đang phân tích bảng điểm...');
-    
+    setSubmissionStep("Đang phân tích bảng điểm...");
+
     try {
       // Xử lý OCR cho bảng điểm nếu có
       let gpa = 0;
       let credits = 0;
-      
+
       if (stepData.transcript && stepData.transcript.length > 0) {
-        const ocrResult = await processTranscriptOCR(stepData.transcript[0].file);
+        const ocrResult = await processTranscriptOCR(
+          stepData.transcript[0].file,
+        );
         gpa = parseFloat(ocrResult.gpa) || 0; // Giữ nguyên GPA hệ 10
         credits = parseInt(ocrResult.credits) || 0;
-        
+
         console.log(`📊 GPA hệ 10: ${gpa}, Credits: ${credits}`);
       }
 
-      setSubmissionStep('Đang chuẩn bị dữ liệu...');
+      setSubmissionStep("Đang chuẩn bị dữ liệu...");
 
+      if (!studentId) {
+        toast.error("Không tìm thấy thông tin sinh viên.");
+        return;
+      }
       // Tạo academic data từ step data
       const academicData = {
         student_id: studentId || "23520123", // Sử dụng studentId từ props hoặc fallback
@@ -682,174 +716,196 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
         has_social_activity: stepData.social_activity.length > 0,
         has_scholarship: stepData.scholarship.length > 0,
         has_leadership_role: stepData.social_activity.length > 0, // Coi hoạt động XH = leadership
-        transcripts: []
+        transcripts: [],
       };
 
       // Thêm transcripts từ stepData
-      Object.keys(stepData).forEach(type => {
+      Object.keys(stepData).forEach((type) => {
         if (stepData[type].length > 0) {
-          stepData[type].forEach(document => {
+          stepData[type].forEach((document) => {
             academicData.transcripts.push({
               document_type: type,
               file_name: document.name,
               file_size: document.file.size,
-              file_type: document.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
+              file_type: document.name.toLowerCase().endsWith(".pdf")
+                ? "pdf"
+                : "image",
               file_url: document.url, // URL từ createObjectURL
               mime_type: document.file.type,
               upload_date: new Date().toISOString(),
               uploaded_at: new Date(),
-              processed: false // Sẽ được xử lý sau
+              processed: false, // Sẽ được xử lý sau
             });
           });
         }
       });
 
-      console.log('=== BẮT ĐẦU GỬI DỮ LIỆU XUỐNG BACKEND ===');
-      console.log('🎯 Student ID:', academicData.student_id);
-      console.log('📊 GPA:', academicData.gpa);
-      console.log('📊 Current GPA:', academicData.current_gpa);
-      console.log('🏆 Total Credits Earned:', academicData.total_credits_earned);
-      console.log('📄 Transcripts:', academicData.transcripts);
-      console.log('🏅 Has Personal Achievement:', academicData.has_personal_achievement);
-      console.log('👥 Has Social Activity:', academicData.has_social_activity);
-      console.log('💰 Scholarship Count:', academicData.scholarship_count);
-      console.log('📋 Academic Data to submit (FULL OBJECT):');
+      console.log("=== BẮT ĐẦU GỬI DỮ LIỆU XUỐNG BACKEND ===");
+      console.log("🎯 Student ID:", academicData.student_id);
+      console.log("📊 GPA:", academicData.gpa);
+      console.log("📊 Current GPA:", academicData.current_gpa);
+      console.log(
+        "🏆 Total Credits Earned:",
+        academicData.total_credits_earned,
+      );
+      console.log("📄 Transcripts:", academicData.transcripts);
+      console.log(
+        "🏅 Has Personal Achievement:",
+        academicData.has_personal_achievement,
+      );
+      console.log("👥 Has Social Activity:", academicData.has_social_activity);
+      console.log("💰 Scholarship Count:", academicData.scholarship_count);
+      console.log("📋 Academic Data to submit (FULL OBJECT):");
       console.table(academicData);
-      console.log('📤 JSON String gửi đi:', JSON.stringify(academicData, null, 2));
-      console.log('🔍 Object.keys:', Object.keys(academicData));
-      console.log('🔍 Kiểm tra từng field:');
+      console.log(
+        "📤 JSON String gửi đi:",
+        JSON.stringify(academicData, null, 2),
+      );
+      console.log("🔍 Object.keys:", Object.keys(academicData));
+      console.log("🔍 Kiểm tra từng field:");
       for (const [key, value] of Object.entries(academicData)) {
         console.log(`  ${key}:`, value, `(type: ${typeof value})`);
       }
-      
-      setSubmissionStep('Đang lưu vào cơ sở dữ liệu...');
-      console.log('🌐 Đang gọi API create/update...');
-      
+
+      setSubmissionStep("Đang lưu vào cơ sở dữ liệu...");
+      console.log("🌐 Đang gọi API create/update...");
+
       let isSuccess = false;
       let responseData = null;
-      
+
       // Thử create trước, nếu conflict thì update
       try {
-        console.log('📡 ===== CALLING academic.create API =====');
-        console.log('📤 Data gửi đi:', academicData);
+        console.log("📡 ===== CALLING academic.create API =====");
+        console.log("📤 Data gửi đi:", academicData);
         const createResponse = await academic.create(academicData);
-        console.log('📥 ===== RESPONSE TỪ academic.create =====');
-        console.log('📊 Status:', createResponse.status);
-        console.log('📦 Data nhận về:', createResponse.data);
-        console.log('📝 Full response object:', createResponse);
-        
+        console.log("📥 ===== RESPONSE TỪ academic.create =====");
+        console.log("📊 Status:", createResponse.status);
+        console.log("📦 Data nhận về:", createResponse.data);
+        console.log("📝 Full response object:", createResponse);
+
         if (createResponse.status === 200 || createResponse.status === 201) {
-          console.log('✅ Create successful:', createResponse.data);
+          console.log("✅ Create successful:", createResponse.data);
           isSuccess = true;
           responseData = createResponse.data;
         }
       } catch (error: any) {
-        console.log('❌ ===== ERROR TỪ academic.create =====');
-        console.log('🚨 Error object:', error);
-        console.log('🚨 Error message:', error.message);
-        console.log('🚨 Error response:', error.response);
-        console.log('🚨 Error status:', error.response?.status);
-        console.log('🚨 Error data:', error.response?.data);
-        
+        console.log("❌ ===== ERROR TỪ academic.create =====");
+        console.log("🚨 Error object:", error);
+        console.log("🚨 Error message:", error.message);
+        console.log("🚨 Error response:", error.response);
+        console.log("🚨 Error status:", error.response?.status);
+        console.log("🚨 Error data:", error.response?.data);
+
         // Nếu 409 Conflict (record đã tồn tại), thử update
         if (error.response?.status === 409) {
-          setSubmissionStep('Đang cập nhật thông tin...');
-          console.log('🔄 Record đã tồn tại, chuyển sang update...');
-          console.log('📡 ===== CALLING academic.update API =====');
-          console.log('📤 Student ID:', academicData.student_id);
-          console.log('📤 Data gửi đi:', academicData);
-          
+          setSubmissionStep("Đang cập nhật thông tin...");
+          console.log("🔄 Record đã tồn tại, chuyển sang update...");
+          console.log("📡 ===== CALLING academic.update API =====");
+          console.log("📤 Student ID:", academicData.student_id);
+          console.log("📤 Data gửi đi:", academicData);
+
           try {
-            const updateResponse = await academic.update(academicData.student_id, academicData);
-            console.log('📥 ===== RESPONSE TỪ academic.update =====');
-            console.log('📊 Status:', updateResponse.status);
-            console.log('📦 Data nhận về:', updateResponse.data);
-            console.log('📝 Full response object:', updateResponse);
-            
+            const updateResponse = await academic.update(
+              academicData.student_id,
+              academicData,
+            );
+            console.log("📥 ===== RESPONSE TỪ academic.update =====");
+            console.log("📊 Status:", updateResponse.status);
+            console.log("📦 Data nhận về:", updateResponse.data);
+            console.log("📝 Full response object:", updateResponse);
+
             if (updateResponse.status === 200) {
-              console.log('✅ Update successful:', updateResponse.data);
+              console.log("✅ Update successful:", updateResponse.data);
               isSuccess = true;
               responseData = updateResponse.data;
             } else {
-              throw new Error(`Update failed with status: ${updateResponse.status}`);
+              throw new Error(
+                `Update failed with status: ${updateResponse.status}`,
+              );
             }
           } catch (updateError) {
-            console.log('❌ ===== ERROR TỪ academic.update =====');
-            console.log('🚨 Update Error:', updateError);
+            console.log("❌ ===== ERROR TỪ academic.update =====");
+            console.log("🚨 Update Error:", updateError);
             throw updateError;
           }
         } else {
-          console.log('❌ Create API Error:', error);
+          console.log("❌ Create API Error:", error);
           throw error;
         }
       }
 
-      console.log('🔍 DEBUG: isSuccess =', isSuccess);
-      console.log('🔍 DEBUG: responseData =', responseData);
+      console.log("🔍 DEBUG: isSuccess =", isSuccess);
+      console.log("🔍 DEBUG: responseData =", responseData);
 
       if (isSuccess) {
-        console.log('🎉 ===== API THÀNH CÔNG =====');
-        console.log('✅ API Response thành công:', responseData);
-        console.log('🔄 Sẽ set submissionResult và gọi onFinalSubmit...');
-        
+        console.log("🎉 ===== API THÀNH CÔNG =====");
+        console.log("✅ API Response thành công:", responseData);
+        console.log("🔄 Sẽ set submissionResult và gọi onFinalSubmit...");
+
         // Set submission result để hiển thị kết quả
-        console.log('🔧 Setting submissionResult with data:', {
+        console.log("🔧 Setting submissionResult with data:", {
           gpa: academicData.gpa,
           credits: academicData.total_credits_earned,
           hasPersonalAchievement: academicData.has_personal_achievement,
-          hasSocialActivity: academicData.has_social_activity || academicData.has_leadership_role,
+          hasSocialActivity:
+            academicData.has_social_activity ||
+            academicData.has_leadership_role,
           hasScholarship: academicData.has_scholarship,
           transcriptCount: academicData.transcripts?.length || 0,
           achievementCount: academicData.achievement_award_count || 0,
           activityCount: academicData.extracurricular_activity_count || 0,
-          scholarshipCount: academicData.scholarship_count || 0
+          scholarshipCount: academicData.scholarship_count || 0,
         });
-        
+
         setSubmissionResult({
           gpa: academicData.gpa,
           credits: academicData.total_credits_earned,
           hasPersonalAchievement: academicData.has_personal_achievement,
-          hasSocialActivity: academicData.has_social_activity || academicData.has_leadership_role,
+          hasSocialActivity:
+            academicData.has_social_activity ||
+            academicData.has_leadership_role,
           hasScholarship: academicData.has_scholarship,
           transcriptCount: academicData.transcripts?.length || 0,
           achievementCount: academicData.achievement_award_count || 0,
           activityCount: academicData.extracurricular_activity_count || 0,
-          scholarshipCount: academicData.scholarship_count || 0
+          scholarshipCount: academicData.scholarship_count || 0,
         });
-        console.log('✅ submissionResult đã được set');
-        
+        console.log("✅ submissionResult đã được set");
+
         // Scroll đến kết quả sau một frame
         setTimeout(() => {
-          resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          resultRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         }, 100);
-        
+
         // Reload trang sau 2 giây để refresh data
         setTimeout(() => {
-          console.log('🔄 Reloading page to refresh data...');
+          console.log("🔄 Reloading page to refresh data...");
           window.location.reload();
         }, 500);
-        
+
         // Gọi callback nếu có để invalidate cache
         if (onFinalSubmit) {
-          console.log('📞 Calling onFinalSubmit callback...');
+          console.log("📞 Calling onFinalSubmit callback...");
           onFinalSubmit(academicData);
-          console.log('✅ onFinalSubmit callback completed');
+          console.log("✅ onFinalSubmit callback completed");
         } else {
-          console.log('⚠️ onFinalSubmit callback không tồn tại');
+          console.log("⚠️ onFinalSubmit callback không tồn tại");
         }
-        
-        console.log('=== KẾT THÚC QUÁ TRÌNH GỬI DỮ LIỆU ===');
+
+        console.log("=== KẾT THÚC QUÁ TRÌNH GỬI DỮ LIỆU ===");
       } else {
-        console.log('❌ ===== API THẤT BẠI =====');
-        throw new Error('Failed to save academic data');
+        console.log("❌ ===== API THẤT BẠI =====");
+        throw new Error("Failed to save academic data");
       }
-      
     } catch (error) {
-      console.error('Error submitting academic data:', error);
-      alert('Có lỗi xảy ra khi cập nhật thông tin học tập!');
+      console.error("Error submitting academic data:", error);
+      alert("Có lỗi xảy ra khi cập nhật thông tin học tập!");
     } finally {
       setIsSubmitting(false);
-      setSubmissionStep('');
+      setSubmissionStep("");
     }
   };
 
@@ -871,34 +927,37 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-        <div 
-          className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" 
+      <div className="h-2.5 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+        <div
+          className="h-2.5 rounded-full bg-indigo-600 transition-all duration-300"
           style={{ width: `${getStepProgress()}%` }}
         ></div>
       </div>
 
       {/* Step Indicator */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         {Object.values(DOCUMENT_TYPES).map((type) => {
-          const isCompleted = stepData[Object.keys(DOCUMENT_TYPES)[type.step - 1]].length > 0;
+          const isCompleted =
+            stepData[Object.keys(DOCUMENT_TYPES)[type.step - 1]].length > 0;
           const isSkipped = skippedSteps.has(type.step);
           const isCurrent = type.step === currentStep;
-          
+
           return (
             <div key={type.step} className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                isCompleted 
-                  ? 'bg-green-500 text-white' 
-                  : isSkipped
-                  ? 'bg-gray-400 text-white'
-                  : isCurrent 
-                  ? 'bg-indigo-500 text-white' 
-                  : 'bg-gray-300 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
-              }`}>
-                {isCompleted ? '✓' : isSkipped ? '−' : type.step}
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
+                  isCompleted
+                    ? "bg-green-500 text-white"
+                    : isSkipped
+                      ? "bg-gray-400 text-white"
+                      : isCurrent
+                        ? "bg-indigo-500 text-white"
+                        : "bg-gray-300 text-gray-600 dark:bg-gray-600 dark:text-gray-300"
+                }`}
+              >
+                {isCompleted ? "✓" : isSkipped ? "−" : type.step}
               </div>
-              <span className="text-xs mt-1 text-gray-600 dark:text-gray-400">
+              <span className="mt-1 text-xs text-gray-600 dark:text-gray-400">
                 {type.label}
               </span>
               {isSkipped && (
@@ -912,11 +971,13 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
       {/* Current Step Content */}
       {currentDocumentType ? (
         <DocumentUpload
-          documents={stepData[currentDocumentType as keyof typeof stepData] || []}
-          onDocumentsChange={(docs: any) => 
-            setStepData(prev => ({
+          documents={
+            stepData[currentDocumentType as keyof typeof stepData] || []
+          }
+          onDocumentsChange={(docs: any) =>
+            setStepData((prev) => ({
               ...prev,
-              [currentDocumentType]: docs
+              [currentDocumentType]: docs,
             }))
           }
           documentType={currentDocumentType}
@@ -928,18 +989,22 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
           onSkip={handleSkipStep}
         />
       ) : (
-        <div className="text-center py-8">
-          <p className="text-red-500">❌ Không tìm thấy loại document cho step {currentStep}</p>
-          <p className="text-sm text-gray-500 mt-2">Debug: currentDocumentType = {currentDocumentType}</p>
+        <div className="py-8 text-center">
+          <p className="text-red-500">
+            ❌ Không tìm thấy loại document cho step {currentStep}
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
+            Debug: currentDocumentType = {currentDocumentType}
+          </p>
         </div>
       )}
 
       {/* Step Navigation */}
-      <div className="flex justify-between items-center pt-4">
+      <div className="flex items-center justify-between pt-4">
         <button
-          onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
+          onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
           disabled={currentStep === 1}
-          className="px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
         >
           ← Bước trước
         </button>
@@ -949,14 +1014,16 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
           <button
             onClick={handleFinalSubmit}
             disabled={isSubmitting}
-            className={`px-6 py-2 rounded-lg font-medium flex items-center space-x-2 ${
-              isSubmitting 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-indigo-500 hover:bg-indigo-600 cursor-pointer'
+            className={`flex items-center space-x-2 rounded-lg px-6 py-2 font-medium ${
+              isSubmitting
+                ? "cursor-not-allowed bg-gray-400"
+                : "cursor-pointer bg-indigo-500 hover:bg-indigo-600"
             } text-white`}
           >
             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>{isSubmitting ? 'Đang xử lý...' : 'Cập nhật thông tin học tập'}</span>
+            <span>
+              {isSubmitting ? "Đang xử lý..." : "Cập nhật thông tin học tập"}
+            </span>
           </button>
         ) : (
           <div className="flex space-x-3">
@@ -964,23 +1031,28 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
             {!isTranscriptStep && (
               <button
                 onClick={handleSkipStep}
-                className="px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600"
+                className="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
               >
                 Bỏ qua
               </button>
             )}
-            
+
             {/* Next button */}
             <button
-              onClick={() => setCurrentStep(prev => Math.min(4, prev + 1))}
-              disabled={currentStep === 4 || (isTranscriptStep && !canProceedToNextStep())}
-              className={`px-4 py-2 rounded-lg font-medium ${
+              onClick={() => setCurrentStep((prev) => Math.min(4, prev + 1))}
+              disabled={
+                currentStep === 4 ||
                 (isTranscriptStep && !canProceedToNextStep())
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-indigo-500 text-white hover:bg-indigo-600 cursor-pointer'
+              }
+              className={`rounded-lg px-4 py-2 font-medium ${
+                isTranscriptStep && !canProceedToNextStep()
+                  ? "cursor-not-allowed bg-gray-300 text-gray-500"
+                  : "cursor-pointer bg-indigo-500 text-white hover:bg-indigo-600"
               }`}
             >
-              {isTranscriptStep && !canProceedToNextStep() ? 'Cần upload bảng điểm' : 'Bước tiếp →'}
+              {isTranscriptStep && !canProceedToNextStep()
+                ? "Cần upload bảng điểm"
+                : "Bước tiếp →"}
             </button>
           </div>
         )}
@@ -1015,53 +1087,66 @@ const DocumentUploadDemo = ({ studentId, onFinalSubmit }) => {
 
       {/* Kết quả sau khi submit thành công */}
       {submissionResult && (
-        <div ref={resultRef} className="mt-8 rounded-xl border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/20">
-          <div className="flex items-center space-x-3 mb-4">
+        <div
+          ref={resultRef}
+          className="mt-8 rounded-xl border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/20"
+        >
+          <div className="mb-4 flex items-center space-x-3">
             <CheckCircle className="h-6 w-6 text-green-500" />
             <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
               Cập nhật thông tin học tập thành công!
             </h3>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
             {/* GPA */}
-            <div className="text-center p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+            <div className="rounded-lg bg-white p-4 text-center shadow-sm dark:bg-gray-800">
               <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                 {submissionResult.gpa}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">GPA (hệ 10)</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                GPA (hệ 10)
+              </div>
             </div>
 
             {/* Tín chỉ */}
-            <div className="text-center p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+            <div className="rounded-lg bg-white p-4 text-center shadow-sm dark:bg-gray-800">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {submissionResult.credits}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Tín chỉ</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Tín chỉ
+              </div>
             </div>
 
             {/* Thành tích */}
-            <div className="text-center p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+            <div className="rounded-lg bg-white p-4 text-center shadow-sm dark:bg-gray-800">
               <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                 {submissionResult.achievementCount || 0}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Thành tích</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Thành tích
+              </div>
             </div>
 
             {/* Hoạt động */}
-            <div className="text-center p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+            <div className="rounded-lg bg-white p-4 text-center shadow-sm dark:bg-gray-800">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {submissionResult.activityCount || 0}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Hoạt động XH</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Hoạt động XH
+              </div>
             </div>
 
             {/* Học bổng */}
-            <div className="text-center p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
+            <div className="rounded-lg bg-white p-4 text-center shadow-sm dark:bg-gray-800">
               <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                 {submissionResult.scholarshipCount || 0}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Học bổng</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Học bổng
+              </div>
             </div>
           </div>
         </div>
