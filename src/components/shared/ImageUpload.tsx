@@ -42,7 +42,7 @@ const ImageUpload = ({
         }
         setIsProcessing(true, side);
         // Tạo URL để hiển thị ảnh preview
-        const imageUrl = URL.createObjectURL(imageFile);
+        const imageUrl = await uploadImage(imageFile);
         onImageSelect(imageUrl, imageFile);
       }
     },
