@@ -163,15 +163,18 @@ export function useAuth() {
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
-      window.location.href = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/auth/login`;
+      window.location.href =
+        import.meta.env.VITE_FRONTEND_URL || "https://attacker-frontend-1.onrender.com/landing";
     } catch (error) {
       console.error("Logout failed:", error);
       localStorage.removeItem("token");
       setUser(null);
       queryClient.clear();
-      window.location.href = `${import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173"}/auth/login`;
+      window.location.href =
+        import.meta.env.VITE_FRONTEND_URL || "https://attacker-frontend-1.onrender.com/landing";
     }
   };
+
 
   // ✅ Manual method để check authentication
   const checkAuth = useCallback(async () => {
