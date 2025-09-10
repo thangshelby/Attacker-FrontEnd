@@ -268,54 +268,7 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
-
-            {/* Academic Progress */}
-            {academicData && (
-              <div>
-                <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white">
-                  Tiến Độ Học Tập
-                </h2>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">GPA Học kỳ hiện tại</h4>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{formatGPA(academicData.current_gpa)}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(academicData.current_gpa / 4.0) * 100}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {((academicData.current_gpa / 4.0) * 100).toFixed(0)}% so với thang điểm tối đa
-                    </p>
-                  </div>
-                  
-                  <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">Môn thi rớt</h4>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{academicData.failed_course_count}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          academicData.failed_course_count === 0 ? 'bg-green-500' : 
-                          academicData.failed_course_count <= 2 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${Math.min(academicData.failed_course_count * 20, 100)}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {academicData.failed_course_count === 0 ? 'Xuất sắc!' : 
-                       academicData.failed_course_count <= 2 ? 'Cần cải thiện' : 'Cần chú ý'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-
           {/* Right Column */}
           <div className="space-y-8">
             {/* User Information */}
@@ -330,31 +283,6 @@ const Dashboard = () => {
                 { label: 'Trạng thái KYC', value: user?.kyc_status === 'Verified' ? 'Đã xác thực' : 'Chưa xác thực' }
               ]}
             />
-
-
-            {/* Academic Highlights */}
-            {academicData && (
-              <div className="rounded-xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 p-6 text-white">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold">Thành Tích Nổi Bật</h3>
-                    <p className="mt-2 text-sm opacity-90">
-                      {academicData.achievement_award_count > 0 
-                        ? `Bạn đã đạt được ${academicData.achievement_award_count} thành tích!`
-                        : 'Hãy cố gắng để đạt được nhiều thành tích hơn!'
-                      }
-                    </p>
-                    <div className="mt-4 flex items-center gap-2">
-                      <Trophy className="h-5 w-5" />
-                      <span className="text-sm font-medium">
-                        {academicData.has_leadership_role ? 'Có vai trò lãnh đạo' : 'Sinh viên tích cực'}
-                      </span>
-                    </div>
-                  </div>
-                  <Award className="h-12 w-12 opacity-80" />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

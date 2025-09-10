@@ -17,7 +17,7 @@ export default defineConfig({
   },
   build: {
     // Optimize build for production
-    minify: 'terser',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
