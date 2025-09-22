@@ -1,4 +1,4 @@
-# 🏦 Attacker Frontend - Hệ thống Tín dụng Sinh viên
+# 🏦 Hệ thống Tín dụng Sinh viên
 
 [![React](https://img.shields.io/badge/React-19.1.0-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
@@ -8,7 +8,7 @@
 
 ## 📖 Tổng quan
 
-**Attacker Frontend** là giao diện người dùng cho hệ thống tín dụng dành riêng cho sinh viên - một nền tảng hiện đại giúp sinh viên dễ dàng tiếp cận các dịch vụ tài chính với quy trình đánh giá tín dụng thông minh dựa trên AI.
+**Đây là giao diện người dùng cho hệ thống tín dụng dành riêng cho sinh viên - một nền tảng hiện đại giúp sinh viên dễ dàng tiếp cận các dịch vụ tài chính với quy trình đánh giá tín dụng thông minh dựa trên AI.
 
 ### 🎯 Mục tiêu chính
 
@@ -259,7 +259,7 @@ npm run preview
 
 ## 🐛 Bug Reports & Feature Requests
 
-Sử dụng [GitHub Issues](https://github.com/your-username/attacker-frontend/issues) để:
+Sử dụng [GitHub Issues](https://github.com/baominh5xx2) để:
 - Báo cáo bugs
 - Đề xuất tính năng mới
 - Thảo luận về improvements
