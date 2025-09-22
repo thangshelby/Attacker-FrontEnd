@@ -8,7 +8,7 @@
 
 ## 📖 Tổng quan
 
-**Đây là giao diện người dùng cho hệ thống tín dụng dành riêng cho sinh viên - một nền tảng hiện đại giúp sinh viên dễ dàng tiếp cận các dịch vụ tài chính với quy trình đánh giá tín dụng thông minh dựa trên AI.
+Đây là giao diện người dùng cho hệ thống tín dụng dành riêng cho sinh viên - một nền tảng hiện đại giúp sinh viên dễ dàng tiếp cận các dịch vụ tài chính với quy trình đánh giá tín dụng thông minh dựa trên AI.
 
 ### 🎯 Mục tiêu chính
 
