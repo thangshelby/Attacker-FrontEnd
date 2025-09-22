@@ -8,8 +8,8 @@ services:
       - key: NODE_ENV
         value: production
       - key: VITE_API_BASE_URL
-        value: https://your-backend-app.onrender.com/api/v1
+        value: https://attacker-bankend.onrender.com/api/v1
       - key: VITE_SOCKET_URL
-        value: https://your-backend-app.onrender.com
+        value: https://attacker-bankend.onrender.com
       - key: VITE_FRONTEND_URL
-        value: https://your-frontend-app.onrender.com
+        value: https://attacker-frontend-1.onrender.com

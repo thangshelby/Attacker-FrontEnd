@@ -113,7 +113,7 @@ const NewLoans = () => {
   useEffect(() => {
     setStudentInfo({
       fullName: user?.name || "Nguyễn Văn An",
-      studentId: student?.student_id || "SV001",
+      studentId: student?.student_id || "23520123",
       major: student?.major_name || "Khoa học Máy tính",
       academicYear: "2021-2025",
       gpa: academic?.gpa || "3.75",
